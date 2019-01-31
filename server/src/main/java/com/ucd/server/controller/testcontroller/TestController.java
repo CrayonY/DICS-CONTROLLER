@@ -136,7 +136,8 @@ public class TestController {
 
     @GetMapping(value = "/hardware/test1")
     public ResultVO test1(){
-	    
+
+
 	    return null;
     }
 
