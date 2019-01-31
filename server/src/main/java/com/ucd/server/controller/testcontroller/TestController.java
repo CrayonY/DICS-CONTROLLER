@@ -134,7 +134,10 @@ public class TestController {
 		return resultVO;
 	}
 
-
+    @GetMapping(value = "/hardware/test1")
+    public ResultVO test1(){
+	    return null;
+    }
 
     @GetMapping(value = "/test")
     public void test(){
