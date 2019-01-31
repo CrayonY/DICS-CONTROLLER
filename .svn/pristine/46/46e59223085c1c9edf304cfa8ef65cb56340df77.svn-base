@@ -1,0 +1,72 @@
+package com.ucd.server.controller.tdhmetriccontroller;
+ 
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+
+import com.ucd.common.DTO.tdhmetricDTO.TdhMetricDTO;
+
+import com.ucd.common.VO.tdhmetricVO.MetricInfoVO;
+import com.ucd.server.service.tdhmetricservice.TdhMetricService;
+
+import com.ucd.softwarecommon.VO.ResultVO;
+import com.ucd.softwarecommon.utils.ResultVOUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+
+
+ 
+@RestController
+@RequestMapping("/software")
+public class TdhMetricController {
+	
+	@Autowired
+	private TdhMetricService tdhMetricService;
+	
+	/**
+	 * 引入日志，注意都是"org.slf4j"包下
+	 */
+	private final static Logger logger = LoggerFactory.getLogger(TdhMetricController.class);
+	
+	/**
+	 * @author lx 
+	 * @date    
+	 * @param httpServletResponse
+	 * @return  String
+	 * @throws Exception 
+	 */
+	@GetMapping(value = "/saveTdhMetric")
+    public  String saveTdhMetric(HttpServletResponse httpServletResponse) throws Exception {
+        logger.info("进入controller啦——————————————");
+		logger.info("进入controller啦——————————————");
+		List<TdhMetricDTO> result = tdhMetricService.saveTdhMetric();
+		if (result == null) {
+			return "数据插入异常";
+		}
+		return "数据已成功插入！";
+	}
+
+
+//	  public  List<RestApiResult> getTranSwarpData() throws Exception {
+//		  logger.info("进入controller啦——————————————");
+//			List<RestApiResult> result = tdhMetricService.getTranSwarpData();
+//			if (result == null) {
+//				logger.error("异常：e=" + ExceptionEnum.ERROR_NOFOUND.getValue());
+//				throw new NoFoundExcepiton(ExceptionEnum.ERROR_NOFOUND.getValue());
+//			}
+//			return result;
+//	    }
+
+	@GetMapping(value = "/getMetricAllInfo")
+	public ResultVO getMetricAllInfo(){
+        List<MetricInfoVO> metricInfoVOList = tdhMetricService.getMetricAllInfo();
+        return ResultVOUtil.success(metricInfoVOList);
+    }
+}

@@ -1,0 +1,68 @@
+package com.ucd.server.service.impl.tdhservicesserviceimpl;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.ucd.client.DaoClient;
+import com.ucd.common.VO.ResultVO;
+import com.ucd.common.enums.ResultExceptEnum;
+import com.ucd.common.utils.Tools;
+import com.ucd.common.utils.pager.PageView;
+import com.ucd.daocommon.DTO.tdhDsauditDTO.TdhDsauditDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsMonthsListDTO;
+import com.ucd.daocommon.VO.tdhdsVO.TdhDsVO;
+import com.ucd.daocommon.VO.tdhdsVO.tdhdslistVO.TdhDsListVO;
+import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
+import com.ucd.server.service.tdhservicesservice.TdhServicesDsauditService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService {
+
+
+    @Autowired
+    public DaoClient daoClient;
+
+//    @Autowired
+//    public LocalDaoClient localDaoClient;
+
+
+    private final static Logger logger = LoggerFactory.getLogger(TdhServicesDsauditServiceImpl.class);
+
+
+    @Override
+    public ResultVO saveTdhDsauditInfo(TdhDsauditDTO tdhDsauditDTO) throws Exception {
+        if(tdhDsauditDTO == null ){
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        }
+        ResultVO resultVO = daoClient.saveTdhDsauditInfo(tdhDsauditDTO);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO saveTdhDsauditData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception {
+        if(tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0){
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        }
+        ResultVO resultVO = daoClient.saveTdhDsauditData(tdhDsauditDTOList);
+        logger.info("resultVO=" + resultVO);
+        if ("000000".equals(resultVO.getCode())) {
+            return resultVO;
+        } else {
+            logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+        }
+    }
+}

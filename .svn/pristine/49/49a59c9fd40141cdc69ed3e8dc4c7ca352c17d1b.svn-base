@@ -1,0 +1,48 @@
+package com.ucd.server.controller.tdhservicescontroller;
+
+
+
+import com.ucd.common.utils.ResultVOUtil;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
+import com.ucd.daocommon.VO.ResultVO;
+import com.ucd.server.service.tdhservicesservice.TdhServicesService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
+@RestController
+@RequestMapping("/software")
+public class TdhServicesController {
+
+    /**
+     * 引入日志，注意都是"org.slf4j"包下
+     */
+    private final static Logger logger = LoggerFactory.getLogger(TdhServicesController.class);
+
+    @Autowired
+    private TdhServicesService tdhServicesService;
+
+    @GetMapping(value = "/saveThdServices")
+    public  ResultVO saveThdServicesData(HttpServletResponse httpServletResponse) {
+        logger.info("进入controller啦——————————————");
+        List<TdhServicesInfoDTO> result = null;
+        ResultVO resultVO = new ResultVO();
+        try {
+            result = tdhServicesService.saveThdServicesData();
+            resultVO = ResultVOUtil.success(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+        }
+
+        return resultVO;
+    }
+}

@@ -1,0 +1,10 @@
+package com.ucd.server.service.tdhservicesservice;
+
+import com.ucd.common.DTO.tdhServicesDTO.TdhServicesInfoDTO;
+
+import java.util.List;
+
+public interface TdhServicesService {
+
+    List<TdhServicesInfoDTO> saveThdServicesData();
+}

@@ -1,0 +1,240 @@
+package com.ucd.server.service.impl.tdhservicesserviceimpl;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.ucd.client.DaoClient;
+import com.ucd.common.VO.ResultVO;
+import com.ucd.common.enums.ResultExceptEnum;
+import com.ucd.common.utils.Tools;
+import com.ucd.common.utils.pager.PageView;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsMonthsListDTO;
+import com.ucd.daocommon.VO.tdhdsVO.TdhDsVO;
+import com.ucd.daocommon.VO.tdhdsVO.tdhdslistVO.TdhDsListVO;
+import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.mapper.TdhTaskParameterMapper;
+import com.ucd.server.service.impl.ServiceThread;
+import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class TdhServicesDsServiceImpl implements TdhServicesDsService {
+
+    @Value("${basicparameters.transwarp.serviceinfourla}")
+    public String serviceinfourla;
+    @Value("${basicparameters.transwarp.joburla}")
+    public String joburla;
+    @Value("${basicparameters.transwarp.centrea}")
+    public String centrea;
+    @Value("${basicparameters.transwarp.usernamea}")
+    public String usernamea;
+    @Value("${basicparameters.transwarp.passworda}")
+    public String passworda;
+    @Value("${basicparameters.transwarp.serviceinfourlb}")
+    public String serviceinfourlb;
+    @Value("${basicparameters.transwarp.joburlb}")
+    public String joburlb;
+    @Value("${basicparameters.transwarp.centreb}")
+    public String centreb;
+    @Value("${basicparameters.transwarp.usernameb}")
+    public String usernameb;
+    @Value("${basicparameters.transwarp.passwordb}")
+    public String passwordb;
+    @Autowired
+    public DaoClient daoClient;
+
+//    @Autowired
+//    public LocalDaoClient localDaoClient;
+
+
+    private final static Logger logger = LoggerFactory.getLogger(TdhServicesDsServiceImpl.class);
+
+
+    @Override
+    public String updateDataSynchronizationState(String centre) throws Exception {
+        return null;
+    }
+
+    @Override
+    public PageView getThdServicesDsInfo(PageView pageView, TdhDsDTO tdhDsDTO) throws Exception {
+//        if (tdhSDsDTO.getType() == null || "".equals(tdhSDsDTO.getType())){
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",type类型不能为空");
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"type类型不能为空");
+//        }
+        if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+        }
+         if ("A".equals(tdhDsDTO.getCentre())) {
+             tdhDsDTO.setCentreTableName("tdha_ds_info");
+        }else {
+             tdhDsDTO.setCentreTableName("tdhb_ds_info");
+         }
+        Map<String, Object> models = new HashMap<String, Object>();
+        models.put("pageView",pageView);
+        models.put("tdhDsDTO",tdhDsDTO);
+        ResultVO resultVO = daoClient.getTdhDsInfo(models);
+        logger.info("resultVO=" + resultVO);
+        if("000000".equals(resultVO.getCode())){
+            Object object = resultVO.getData();
+            if (object != null) {
+                String pageViewString = Tools.toJson(object);
+                Gson gs = new Gson();
+                pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
+                }.getType());
+                logger.info("pageViewString:" + pageViewString);
+            }
+        }else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        }
+        return  pageView;
+    }
+
+    @Override
+    public ResultVO getThdDsListData(List<TdhDsDTO> tdhDsDTOS) throws Exception {
+        Gson gs = new Gson();
+        List<TdhDsVO> tdhDsVOList = new ArrayList<TdhDsVO>();
+        if(tdhDsDTOS == null || tdhDsDTOS.size() == 0){
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        }
+        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
+        if("000000".equals(resultVOTdhDsListVO.getCode())) {
+            logger.info("resultVOTdhDsListVO=" + resultVOTdhDsListVO);
+            return resultVOTdhDsListVO;
+        }else {
+            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+        }
+    }
+
+    @Override
+    public ResultVO auditThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) throws Exception {
+
+        //        2.修改DS的审核状态为“审核中”
+        //--1.判断是否是当月要做数据同步T：从月初到当前时间为止，涉及本张表所有的记录，状态更改为“审核中”F：从月初到月末，涉及本张表所有的记录，状态更改为“审核中”
+//        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
+//        2.向对端发送http审核请求（若  请求不成功，则将审核状态为“审核失败”）
+        Gson gs = new Gson();
+        if(tdhDsMonthsDTOS == null || tdhDsMonthsDTOS.size() == 0){
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        }
+        for (TdhDsMonthsDTO tdhDsMonthsDTO : tdhDsMonthsDTOS){
+            if(tdhDsMonthsDTO.getCentre() == null || "".equals(tdhDsMonthsDTO.getCentre())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+//                return null;
+            }
+            if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
+            }
+            if ("A".equals(tdhDsMonthsDTO.getCentre())) {
+                tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
+            }else {
+                tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            }
+        }
+
+
+        ResultVO resultVOTdhDsListVO = daoClient.getTdhDsMonthsInfoS(tdhDsMonthsDTOS);
+        if("000000".equals(resultVOTdhDsListVO.getCode())) {
+            List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
+            Object object = resultVOTdhDsListVO.getData();
+            if (object != null) {
+                String tdhDsListVOString = Tools.toJson(object);
+                logger.info("tdhDsListVOString:" + tdhDsListVOString);
+                tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
+                }.getType());
+                logger.info("tdhDsVOS:" + tdhDsVOS);
+                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                }else {
+                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
+                        List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
+                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
+                            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                        }else {
+                            for (TdhDsVO TdhDsVO : tdhDsVOList) {
+                                if (TdhDsVO.getState() == 1){//处理中，说明此表已经审核过了，不需要再次审核
+                                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getCode(),ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getMessage());
+                                }
+                                if (TdhDsVO.getAuditStatus() == 1 ){//1.审核中
+                                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_AUDITSTATE.getCode(),ResultExceptEnum.ERROR_PARAMETER_AUDITSTATE.getMessage());
+                                }
+                            }
+                        }
+                    }
+                    Map<String, Object> models = new HashMap<String, Object>();
+                    TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
+                    tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
+                    models.put("auditStatus",2);
+                    models.put("userCode","gwm");
+                    models.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO);
+                    ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
+                    if ("000000".equals(resultVO1.getCode())) {
+                        logger.info("审核中！修改成功");
+                    } else {
+                        logger.info("审核中！修改失败");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核中！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                    }
+//                    向对端发送http审核请求（若  请求不成功，则将审核状态为“审核失败”）
+//1111111111111111111111111111111111先测试审核接口
+                }
+            }
+        }else {
+            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+        }
+
+        return null;
+    }
+
+    @Override
+    public PageView getTdhDsMonthsInfo(PageView pageView, TdhDsMonthsDTO tdhDsMonthsDTO) throws Exception {
+        if(tdhDsMonthsDTO.getCentre() == null || "".equals(tdhDsMonthsDTO.getCentre())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+        }
+        if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
+        }
+        if ("A".equals(tdhDsMonthsDTO.getCentre())) {
+            tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
+        }else {
+            tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+        }
+        Map<String, Object> models = new HashMap<String, Object>();
+        models.put("pageView",pageView);
+        models.put("tdhDsMonthsDTO",tdhDsMonthsDTO);
+        ResultVO resultVO = daoClient.getTdhDsMonthsInfo(models);
+        logger.info("resultVO=" + resultVO);
+        if("000000".equals(resultVO.getCode())){
+            Object object = resultVO.getData();
+            if (object != null) {
+                String pageViewString = Tools.toJson(object);
+                Gson gs = new Gson();
+                pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
+                }.getType());
+                logger.info("pageViewString:" + pageViewString);
+            }
+        }else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        }
+        return  pageView;
+    }
+}

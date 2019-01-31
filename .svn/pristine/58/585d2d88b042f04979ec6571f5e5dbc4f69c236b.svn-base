@@ -1,0 +1,24 @@
+package com.ucd.server.exception;
+
+import com.ucd.server.enums.ResultEnum;
+
+public class SoftwareException extends Exception{
+    private Integer code;
+
+    public SoftwareException(Integer code, String message){
+        super(message);
+        this.code = code;
+    }
+
+    public SoftwareException(ResultEnum resultEnum){
+        super(resultEnum.getMessage());
+        this.code = resultEnum.getCode();
+
+    }
+
+    public SoftwareException(ResultEnum resultEnum, String message){
+        super(resultEnum.getMessage()+","+message);
+        this.code = resultEnum.getCode();
+
+    }
+}

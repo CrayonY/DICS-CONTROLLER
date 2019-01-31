@@ -1,0 +1,53 @@
+package com.ucd.server.service.impl;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.ucd.client.DaoClient;
+import com.ucd.common.VO.ResultVO;
+import com.ucd.common.enums.ResultExceptEnum;
+import com.ucd.common.utils.KeyUtil;
+import com.ucd.common.utils.Tools;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesHealthckDTO;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesJobDTO;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesListDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.daocommon.VO.thdServicesVO.TdhServicesJobVO;
+import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.mapper.TdhTaskParameterMapper;
+import com.ucd.server.trapswapApi.ManagerApi.InceptorApi;
+import com.ucd.server.trapswapApi.ManagerApi.ServicesApi;
+import com.ucd.server.trapswapApi.ManagerApi.UserApi;
+import com.ucd.server.trapswapApi.connection.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+@Component
+public class ServiceSync {
+
+    @Autowired
+    public DaoClient daoClient;
+
+    @Autowired
+    public TdhTaskParameterMapper tdhTaskParameterMapper;
+
+    private final static Logger logger = LoggerFactory.getLogger(ServiceSync.class);
+
+
+    public String SyncThdListDataThread(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) {
+        return "OK";
+    }
+
+
+
+    public static void main(String[] args) {}
+}

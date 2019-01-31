@@ -1,0 +1,177 @@
+package com.ucd.server.controller.testcontroller;
+
+import com.ucd.common.VO.ResultVO;
+import com.ucd.common.utils.ResultVOUtil;
+import com.ucd.common.utils.Tools;
+import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.utils.HttpClientUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/test")
+public class TestController {
+
+	/**
+	 * 引入日志，注意都是"org.slf4j"包下
+	 */
+	private final static Logger logger = LoggerFactory.getLogger(TestController.class);
+
+
+    @GetMapping(value = "/softwareDs/getThdServicesDsInfo")
+    public ResultVO getThdServicesDsInfo(){
+        ResultVO resultVO = new ResultVO();
+        String content1 = "currentpage="+"1"+"&"+"maxresult="+"2"+"&"+/*"cpu="+"1000"+"&"+"vcpu="+"200"+*/"&"+"startdownTimems="+"2018-12-21 16:53:49"+"&"+"startupTimems="+"2018-12-21 16:59:59"+"&"+"tableName="+"2"+"&"+"centre="+"B";
+        try {
+            String result1 = HttpClientUtils.postString("http://10.66.1.192:28070/softwareDs/getThdServicesDsInfo",content1,
+                    "application/x-www-form-urlencoded",null);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+        }
+        return resultVO;
+    }
+
+    @GetMapping(value = "/softwareDs/getTdhDsMonthsInfo")
+    public ResultVO getTdhDsMonthsInfo(){
+        ResultVO resultVO = new ResultVO();
+        String content1 = "currentpage="+"1"+"&"+"maxresult="+"2"+"&"+"&"+"startdownTime="+"2018-12"+"&"+"&"+"tableName="+"2"+"&"+"centre="+"A"+"&"+"auditStatus="+"0";
+        try {
+            String result1 = HttpClientUtils.postString("http://10.66.1.192:28070/softwareDs/getTdhDsMonthsInfo",content1,
+                    "application/x-www-form-urlencoded",null);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+        }
+        return resultVO;
+    }
+
+    /**
+     * 向对端发送要进行数据同步的审核
+     *
+     * @return
+     */
+//    @GetMapping(value = "/softwareDs/auditThdDsListData")
+//    public ResultVO auditThdDsListData(){
+//        ResultVO resultVO = new ResultVO();
+//        List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
+//        for () {
+//            TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
+//            tdhDsMonthsDTO.setTableName("syc_a_");
+//            tdhDsMonthsDTO.setStartdownTime("2018-12");
+//            tdhDsMonthsDTO.setCentre("A");
+//            tdhDsMonthsDTO.setTableNameTotal("syc_a_2018-12");
+//        }
+//        try {
+//            String result = HttpClientUtils.postString("http://10.66.1.192:28070/hardware/saveHardWareInfo",content,"application/json",null);
+////			String result = HttpClientUtils.postString("http://10.66.1.192:28070/hardware/saveHardWareInfo",Tools.toJson(hardwareDTO), "application/json",null);
+//            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            resultVO = ResultVOUtil.error(e);
+//        }
+//        return resultVO;
+//    }
+
+
+
+	@GetMapping(value = "/hardware/gethardwareInfo")
+	public ResultVO gethardwareInfo(){
+		ResultVO resultVO = new ResultVO();
+		String content1 = "currentpage="+"1"+"&"+"maxresult="+"2"+"&"+/*"cpu="+"1000"+"&"+"vcpu="+"200"+*/"&"+"startTimems="+"2019-01-12 20:51:03"+"&"+"endTimems="+"2019-01-15 20:51:04"+"&"+"Nip="+"ce";
+		try {
+			String result1 = HttpClientUtils.postString("http://10.66.1.192:28070/hardware/gethardwareInfo",content1,
+					"application/x-www-form-urlencoded",null);
+			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result1);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultVO = ResultVOUtil.error(e);
+		}
+		return resultVO;
+	}
+
+
+
+	@GetMapping(value = "/hardware/saveHardWareInfo")
+	public ResultVO saveHardWareInfo(){
+		ResultVO resultVO = new ResultVO();
+		String content = "{\"cpu\":1000,\"vcpu\":200,\"host\":\"111000\",\"diskstatus\":[1.2,3.5],\"Nip\":\"ceshi2\",\"intime\":\"1547540793427\"}";
+		logger.info("content:"+content);
+		HardwareDTO hardwareDTO = new HardwareDTO();
+		hardwareDTO.setCpu(5000.0);
+		hardwareDTO.setHost("12345687");
+		hardwareDTO.setVcpu(499.0);
+		List<Double> doubleList = new ArrayList<Double>();
+		doubleList.add(10.90);
+		doubleList.add(67.99);
+		hardwareDTO.setDiskstatus(doubleList);
+		hardwareDTO.setNip("ceshi");
+		Date now = new Date();
+		hardwareDTO.setIntime(String.valueOf(now.getTime()));
+		logger.info(Tools.toJson(hardwareDTO));
+		try {
+			String result = HttpClientUtils.postString("http://10.66.1.192:28070/hardware/saveHardWareInfo",content,"application/json",null);
+//			String result = HttpClientUtils.postString("http://10.66.1.192:28070/hardware/saveHardWareInfo",Tools.toJson(hardwareDTO), "application/json",null);
+			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultVO = ResultVOUtil.error(e);
+		}
+		return resultVO;
+	}
+
+
+
+    @GetMapping(value = "/test")
+    public void test(){
+        try {
+            DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String testTimeStr = "2017-02-03 08:25:37";
+            Date testTime = format2.parse(testTimeStr);
+        Date now = new Date();
+        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(now);
+            calendar.setTime(testTime);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DATE);
+        System.out.println("year:"+year+",month:"+month+",day:"+day);
+        // 设置日期为本月最大日期
+        calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
+        System.out.println("Datetime:"+calendar.getTime());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String str=format.format(calendar.getTime());
+        System.out.println("str:"+str);
+        Date d2= null;
+        d2 = format.parse(str);
+        System.out.println("d2:"+d2);
+        int dayMis=1000*60*60*24;
+        System.out.println("一天的毫秒-1:"+dayMis);
+            //返回自 1970 年 1 月 1 日 00:00:00 GMT 以来此 Date 对象表示的毫秒数。
+            long curMillisecond=d2.getTime();//当天的毫秒
+            System.out.println("curMillisecond:"+new Date(curMillisecond));
+            long resultMis=curMillisecond+(dayMis-1); //当天最后一秒
+            System.out.println("resultMis:"+resultMis);
+            //得到我需要的时间    当天最后一秒
+            Date resultDate=new Date(resultMis);
+            System.out.println("resultDate:"+resultDate);
+            System.out.println("FormatResult:"+format2.format(resultDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+}

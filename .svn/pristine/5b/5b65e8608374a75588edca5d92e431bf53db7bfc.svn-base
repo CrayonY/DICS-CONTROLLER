@@ -1,0 +1,119 @@
+package com.ucd.server.task;
+
+import com.ucd.server.mapper.TdhTaskParameterMapper;
+import com.ucd.server.service.impl.ServiceThread;
+import com.ucd.server.trapswapApi.connection.Connection;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+@Lazy(false)
+public class TaskTdhService {
+
+    @Value("${basicparameters.transwarp.serviceinfourla}")
+    public String serviceinfourla;
+    @Value("${basicparameters.transwarp.joburla}")
+    public String joburla;
+    @Value("${basicparameters.transwarp.centrea}")
+    public String centrea;
+    @Value("${basicparameters.transwarp.usernamea}")
+    public String usernamea;
+    @Value("${basicparameters.transwarp.passworda}")
+    public String passworda;
+    @Value("${basicparameters.transwarp.serviceinfourlb}")
+    public String serviceinfourlb;
+    @Value("${basicparameters.transwarp.joburlb}")
+    public String joburlb;
+    @Value("${basicparameters.transwarp.centreb}")
+    public String centreb;
+    @Value("${basicparameters.transwarp.usernameb}")
+    public String usernameb;
+    @Value("${basicparameters.transwarp.passwordb}")
+    public String passwordb;
+
+    @Autowired
+    public TdhTaskParameterMapper tdhTaskParameterMapper;
+
+    @Autowired
+    public ServiceThread serviceThread;
+
+    private final static Logger logger = LoggerFactory.getLogger(TaskTdhService.class);
+    // 每5秒启动（测试）
+    @Scheduled(cron = "0/5 * * * * ?")
+    public void timerToNow(){
+        System.out.println("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    }
+    //向星环发起请求，获取集群服务信息，并存库
+    //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
+    //@Scheduled(cron = "0/30 * * * * ?")
+    public void taskSaveThdServicesListData(){
+
+            logger.info("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put("taskState",1);
+            map.put("taskName","taskServiceInfo");
+            int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+            logger.info("num:" + num);
+            if (num == 1) {
+                try {
+                logger.info("成功进入");
+                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda);
+                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb);
+                    Thread.sleep(5000);
+                    map.put("taskState",0);
+                    tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                logger.info("没有进入");
+                return;
+            }
+
+        return ;
+    }
+
+    //
+    //@Scheduled(cron = "0/30 * * * * ?")
+    public void taskSaveThdServicesJobErrorData(){
+
+        logger.info("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("taskState",1);
+        map.put("taskName","taskServicejob");
+        int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+        logger.info("num:" + num);
+        if (num == 1) {
+            try {
+                logger.info("成功进入");
+                //serviceThread.taskSaveThdServicesJobErrorData(joburla, centrea);
+                serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb);
+                Thread.sleep(5000);
+                map.put("taskState",0);
+                tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            logger.info("没有进入");
+            return;
+        }
+
+        return ;
+    }
+
+
+
+}

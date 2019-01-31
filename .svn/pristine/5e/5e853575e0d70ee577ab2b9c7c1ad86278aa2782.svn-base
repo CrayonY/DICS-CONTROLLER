@@ -1,0 +1,18 @@
+package com.ucd.server.service;
+
+
+
+import com.ucd.common.DTO.TranSwarpDTO;
+import com.ucd.server.model.RestApiResult;
+
+public interface RestApiResultService {
+
+	/**
+	 * <p>Title: selectUser</p>  
+	 * @author lx  
+	 * @date  
+	 * @return String
+	 */
+	TranSwarpDTO changeFormatByresult(String result);
+
+}

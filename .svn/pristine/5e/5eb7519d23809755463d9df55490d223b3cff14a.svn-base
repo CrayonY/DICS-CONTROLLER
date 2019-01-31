@@ -1,0 +1,206 @@
+package com.ucd.server.service.impl;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.ucd.client.DaoClient;
+import com.ucd.common.VO.ResultVO;
+import com.ucd.common.enums.ResultExceptEnum;
+import com.ucd.common.utils.KeyUtil;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesHealthckDTO;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
+import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesListDTO;
+import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.mapper.TdhTaskParameterMapper;
+import com.ucd.server.service.impl.tdhservicesserviceimpl.TdhServicesServiceImpl;
+import com.ucd.server.trapswapApi.ManagerApi.ServicesApi;
+import com.ucd.server.trapswapApi.ManagerApi.UserApi;
+import com.ucd.server.trapswapApi.connection.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Component
+public class ServiceThread {
+
+    @Autowired
+    public DaoClient daoClient;
+
+    @Autowired
+    public TdhTaskParameterMapper tdhTaskParameterMapper;
+
+    private final static Logger logger = LoggerFactory.getLogger(ServiceThread.class);
+
+    @Async("transwarpExecutor")
+    public void saveThdServicesListDataThread(String url, String centre, String username, String password) {
+
+        logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+        Connection client = new Connection(url,centre);
+        List<TdhServicesInfoDTO> result = new ArrayList<>();
+        Date now = new Date();
+        Gson gs = new Gson();
+        try {
+            //return url+"-"+centre+"-"+username+"-"+password;
+            if (UserApi.login(client, username, password)) {
+                try {
+                    String servicesInfo = ServicesApi.getAllServices(client);
+                    System.out.println(servicesInfo);
+                    result = gs.fromJson(servicesInfo, new TypeToken<List<TdhServicesInfoDTO>>() {
+                    }.getType());
+                    logger.info(result.toString());
+                    UserApi.logout(client);
+                    client.close1();
+                }catch (Exception e){
+                    UserApi.logout(client);
+                    client.close1();
+                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                    throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
+                }
+                logger.info(centre + "中心连接关闭" );
+                if (result == null) {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
+                    throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
+                }
+                for (TdhServicesInfoDTO tdhServicesInfoDTO : result) {
+                    tdhServicesInfoDTO.setCentre(centre);//与URL匹配，设置中心
+                    String healthChecksId = KeyUtil.genUniqueKey();
+                    tdhServicesInfoDTO.setCreattime(now);
+                    tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
+                    tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+                    logger.info(tdhServicesInfoDTO.toString());
+                    List<TdhServicesHealthckDTO> tdhServicesHealthckDTOList = tdhServicesInfoDTO.getHealthChecks();
+                    String lastCheck = "";
+                    if (null == tdhServicesHealthckDTOList || tdhServicesHealthckDTOList.size() == 0) {
+                        logger.info(centre + "中心：tdhServicesHealthckDTOList为空");
+                    } else {
+                        for (TdhServicesHealthckDTO tdhServicesHealthckDTO : tdhServicesHealthckDTOList) {
+                            tdhServicesHealthckDTO.setCreattime(now);
+                            tdhServicesHealthckDTO.setHealthChecksId(healthChecksId);
+                            logger.info(centre + "中心:"+tdhServicesHealthckDTO.getType()+": time:"+tdhServicesHealthckDTO.getLastCheck());
+                            if ("".equals(lastCheck)) {
+                                lastCheck = tdhServicesHealthckDTO.getLastCheck();
+                            }
+                            if("VITAL_SIGN_CHECK".equals(tdhServicesHealthckDTO.getType())){
+                                lastCheck = tdhServicesHealthckDTO.getLastCheck();
+                            }
+                            tdhServicesInfoDTO.setLastCheck(lastCheck);
+                            logger.info(tdhServicesHealthckDTO.toString());
+                        }
+                    }
+                    setTableName(tdhServicesInfoDTO);
+                }
+                //插入数据库，调用monitor-dao微服务
+                TdhServicesListDTO tdhServicesListDTO = new TdhServicesListDTO();
+                tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+                ResultVO resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
+                logger.info("resultVO=" + resultVO);
+                if ("000000".equals(resultVO.getCode())) {
+                    // return resultVO.getData().toString();
+                } else {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg());
+                }
+
+
+            } else {
+                logger.info(centre + "中心异常：e=" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR);
+                throw new SoftwareException(TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getCode(), centre + "中心异常:" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getMessage());
+            }
+        }catch (Exception e){
+            logger.info(centre + "中心异常：e="+e.toString());
+            try {
+                UserApi.logout(client);
+                client.close1();
+            }catch (Exception e1){
+                logger.info(centre + "中心退出异常：e="+e1.toString());
+            }
+            return;
+        }finally {
+            //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
+        }
+    }
+
+    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
+        String centre = tdhServicesInfoDTO.getCentre();
+        String type = tdhServicesInfoDTO.getType();
+        if ("A".equals(centre)) {
+            if (type == null || "".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_tos");
+            } else if ("TOS".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_tos");
+            } else if ("LICENSE_SERVICE".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_license");
+            } else if ("ZOOKEEPER".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_zookeeper");
+            } else if ("KAFKA".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_kafka");
+            } else if ("SEARCH".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_search");
+            } else if ("MILANO".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_milano");
+            } else if ("HDFS".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+            } else if ("YARN".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_yarn");
+            } else if ("TXSQL".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_txsql");
+            } else if ("INCEPTOR".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_inceptor");
+            } else if ("SLIPSTREAM".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_slipstream");
+            } else if ("HYPERBASE".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_hyperbase");
+            } else if ("PILOT".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_pilot");
+            } else if ("TRANSPORTER".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_transporter");
+            } else if ("WORKFLOW".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_workflow");
+            } else if ("GUARDIAN".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_guardian");
+            }
+        }else {
+            if (type == null || "".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
+            } else if ("TOS".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
+            } else if ("LICENSE_SERVICE".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_license");
+            } else if ("ZOOKEEPER".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_zookeeper");
+            } else if ("KAFKA".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_kafka");
+            } else if ("SEARCH".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_search");
+            } else if ("MILANO".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_milano");
+            } else if ("HDFS".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_hdfs");
+            } else if ("YARN".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_yarn");
+            } else if ("TXSQL".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_txsql");
+            } else if ("INCEPTOR".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_inceptor");
+            } else if ("SLIPSTREAM".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream");
+            } else if ("HYPERBASE".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_hyperbase");
+            } else if ("PILOT".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_pilot");
+            } else if ("TRANSPORTER".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_transporter");
+            } else if ("WORKFLOW".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_workflow");
+            } else if ("GUARDIAN".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_guardian");
+            }
+        }
+    }
+}

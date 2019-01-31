@@ -1,0 +1,217 @@
+package com.ucd.server.service.impl;
+ 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ucd.client.DaoClient;
+import com.ucd.common.DTO.TranSwarpDTO;
+import com.ucd.common.VO.MetricInfoVO;
+import com.ucd.server.controller.TranSwarpDataController;
+import com.ucd.server.exception.ExceptionEnum;
+import com.ucd.server.exception.NoFoundExcepiton;
+import com.ucd.server.service.RestApiResultService;
+import com.ucd.server.service.TranSwarpDataService;
+import com.ucd.server.trapswapApi.ManagerApi.MetricApi;
+import com.ucd.server.trapswapApi.ManagerApi.UserApi;
+import com.ucd.server.trapswapApi.connection.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+
+ 
+@Service
+public class TranSwarpDataServiceImpl implements TranSwarpDataService {
+
+	private final static Logger logger = LoggerFactory.getLogger(TranSwarpDataController.class);
+	
+	@Autowired
+	public RestApiResultService restApiResultService;
+
+    @Autowired
+    public DaoClient daoClient;
+
+
+	@Override
+	public List<TranSwarpDTO> getTranSwarpData() {
+		List<TranSwarpDTO> result = new ArrayList<>();
+		Connection client = new Connection("http://10.28.3.51:8180/api");
+    	try {
+			if (UserApi.login(client, "admin", "admin")) {
+				String cpu_used = MetricApi.getClusterMetric(client, 1, "cpu_used", getTimeBeforMills(), getNowTimeMills());
+//				String disk_ratio = MetricApi.getClusterMetric(client, 1, "disk_ratio", getTimeBeforMills(), getNowTimeMills());
+//				String mem_used = MetricApi.getClusterMetric(client, 1, "mem_used", getTimeBeforMills(), getNowTimeMills());
+//				String mem_ratio = MetricApi.getClusterMetric(client, 1, "mem_ratio", getTimeBeforMills(), getNowTimeMills());
+//				String capacityUsed = MetricApi.getServiceMetric(client, 7, "CapacityUsed", getTimeBeforMills(), getNowTimeMills());
+//				String capacityRemaining = MetricApi.getServiceMetric(client, 7, "CapacityRemaining", getTimeBeforMills(), getNowTimeMills());
+//				String dataNodeBytesRead = MetricApi.getServiceMetric(client, 7, "DataNodeBytesRead", getTimeBeforMills(), getNowTimeMills());
+//				String dataNodeBytesWrite = MetricApi.getServiceMetric(client, 7, "DataNodeBytesWrite", getTimeBeforMills(), getNowTimeMills());
+//				String hyperBaseNumRegionServers = MetricApi.getServiceMetric(client, 12, "HyperBaseNumRegionServers", getTimeBeforMills(), getNowTimeMills());
+//				String hyperBaseNumTotalRegion = MetricApi.getServiceMetric(client, 12, "HyperBaseNumTotalRegion", getTimeBeforMills(), getNowTimeMills());
+//				String hyperBaseReadRequestsRate = MetricApi.getServiceMetric(client, 12, "HyperBaseReadRequestsRate", getTimeBeforMills(), getNowTimeMills());
+//				String hyperBaseWriteRequestsRate = MetricApi.getServiceMetric(client, 12, "HyperBaseWriteRequestsRate", getTimeBeforMills(), getNowTimeMills());
+//				String allTopicsBytesInPerSec = MetricApi.getServiceMetric(client, 4, "AllTopicsBytesInPerSec", getTimeBeforMills(), getNowTimeMills());
+//				String allTopicsBytesOutPerSec = MetricApi.getServiceMetric(client, 4, "AllTopicsBytesOutPerSec", getTimeBeforMills(), getNowTimeMills());
+//				String allTopicsMessagesInPerSec = MetricApi.getServiceMetric(client, 4, "AllTopicsMessagesInPerSec", getTimeBeforMills(), getNowTimeMills());
+//				String liveBrokers = MetricApi.getServiceMetric(client, 4, "LiveBrokers", getTimeBeforMills(), getNowTimeMills());
+//				String deadBrokers = MetricApi.getServiceMetric(client, 4, "DeadBrokers", getTimeBeforMills(), getNowTimeMills());
+				System.out.println(cpu_used);
+//				System.out.println(disk_ratio);
+//				System.out.println(mem_used);
+//				System.out.println(mem_ratio);
+//				System.out.println(capacityUsed);
+//				System.out.println(capacityRemaining);
+//				System.out.println(dataNodeBytesRead);
+//				System.out.println(dataNodeBytesWrite);
+//				System.out.println(hyperBaseNumRegionServers);
+//				System.out.println(hyperBaseNumTotalRegion);
+//				System.out.println(hyperBaseReadRequestsRate);
+//				System.out.println(hyperBaseWriteRequestsRate);
+//				System.out.println(allTopicsBytesInPerSec);
+//				System.out.println(allTopicsBytesOutPerSec);
+//				System.out.println(allTopicsMessagesInPerSec);
+//				System.out.println(liveBrokers);
+//				System.out.println(deadBrokers);
+				if(isnotNULL(cpu_used)){
+                    TranSwarpDTO cpuUsedResult = restApiResultService.changeFormatByresult(cpu_used);
+					if(null!=cpuUsedResult.getValue()){
+						result.add(cpuUsedResult);
+					}
+				}
+//				if(isnotNULL(disk_ratio)){
+//					RestApiResult	diskRatioResult = restApiResultService.changeFormatByresult(disk_ratio);
+//					if(null!=diskRatioResult.getValue()){
+//						result.add(diskRatioResult);
+//					}
+//				}
+//				if(isnotNULL(mem_used.trim())){
+//					RestApiResult	memUsedResult = restApiResultService.changeFormatByresult(mem_used);
+//					if(null!=memUsedResult.getValue()){
+//						result.add(memUsedResult);
+//					}
+//				}
+//				if(isnotNULL(mem_ratio.trim())){
+//					RestApiResult	memRatioResult = restApiResultService.changeFormatByresult(mem_ratio);
+//					if(null!=memRatioResult.getValue()){
+//						result.add(memRatioResult);
+//					}
+//				}
+//				if(isnotNULL(capacityUsed.trim())){
+//					RestApiResult	capacityUsedResult = restApiResultService.changeFormatByresult(capacityUsed);
+//					if(null!=capacityUsedResult.getValue()){
+//						result.add(capacityUsedResult);
+//					}
+//				}
+//				if(isnotNULL(capacityRemaining.trim())){
+//					RestApiResult	capacityRemainingResult = restApiResultService.changeFormatByresult(capacityRemaining);
+//					if(null!=capacityRemainingResult.getValue()){
+//						result.add(capacityRemainingResult);
+//					}
+//				}
+//				if(isnotNULL(dataNodeBytesRead.trim())){
+//					RestApiResult	dataNodeBytesReadResult = restApiResultService.changeFormatByresult(dataNodeBytesRead);
+//					if(null!=dataNodeBytesReadResult.getValue()){
+//						result.add(dataNodeBytesReadResult);
+//					}
+//				}
+//				if(isnotNULL(dataNodeBytesWrite.trim())){
+//					RestApiResult	dataNodeBytesWriteResult = restApiResultService.changeFormatByresult(dataNodeBytesWrite);
+//					if(null!=dataNodeBytesWriteResult.getValue()){
+//						result.add(dataNodeBytesWriteResult);
+//					}
+//				}
+//				if(isnotNULL(hyperBaseNumRegionServers.trim())){
+//					RestApiResult	hyperBaseNumRegionServersResult = restApiResultService.changeFormatByresult(hyperBaseNumRegionServers);
+//					if(null!=hyperBaseNumRegionServersResult.getValue()){
+//						result.add(hyperBaseNumRegionServersResult);
+//					}
+//				}
+//				if(isnotNULL(hyperBaseNumTotalRegion.trim())){
+//					RestApiResult	hyperBaseNumTotalRegionResult = restApiResultService.changeFormatByresult(hyperBaseNumTotalRegion);
+//					if(null!=hyperBaseNumTotalRegionResult.getValue()){
+//						result.add(hyperBaseNumTotalRegionResult);
+//					}
+//				}
+//				if(isnotNULL(hyperBaseReadRequestsRate.trim())){
+//					RestApiResult	hyperBaseReadRequestsRateResult = restApiResultService.changeFormatByresult(hyperBaseReadRequestsRate);
+//					if(null!=hyperBaseReadRequestsRateResult.getValue()){
+//						result.add(hyperBaseReadRequestsRateResult);
+//					}
+//				}
+//				if(isnotNULL(hyperBaseWriteRequestsRate.trim())){
+//					RestApiResult	hyperBaseWriteRequestsRateResult = restApiResultService.changeFormatByresult(hyperBaseWriteRequestsRate);
+//					if(null!=hyperBaseWriteRequestsRateResult.getValue()){
+//						result.add(hyperBaseWriteRequestsRateResult);
+//					}
+//				}
+//				if(isnotNULL(allTopicsBytesInPerSec.trim())){
+//					RestApiResult	allTopicsBytesInPerSecResult = restApiResultService.changeFormatByresult(allTopicsBytesInPerSec);
+//					if(null!=allTopicsBytesInPerSecResult.getValue()){
+//						result.add(allTopicsBytesInPerSecResult);
+//					}
+//				}
+//				if(isnotNULL(allTopicsBytesOutPerSec.trim())){
+//					RestApiResult	allTopicsBytesOutPerSecResult = restApiResultService.changeFormatByresult(allTopicsBytesOutPerSec);
+//					if(null!=allTopicsBytesOutPerSecResult.getValue()){
+//						result.add(allTopicsBytesOutPerSecResult);
+//					}
+//				}
+//				if(isnotNULL(allTopicsMessagesInPerSec.trim())){
+//					RestApiResult	allTopicsMessagesInPerSecResult = restApiResultService.changeFormatByresult(allTopicsMessagesInPerSec);
+//					if(null!=allTopicsMessagesInPerSecResult.getValue()){
+//						result.add(allTopicsMessagesInPerSecResult);
+//					}
+//				}
+//				if(isnotNULL(liveBrokers.trim())){
+//					RestApiResult	liveBrokersResult = restApiResultService.changeFormatByresult(liveBrokers);
+//					if(null!=liveBrokersResult.getValue()){
+//						result.add(liveBrokersResult);
+//					}
+//				}
+//				if(isnotNULL(deadBrokers.trim())){
+//					RestApiResult	DeadBrokersResult = restApiResultService.changeFormatByresult(deadBrokers);
+//					if(null!=DeadBrokersResult.getValue()){
+//						result.add(DeadBrokersResult);
+//					}
+//				}
+				UserApi.logout(client);
+				client.close();
+			}
+			if (result == null) {
+				logger.error("异常：e=" + ExceptionEnum.ERROR_NOFOUND.getValue());
+				throw new NoFoundExcepiton(ExceptionEnum.ERROR_NOFOUND.getValue());
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//插入数据库，调用monitor-dao微服务
+        for (TranSwarpDTO tranSwarpDTO : result){
+            daoClient.saveSwarpData(tranSwarpDTO);
+        }
+
+
+		return result;
+	}
+
+	@Override
+	public List<MetricInfoVO> getMetricAllInfo() {
+		return daoClient.getMetricAllInfo();
+	}
+
+	public String getNowTimeMills() {
+		return String.valueOf(System.currentTimeMillis());
+	}
+	public String getTimeBeforMills() {
+		return String.valueOf(System.currentTimeMillis()-40000);
+	}
+	public boolean isnotNULL(String s){
+		if(null==s||("").equals(s.trim())){
+			return false;
+		}
+		return true;
+	}
+}

@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: software
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/clouddemo?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
+#  jpa:
+#    show-sql: true
+#  cloud:
+#    config:
+#      discovery:
+#        enabled: true
+#        service-id: CONFIG
+#      profile: dev
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+SOFTWARE:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+    ReadTimeout: 120000
+    ConnectTimeout: 30000
+mybatis:
+  mapper-locations: classpath:mapping/*.xml  #注意：一定要对应mapper映射xml文件的所在路径
+  type-aliases-package: com.ucd.server.model.*  # 注意：对应实体类的路径
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印SQL
+
+basicparameters:
+  transwarp:
+    urla: http://10.28.3.50:8180/api
+    centrea: A
+    usernamea: admin
+    passworda: admin
+    urlb: http://10.28.3.51:8180/api
+    centreb: B
+    usernameb: admin
+    passwordb: admin
+

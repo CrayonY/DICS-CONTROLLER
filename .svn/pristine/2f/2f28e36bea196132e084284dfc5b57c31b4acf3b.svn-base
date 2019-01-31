@@ -1,0 +1,35 @@
+package com.ucd.server.service.impl;
+ 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.ucd.common.TranSwarpDTO;
+import com.ucd.server.model.RestApiResult;
+
+
+import com.ucd.server.service.RestApiResultService;
+import org.springframework.stereotype.Service;
+
+
+
+
+ 
+@Service
+public class RestApiResultServiceImpl implements RestApiResultService {
+	
+	@Override
+	public TranSwarpDTO changeFormatByresult(String result) {
+//		String getJson = StringUtils.trim(result).substring(1, result.length()-1);
+        TranSwarpDTO tranSwarpDTO  = new TranSwarpDTO();
+		JSONArray jsonArray = JSONArray.parseArray(result);
+		for (Object obj : jsonArray) {
+
+	        JSONObject jsonObject = (JSONObject) obj;
+            tranSwarpDTO.setName(jsonObject.getString("name"));
+            tranSwarpDTO.setValue(jsonObject.getString("value"));
+            tranSwarpDTO.setType(jsonObject.getString("type"));
+            tranSwarpDTO.setEnname(jsonObject.getString("name"));
+            tranSwarpDTO.setTimestamp(jsonObject.getString("timestamp"));
+	    }
+		return tranSwarpDTO;
+	}
+}

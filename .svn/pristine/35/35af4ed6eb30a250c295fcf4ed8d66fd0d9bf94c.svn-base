@@ -1,0 +1,24 @@
+package com.ucd.server.service;
+
+
+import com.ucd.common.DTO.TranSwarpDTO;
+import com.ucd.common.VO.MetricInfoVO;
+import com.ucd.server.model.RestApiResult;
+
+
+import java.util.List;
+
+
+
+
+public interface TranSwarpDataService {
+
+	/**
+	 * @author lx  
+	 * @date  
+	 * @return String
+	 */
+	List<TranSwarpDTO> getTranSwarpData();
+
+	List<MetricInfoVO> getMetricAllInfo();
+}

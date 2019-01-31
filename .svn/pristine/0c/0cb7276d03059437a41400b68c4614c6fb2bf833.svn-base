@@ -1,0 +1,24 @@
+package com.ucd.server.service.tdhmetricservice;
+
+
+
+import com.ucd.common.DTO.tdhmetricDTO.TdhMetricDTO;
+import com.ucd.common.VO.tdhmetricVO.MetricInfoVO;
+
+
+import java.util.List;
+
+
+
+
+public interface TdhMetricService {
+
+	/**
+	 * @author lx  
+	 * @date  
+	 * @return String
+	 */
+	List<TdhMetricDTO> saveTdhMetric();
+
+	List<MetricInfoVO> getMetricAllInfo();
+}

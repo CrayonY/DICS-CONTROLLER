@@ -1,0 +1,13 @@
+package com.ucd.server.model;
+
+import lombok.Data;
+
+@Data
+public class TdhTaskParameter {
+    private String id;
+
+    private String taskName;
+
+    private Integer taskState;
+
+}
