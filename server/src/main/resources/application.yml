@@ -50,6 +50,6 @@ basicparameters:
     jobsizeb: 3
     kafkatime: 0.01
   configrunning: 0
-  centrelocal: B
+  centrelocal: A
   urlotherside: http://10.66.1.160:28070
 

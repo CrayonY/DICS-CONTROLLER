@@ -456,10 +456,10 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         }else {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
                                 if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
-                                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getCode(),ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getMessage());
+                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
                                 }
                                 if (TdhDsVO.getAuditStatus() != 3 ){//1参数有误，审核未通过，不可同步操作
-                                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_AUDITSTATEING.getCode(),ResultExceptEnum.ERROR_PARAMETER_AUDITSTATEING.getMessage());
+                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getMessage());
                                 }
                             }
                         }
@@ -555,6 +555,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     tdhDsMonthsDTO.setTableName(tdhDssyncVO.getTableName());
                     tdhDsMonthsDTO.setTableNameTotal(tdhDssyncVO.getTableNameall());
                     tdhDsMonthsDTO.setStartdownTime(tdhDssyncVO.getSyncMonth());
+                    if ("A".equals(tdhDsMonthsDTO.getCentre())) {
+                        tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
+                    }else {
+                        tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+                    }
                     tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
                     Map<String, Object> models = new HashMap<String, Object>();
                     TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();

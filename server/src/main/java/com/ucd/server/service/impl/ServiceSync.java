@@ -24,6 +24,7 @@ public class ServiceSync {
 
 
     public String SyncThdListDataThread(TdhDssyncDTO tdhDssyncDTO) {
+        logger.info("tdhDssyncDTO:"+tdhDssyncDTO);
         return "OK";
     }
 
