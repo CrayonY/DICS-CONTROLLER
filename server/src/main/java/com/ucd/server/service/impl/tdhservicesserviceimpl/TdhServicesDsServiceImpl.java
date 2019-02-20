@@ -135,7 +135,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     }
 
     @Override
-    public ResultVO auditThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) throws Exception {
+    public ResultVO auditThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception {
 
         //        2.修改DS的审核状态为“审核中”
         //--1.判断是否是当月要做数据同步T：从月初到当前时间为止，涉及本张表所有的记录，状态更改为“审核中”F：从月初到月末，涉及本张表所有的记录，状态更改为“审核中”
@@ -169,7 +169,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
             }
             TdhDsauditDTO tdhDsauditDTO = new TdhDsauditDTO();
-            tdhDsauditDTO.setApplyerCode("gwm");
+            tdhDsauditDTO.setApplyerCode(userCode);
             tdhDsauditDTO.setApplysyncTime(tdhDsMonthsDTO.getStartdownTime());
             tdhDsauditDTO.setApplyTime(new Date());
             tdhDsauditDTO.setTableName(tdhDsMonthsDTO.getTableName());
@@ -212,7 +212,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
                     tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
                     models.put("auditStatus",1);
-                    models.put("userCode","gwm");
+                    models.put("userCode",userCode);
                     models.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO);
                     ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
                     if ("000000".equals(resultVO1.getCode())) {
@@ -269,8 +269,6 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
             throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
         }
-
-
     }
 
     @Override
@@ -396,7 +394,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     }
 
     @Override
-    public ResultVO syncThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) throws Exception {
+    public ResultVO syncThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception {
         ResultVO resultVO = new ResultVO();
         Gson gs = new Gson();
         if(tdhDsMonthsDTOS == null || tdhDsMonthsDTOS.size() == 0){
@@ -428,7 +426,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
             String ID = KeyUtil.genUniqueKey();
             tdhDssyncDTO.setId(ID + UUIDUtils.getUUID());
-            tdhDssyncDTO.setUserCode("gwm");
+            tdhDssyncDTO.setUserCode(userCode);
             tdhDssyncDTO.setSyncMonth(tdhDsMonthsDTO.getStartdownTime());
             tdhDssyncDTO.setSyncTime(new Date());
             tdhDssyncDTO.setTableName(tdhDsMonthsDTO.getTableName());
@@ -478,7 +476,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
                         tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
                         models.put("syncState", 1);
-                        models.put("operCode", "gwm");
+                        models.put("operCode", userCode);
                         models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
                         ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
                         if ("000000".equals(resultVO1.getCode())) {

@@ -21,7 +21,7 @@ public interface TdhServicesDsauditService {
 
     ResultVO getTdhDsauditData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception;
 
-    ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception;
+    ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList,String userCode) throws Exception;
 
     ResultVO countTdhDsauditDataoByAuditStatus(Integer auditStatus) throws Exception;
 }

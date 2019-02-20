@@ -6,11 +6,15 @@ import com.ucd.common.utils.Tools;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.utils.HttpClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +27,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/test")
 public class TestController {
+
+    @Autowired
+    private OperationLogInfoService operationLogInfoService;
 
 	/**
 	 * 引入日志，注意都是"org.slf4j"包下
@@ -48,7 +55,7 @@ public class TestController {
     @GetMapping(value = "/softwareDs/getTdhDsMonthsInfo")
     public ResultVO getTdhDsMonthsInfo(){
         ResultVO resultVO = new ResultVO();
-        String content1 = "currentpage="+"1"+"&"+"maxresult="+"2"+"&"+"&"+"startdownTime="+"2018-12"+"&"+"&"+"tableName="+"2"+"&"+"centre="+"A"+"&"+"auditStatus="+"0";
+        String content1 = "currentpage="+"1"+"&"+"maxresult="+"2"+"&"+"startdownTime="+"2018-12"+"&"+"tableName="+"2"+"&"+"centre="+"A"+"&"+"auditStatus="+"0";
         try {
             String result1 = HttpClientUtils.postString("http://10.66.1.192:28070/softwareDs/getTdhDsMonthsInfo",content1,
                     "application/x-www-form-urlencoded",null);
@@ -142,7 +149,7 @@ public class TestController {
     }
 
     @GetMapping(value = "/test")
-    public void test(){
+    public void test(HttpServletRequest req){
         try {
             DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String testTimeStr = "2017-02-03 08:25:37";
@@ -175,7 +182,41 @@ public class TestController {
             Date resultDate=new Date(resultMis);
             System.out.println("resultDate:"+resultDate);
             System.out.println("FormatResult:"+format2.format(resultDate));
-        } catch (ParseException e) {
+            req.setCharacterEncoding("utf-8");
+            //获取cookie
+            Cookie cookies[] = req.getCookies();
+            if(cookies==null || cookies.length == 0){
+                System.out.println("没有cookie");
+            }else{
+                for (Cookie cookie : cookies){
+
+                    //获取cookie的解释内容
+                    String comment = cookie.getComment();
+                    System.out.println("comment:"+comment);
+                    //获取cookie的键
+                    String key = cookie.getName();
+                    System.out.println("key:"+key);
+
+                    //获取cookie的值
+                    String value = cookie.getValue();
+                    System.out.println("value:"+value);
+
+                    //获取cookie的有效时间。
+                    int time = cookie.getMaxAge();
+                    System.out.println("time:"+time);
+
+                    //获取服务器的IP对应的域名
+                    String domain = cookie.getDomain();
+                    System.out.println("domain:"+ domain);
+
+                    //获取有效路径
+                    String path = cookie.getPath();
+                    System.out.println("path:"+ path);
+
+                }
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -39,14 +39,14 @@ basicparameters:
     serviceinfourla: http://10.28.3.50:8180/api
     joburla: http://10.28.3.50:4044/api
     centrea: A
-    usernamea: admin
-    passworda: admin
+    usernamea: gongweimin
+    passworda: gongweimin
     jobsizea: 6
     serviceinfourlb: http://10.28.3.51:8180/api
     joburlb: http://10.28.3.52:4044/api
     centreb: B
-    usernameb: admin
-    passwordb: admin
+    usernameb: gongweimin
+    passwordb: gongweimin
     jobsizeb: 3
     kafkatime: 0.01
   configrunning: 0

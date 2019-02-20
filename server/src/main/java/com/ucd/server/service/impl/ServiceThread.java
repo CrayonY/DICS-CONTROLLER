@@ -146,6 +146,7 @@ public class ServiceThread {
     public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
         String centre = tdhServicesInfoDTO.getCentre();
         String type = tdhServicesInfoDTO.getType();
+        logger.info("++++++++++++++++++++++++++++++type=" + type);
         if ("A".equals(centre)) {
             if (type == null || "".equals(type)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_tos");
@@ -181,6 +182,12 @@ public class ServiceThread {
                 tdhServicesInfoDTO.setTableName("tdha_services_workflow");
             } else if ("GUARDIAN".equals(type)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_guardian");
+            } else if ("SLIPSTREAM_STUDIO".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_slipstream_studio");
+            }else if ("NOTIFICATION".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_notification");
+            }else if ("RUBIK".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_rubik");
             }
         }else {
             if (type == null || "".equals(type)) {
@@ -217,6 +224,12 @@ public class ServiceThread {
                 tdhServicesInfoDTO.setTableName("tdhb_services_workflow");
             } else if ("GUARDIAN".equals(type)) {
                 tdhServicesInfoDTO.setTableName("tdhb_services_guardian");
+            }else if ("SLIPSTREAM_STUDIO".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream_studio");
+            }else if ("NOTIFICATION".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_notification");
+            }else if ("RUBIK".equals(type)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_rubik");
             }
         }
     }

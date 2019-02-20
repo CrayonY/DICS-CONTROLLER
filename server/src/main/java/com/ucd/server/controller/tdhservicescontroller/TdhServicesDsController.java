@@ -3,11 +3,16 @@ package com.ucd.server.controller.tdhservicescontroller;
 
 import com.ucd.common.VO.ResultVO;
 import com.ucd.common.enums.ResultEnum;
+import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.ResultVOUtil;
 import com.ucd.common.utils.pager.PageView;
+import com.ucd.daocommon.DTO.operationLogInfoDTO.OperationLogInfoDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.server.enums.OperationLogInfoEnum;
 import com.ucd.server.enums.TdhServicesReturnEnum;
+import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
 import feign.Param;
 import org.slf4j.Logger;
@@ -15,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -29,6 +36,9 @@ public class TdhServicesDsController {
 
     @Autowired
     private TdhServicesDsService tdhServicesDsService;
+
+    @Autowired
+    private OperationLogInfoService operationLogInfoService;
 
 
 
@@ -99,11 +109,53 @@ public class TdhServicesDsController {
      * @return
      */
     @PostMapping(value = "/auditThdDsListData")
-    public ResultVO auditThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS){
+    public ResultVO auditThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
+        String userCode = "";
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
-            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsMonthsDTOS);
+            req.setCharacterEncoding("utf-8");
+            //获取cookie
+            Cookie cookies[] = req.getCookies();
+            if(cookies==null || cookies.length == 0){
+                logger.info("没有cookie");
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+            }else{
+                for (Cookie cookie : cookies){
+
+                    //获取cookie的解释内容
+                    String comment = cookie.getComment();
+                    System.out.println("comment:"+comment);
+                    //获取cookie的键
+                    String key = cookie.getName();
+                    System.out.println("key:"+key);
+                    if ("userCode".equals(key)) {
+
+                        //获取cookie的值
+                        String value = cookie.getValue();
+                        System.out.println("value:" + value);
+                        userCode = value;
+                    }
+
+                    //获取cookie的有效时间。
+                    int time = cookie.getMaxAge();
+                    System.out.println("time:"+time);
+
+                    //获取服务器的IP对应的域名
+                    String domain = cookie.getDomain();
+                    System.out.println("domain:"+ domain);
+
+                    //获取有效路径
+                    String path = cookie.getPath();
+                    System.out.println("path:"+ path);
+
+                }
+            }
+            OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
+            operationLogInfoDTO.setUserCode(userCode);
+            operationLogInfoDTO.setValue(userCode+OperationLogInfoEnum.auditThdDsListData.getMessage());
+            operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
+//            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsMonthsDTOS,userCode);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {
@@ -123,7 +175,6 @@ public class TdhServicesDsController {
     public ResultVO updateThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS){
         ResultVO resultVO = new ResultVO();
         try {
-            //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             resultVO = tdhServicesDsService.updateThdDsListData(tdhDsMonthsDTOS);
             logger.info("resultVO:"+resultVO);
             return resultVO;
@@ -141,11 +192,53 @@ public class TdhServicesDsController {
      * @return
              */
     @PostMapping(value = "/syncThdDsListData")
-    public ResultVO syncThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS){
+    public ResultVO syncThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
+        String userCode = "";
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
-            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsMonthsDTOS);
+            req.setCharacterEncoding("utf-8");
+            //获取cookie
+            Cookie cookies[] = req.getCookies();
+            if(cookies==null || cookies.length == 0){
+                logger.info("没有cookie");
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+            }else{
+                for (Cookie cookie : cookies){
+
+                    //获取cookie的解释内容
+                    String comment = cookie.getComment();
+                    System.out.println("comment:"+comment);
+                    //获取cookie的键
+                    String key = cookie.getName();
+                    System.out.println("key:"+key);
+                    if ("userCode".equals(key)) {
+
+                        //获取cookie的值
+                        String value = cookie.getValue();
+                        System.out.println("value:" + value);
+                        userCode = value;
+                    }
+
+                    //获取cookie的有效时间。
+                    int time = cookie.getMaxAge();
+                    System.out.println("time:"+time);
+
+                    //获取服务器的IP对应的域名
+                    String domain = cookie.getDomain();
+                    System.out.println("domain:"+ domain);
+
+                    //获取有效路径
+                    String path = cookie.getPath();
+                    System.out.println("path:"+ path);
+
+                }
+            }
+            OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
+            operationLogInfoDTO.setUserCode(userCode);
+            operationLogInfoDTO.setValue(userCode+OperationLogInfoEnum.syncThdDsListData.getMessage());
+            operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
+//            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsMonthsDTOS,userCode);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {

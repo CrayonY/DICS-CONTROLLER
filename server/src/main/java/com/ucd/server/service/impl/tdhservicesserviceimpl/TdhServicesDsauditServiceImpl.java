@@ -105,7 +105,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
     }
 
     @Override
-    public ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception {
+    public ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList,String userCode) throws Exception {
         String centre = "";
         if (centrelocal.equals("A")){
             centre = "B";
@@ -129,7 +129,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",审核状态输入错误");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态输入错误");
             }
-            tdhDsauditDTO.setAuditerCode("gwmb");
+            tdhDsauditDTO.setAuditerCode(userCode);
             TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
             tdhDsMonthsDTO.setAuditStatus(tdhDsauditDTO.getAuditStatus());
             tdhDsMonthsDTO.setUserCode(tdhDsauditDTO.getAuditerCode());
