@@ -59,11 +59,6 @@
                 <artifactId>client</artifactId>
                 <version>${client.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.ucd</groupId>
-                <artifactId>localdao-client</artifactId>
-                <version>${client.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
