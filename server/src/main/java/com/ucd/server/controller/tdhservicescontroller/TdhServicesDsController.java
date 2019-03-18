@@ -14,6 +14,7 @@ import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
 import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
+import com.ucd.server.service.userservice.UserService;
 import feign.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,9 @@ public class TdhServicesDsController {
 
     @Autowired
     private OperationLogInfoService operationLogInfoService;
+
+    @Autowired
+    UserService userService;
 
 
 
@@ -111,7 +115,8 @@ public class TdhServicesDsController {
     @PostMapping(value = "/auditThdDsListData")
     public ResultVO auditThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
-        String userCode = "";
+        String userName = "";
+        String accessToken = "";
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             req.setCharacterEncoding("utf-8");
@@ -129,12 +134,19 @@ public class TdhServicesDsController {
                     //获取cookie的键
                     String key = cookie.getName();
                     System.out.println("key:"+key);
-                    if ("userCode".equals(key)) {
+                    if ("userName".equals(key)) {
 
                         //获取cookie的值
                         String value = cookie.getValue();
-                        System.out.println("value:" + value);
-                        userCode = value;
+                        System.out.println("userNameValue:" + value);
+                        userName = value;
+                    }
+                    if ("accessToken".equals(key)) {
+
+                        //获取cookie的值
+                        String value = cookie.getValue();
+                        System.out.println("accessTokenValue:" + value);
+                        accessToken = value;
                     }
 
                     //获取cookie的有效时间。
@@ -150,12 +162,24 @@ public class TdhServicesDsController {
                     System.out.println("path:"+ path);
 
                 }
+                if("".equals(accessToken)){
+                    logger.info("token为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                }
+                if("".equals(userName)){
+                    logger.info("userName为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
-            operationLogInfoDTO.setUserCode(userCode);
-            operationLogInfoDTO.setValue(userCode+OperationLogInfoEnum.auditThdDsListData.getMessage());
+            operationLogInfoDTO.setUserCode(userName);
+            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.auditThdDsListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
-//            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsMonthsDTOS,userCode);
+            String power = userService.checkUserPower(userName);
+            if ("NO".equals(power)){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            }
+            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsMonthsDTOS,userName);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {
@@ -194,7 +218,8 @@ public class TdhServicesDsController {
     @PostMapping(value = "/syncThdDsListData")
     public ResultVO syncThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
-        String userCode = "";
+        String userName = "";
+        String accessToken = "";
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             req.setCharacterEncoding("utf-8");
@@ -212,12 +237,19 @@ public class TdhServicesDsController {
                     //获取cookie的键
                     String key = cookie.getName();
                     System.out.println("key:"+key);
-                    if ("userCode".equals(key)) {
+                    if ("userName".equals(key)) {
 
                         //获取cookie的值
                         String value = cookie.getValue();
-                        System.out.println("value:" + value);
-                        userCode = value;
+                        System.out.println("userNameValue:" + value);
+                        userName = value;
+                    }
+                    if ("accessToken".equals(key)) {
+
+                        //获取cookie的值
+                        String value = cookie.getValue();
+                        System.out.println("accessTokenValue:" + value);
+                        accessToken = value;
                     }
 
                     //获取cookie的有效时间。
@@ -233,12 +265,24 @@ public class TdhServicesDsController {
                     System.out.println("path:"+ path);
 
                 }
+                if("".equals(accessToken)){
+                    logger.info("token为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                }
+                if("".equals(userName)){
+                    logger.info("userName为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
-            operationLogInfoDTO.setUserCode(userCode);
-            operationLogInfoDTO.setValue(userCode+OperationLogInfoEnum.syncThdDsListData.getMessage());
+            operationLogInfoDTO.setUserCode(userName);
+            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.syncThdDsListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
-//            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsMonthsDTOS,userCode);
+            String power = userService.checkUserPower(userName);
+            if ("NO".equals(power)){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            }
+            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsMonthsDTOS,userName);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {

@@ -227,7 +227,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     ResultVO resultDsauditVO = new ResultVO();
                     String resultDsaudit = "";
                     try {
-                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/softwareDsaudit/saveTdhDsauditData", Tools.toJson(tdhDsauditDTOList), "application/json", null);
+                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDsaudit/saveTdhDsauditData", Tools.toJson(tdhDsauditDTOList), "application/json", null);
                         resultDsauditVO = gs.fromJson(resultDsaudit, new TypeToken<ResultVO>() {
                         }.getType());
                         logger.info("resultDsauditVO:"+resultDsauditVO);

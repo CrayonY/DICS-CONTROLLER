@@ -15,6 +15,7 @@ import com.ucd.server.exception.SoftwareException;
 import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsauditService;
+import com.ucd.server.service.userservice.UserService;
 import feign.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,9 @@ public class TdhServicesDsauditController {
 
     @Autowired
     private OperationLogInfoService operationLogInfoService;
+
+    @Autowired
+    UserService userService;
 
 
 
@@ -131,7 +135,8 @@ public class TdhServicesDsauditController {
     @PostMapping(value = "/auditTdhDsauditListData")
     public ResultVO auditTdhDsauditListData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
-        String userCode = "";
+        String userName = "";
+        String accessToken = "";
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             req.setCharacterEncoding("utf-8");
@@ -149,12 +154,19 @@ public class TdhServicesDsauditController {
                     //获取cookie的键
                     String key = cookie.getName();
                     System.out.println("key:"+key);
-                    if ("userCode".equals(key)) {
+                    if ("userName".equals(key)) {
 
                         //获取cookie的值
                         String value = cookie.getValue();
-                        System.out.println("value:" + value);
-                        userCode = value;
+                        System.out.println("userNameValue:" + value);
+                        userName = value;
+                    }
+                    if ("accessToken".equals(key)) {
+
+                        //获取cookie的值
+                        String value = cookie.getValue();
+                        System.out.println("accessTokenValue:" + value);
+                        accessToken = value;
                     }
 
                     //获取cookie的有效时间。
@@ -170,12 +182,24 @@ public class TdhServicesDsauditController {
                     System.out.println("path:"+ path);
 
                 }
+                if("".equals(accessToken)){
+                    logger.info("token为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                }
+                if("".equals(userName)){
+                    logger.info("userName为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
-            operationLogInfoDTO.setUserCode(userCode);
-            operationLogInfoDTO.setValue(userCode+ OperationLogInfoEnum.auditTdhDsauditListData.getMessage());
+            operationLogInfoDTO.setUserCode(userName);
+            operationLogInfoDTO.setValue(userName+ OperationLogInfoEnum.auditTdhDsauditListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
-//            resultVO = tdhServicesDsauditService.auditTdhDsauditListData(tdhDsauditDTOList,userCode);
+            String power = userService.checkUserPower(userName);
+            if ("NO".equals(power)){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            }
+            resultVO = tdhServicesDsauditService.auditTdhDsauditListData(tdhDsauditDTOList,userName);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {

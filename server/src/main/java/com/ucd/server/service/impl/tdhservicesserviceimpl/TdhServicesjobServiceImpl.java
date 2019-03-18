@@ -52,6 +52,8 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
     public String usernameb;
     @Value("${basicparameters.transwarp.passwordb}")
     public String passwordb;
+    @Value("${basicparameters.urlotherside}")
+    public String urlotherside;
     @Autowired
     public DaoClient daoClient;
 
@@ -129,7 +131,7 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
         //调对端接口，获得“job”表数据，存入本地“job”表数据
         Gson gs = new Gson();
         ResultVO resultJobVO = new ResultVO();
-        String result = HttpClientUtils.postString("http://10.66.1.160:28070/softwarejob/getThdServicesjobListData",Tools.toJson(tdhServicesJobDTOS), "application/json",null);
+        String result = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwarejob/getThdServicesjobListData",Tools.toJson(tdhServicesJobDTOS), "application/json",null);
         resultJobVO = gs.fromJson(result, new TypeToken<ResultVO>() {}.getType());
         logger.info("resultJobVO:"+resultJobVO);
         if("000000".equals(resultJobVO.getCode())){

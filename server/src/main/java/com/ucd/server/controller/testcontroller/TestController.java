@@ -18,10 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -215,6 +212,14 @@ public class TestController {
 
                 }
             }
+//            logger.info("进入testList");
+//            List<String> list = new ArrayList<String>();
+//            for (int j = 0;j <1000;j++){
+//            for(int i = 0;i < 100000;i++){
+//                UUID aa = UUID.randomUUID();
+//                list.add(aa.toString());
+//            }
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -161,7 +161,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                     ResultVO resultDsauditVO = new ResultVO();
                     String resultDsaudit = "";
                     try {
-                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/softwareDs/updateThdDsListData", Tools.toJson(tdhDsMonthsDTOS), "application/json", null);
+                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsMonthsDTOS), "application/json", null);
                         resultDsauditVO = gs.fromJson(resultDsaudit, new TypeToken<ResultVO>() {
                         }.getType());
                     }catch (Exception e){

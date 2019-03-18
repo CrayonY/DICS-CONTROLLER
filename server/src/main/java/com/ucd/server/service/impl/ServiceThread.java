@@ -13,6 +13,7 @@ import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesJobDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesListDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
+import com.ucd.daocommon.DTO.userDTO.UserDTO;
 import com.ucd.daocommon.VO.thdServicesVO.TdhServicesJobVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
@@ -356,6 +357,65 @@ public class ServiceThread {
         }
     }
 
+    @Async("transwarpExecutor")
+    public void taskSaveThdUsersListDataThread(String url, String centre, String username, String password) {
+
+        logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+        Connection client = new Connection(url,centre);
+        List<UserDTO> result = new ArrayList<UserDTO>();
+        Date now = new Date();
+        Gson gs = new Gson();
+        try {
+            //return url+"-"+centre+"-"+username+"-"+password;
+            if (UserApi.login(client, username, password)) {
+                try {
+                    String usersInfo = UserApi.getAllUsers1(client);
+                    System.out.println(usersInfo);
+                    result = gs.fromJson(usersInfo, new TypeToken<List<UserDTO>>() {
+                    }.getType());
+                    logger.info(result.toString());
+                    UserApi.logout(client);
+                    client.close1();
+                }catch (Exception e){
+                    UserApi.logout(client);
+                    client.close1();
+                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                    throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
+                }
+                logger.info(centre + "中心连接关闭" );
+                if (result == null) {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
+                    throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
+                }
+                //插入数据库，调用monitor-dao微服务
+                ResultVO resultVO = daoClient.saveUserInfo(result);
+                logger.info("resultVO=" + resultVO);
+                if ("000000".equals(resultVO.getCode())) {
+                    // return resultVO.getData().toString();
+                } else {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                }
+
+
+            } else {
+                logger.info(centre + "中心异常：e=" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR);
+                throw new SoftwareException(TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getCode(), centre + "中心异常:" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getMessage());
+            }
+        }catch (Exception e){
+            logger.info(centre + "中心异常：e="+e.toString());
+            try {
+                UserApi.logout(client);
+                client.close1();
+            }catch (Exception e1){
+                logger.info(centre + "中心退出异常：e="+e1.toString());
+            }
+            return;
+        }finally {
+            //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
+        }
+    }
+
     public static void main(String[] args) {
         String a = "insert into station_c2222456sdfg_201812 \n" +
                 "SELECT \n" +
@@ -380,4 +440,6 @@ public class ServiceThread {
         System.out.println("t1:"+t1);//
         System.out.println(a.indexOf("insert"));//0
     }
+
+
 }

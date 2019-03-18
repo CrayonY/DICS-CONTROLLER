@@ -58,13 +58,51 @@ public class TaskTdhService {
     public void timerToNow(){
         System.out.println("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
     }
+
+    //向星环发起请求，获取集群用户信息，并存库
+    //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
+    public void taskSaveThdUsersListData(){
+
+        Date now = new Date();
+        logger.info("taskSaveThdUsersListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("taskState",1);
+        map.put("taskName","taskUsersInfo");
+        int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+        logger.info("num:" + num);
+        if (num == 1) {
+            try {
+                logger.info("集群用户信息--成功进入");
+                //记录定时任务运行时间
+                TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
+                tdhTaskParameter.setTaskName("taskUsersInfo");
+                tdhTaskParameter.setTaskTime(now);
+                tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
+                serviceThread.taskSaveThdUsersListDataThread(serviceinfourla, centrea, usernamea, passworda);
+                Thread.sleep(5000);
+                map.put("taskState",0);
+                tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            logger.info("集群用户信息--没有进入");
+            return;
+        }
+
+        return ;
+    }
+
     //向星环发起请求，获取集群服务信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
 //    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
 
         Date now = new Date();
-        logger.info("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
             Map<String,Object> map = new HashMap<String,Object>();
             map.put("taskState",1);
             map.put("taskName","taskServiceInfo");
@@ -72,7 +110,7 @@ public class TaskTdhService {
             logger.info("num:" + num);
             if (num == 1) {
                 try {
-                logger.info("成功进入");
+                logger.info("集群服务信息--成功进入");
                     //记录定时任务运行时间
                     TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
                     tdhTaskParameter.setTaskName("taskServiceInfo");
@@ -87,7 +125,7 @@ public class TaskTdhService {
                     e.printStackTrace();
                 }
             } else {
-                logger.info("没有进入");
+                logger.info("集群服务信息--没有进入");
                 return;
             }
 
@@ -95,10 +133,11 @@ public class TaskTdhService {
     }
 
     //向星环发起请求，获取running的job信息，并判断是否需要数据同步
-    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
         Date now = new Date();
-        logger.info("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskSaveThdServicesJobErrorData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","taskServicejob");
@@ -106,7 +145,7 @@ public class TaskTdhService {
         logger.info("num:" + num);
         if (num == 1) {
             try {
-                logger.info("成功进入");
+                logger.info("running的job信息成功进入");
                 //记录定时任务运行时间
                 TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
                 tdhTaskParameter.setTaskName("taskServicejob");
@@ -126,7 +165,7 @@ public class TaskTdhService {
                 e.printStackTrace();
             }
         } else {
-            logger.info("没有进入");
+            logger.info("running的job信息没有进入");
             return;
         }
 
@@ -134,10 +173,11 @@ public class TaskTdhService {
     }
 
     //自动开门
-    @Scheduled(cron = "5/30 * * * * ?")
+//    @Scheduled(cron = "5/30 * * * * ?")
+    @Scheduled(cron = "5/10 * * * * ?")
     public void taskOpentaskState(){
         Date now = new Date();
-        logger.info("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskOpentaskState()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","tasktaskDoorkeeper");
@@ -156,6 +196,8 @@ public class TaskTdhService {
                 tables.add("taskServiceInfo");
                 tables.add("taskServicejob");
                 tables.add("tasktaskDoorkeeper");
+                tables.add("taskUsersInfo");
+                //testList();
                 tdhTaskParameterMapper.updateTdhServiceTaskStateTo0(tables);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -170,4 +212,15 @@ public class TaskTdhService {
 
 
 
+//    public void testList(){
+//        logger.info("进入testList");
+//        List<String> list = new ArrayList<String>();
+//        for(int i = 0;i < 10000000;i++){
+//            UUID aa = UUID.randomUUID();
+//            list.add(aa.toString());
+//        }
+//        for (String bb : list){
+//            String cc = bb;
+//        }
+//    }
 }

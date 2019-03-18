@@ -6,6 +6,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +27,8 @@ public class UserApi {
     public final static String LOGIN_URL = "/users/login";
     public final static String LOGOUT_URL = "/users/logout";
     public final static String USER_URL = "/users";
+
+    private static final Logger log = LoggerFactory.getLogger(UserApi.class);
     /**
      * 2.1.1 用户登录
      * @param userName 用户名
@@ -87,6 +91,42 @@ public class UserApi {
             }
             boolean result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             return result;
+        }
+    }
+
+    /**
+     * 2.1.3.1 查看用户
+     * @return 是否查询成功
+     * @throws Exception
+     */
+    public static String getAllUsers1(Connection conObject) throws Exception {
+        String responseContent = null;
+        try {
+                CloseableHttpResponse response = conObject.getNOAbort1(USER_URL,conObject);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode == HttpStatus.SC_OK) {
+                // 成功
+                responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
+
+                log.debug("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+
+                return responseContent;
+
+            } else {
+                // 失败
+                responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+                log.error("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+
+                throw new Exception("[HTTP]异常响应状态:" + statusCode);
+            }
+        } catch (Exception ex) {
+
+            log.error("***HTTP请求调用出现异常: " + USER_URL, ex);
+
+            throw ex;
         }
     }
 
