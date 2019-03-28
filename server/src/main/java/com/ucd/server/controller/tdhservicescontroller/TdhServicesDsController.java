@@ -25,7 +25,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-
+@CrossOrigin
 @RestController
 @RequestMapping("/softwareDs")
 public class TdhServicesDsController {
@@ -55,6 +55,7 @@ public class TdhServicesDsController {
             if(pageView == null){
                 pageView = new PageView();
             }
+            logger.info("接受参数tdhSDsDTO："+tdhSDsDTO);
             pageView =tdhServicesDsService.getThdServicesDsInfo(pageView,tdhSDsDTO);
             resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
             logger.info("resultVO:"+resultVO);
@@ -95,6 +96,7 @@ public class TdhServicesDsController {
             if(pageView == null){
                 pageView = new PageView();
             }
+            logger.info("接受参数tdhDsMonthsDTO："+tdhDsMonthsDTO);
             pageView =tdhServicesDsService.getTdhDsMonthsInfo(pageView,tdhDsMonthsDTO);
             resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
             logger.info("resultVO:"+resultVO);
@@ -316,6 +318,7 @@ public class TdhServicesDsController {
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")
     public  ResultVO countTdhDsauditDataoByAuditStatus(TdhDsDTO tdhDsDTO) {
         logger.info("进入countTdhDsauditDataoByAuditStatuscontroller啦——————————————");
+        logger.info("接受参数tdhSDsDTO："+tdhDsDTO);
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsService.countTdhDsauditDataoByAuditStatus(tdhDsDTO);

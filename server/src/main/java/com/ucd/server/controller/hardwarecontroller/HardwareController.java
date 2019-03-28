@@ -5,6 +5,8 @@ import com.ucd.common.utils.ResultVOUtil;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
+import com.ucd.daocommon.DTO.hardwareDTO.HardwareInfoDTO;
+import com.ucd.daocommon.DTO.hardwareDTO.HardwareNowDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.hardwareservice.HardWareService;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 
+@CrossOrigin
 @RestController
 @RequestMapping("/hardware")
 public class HardwareController {
@@ -27,6 +30,21 @@ public class HardwareController {
 	 * 引入日志，注意都是"org.slf4j"包下
 	 */
 	private final static Logger logger = LoggerFactory.getLogger(HardwareController.class);
+
+	@PostMapping(value = "/saveHardWareInfo")
+	public ResultVO saveHardWareInfo(@RequestBody HardwareInfoDTO hardwareInfoDTO ){
+		ResultVO resultVO = new ResultVO();
+		logger.info("接受参数2："+hardwareInfoDTO);
+		try {
+			String result = hardWareService.saveHardWareInfo(hardwareInfoDTO);
+			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),hardwareInfoDTO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultVO = ResultVOUtil.error(e);
+		}
+		logger.info("resultVO:"+resultVO);
+		return resultVO;
+	}
 
 	@PostMapping(value = "/saveHardWareInfo1")
 	public ResultVO saveHardWareInfo1(@RequestParam(value = "param", required = false)String param ){
@@ -39,20 +57,20 @@ public class HardwareController {
 		return resultVO;
 	}
 
-	@PostMapping(value = "/saveHardWareInfo")
-	public ResultVO saveHardWareInfo(@RequestBody HardwareDTO hardwareDTO ){
-		ResultVO resultVO = new ResultVO();
-		logger.info("接受参数1："+hardwareDTO);
-        try {
-		    String result = hardWareService.saveHardWareInfo(hardwareDTO);
-		    resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultVO = ResultVOUtil.error(e);
-        }
-		logger.info("resultVO:"+resultVO);
-		return resultVO;
-	}
+//	@PostMapping(value = "/saveHardWareInfo")
+//	public ResultVO saveHardWareInfo(@RequestBody HardwareDTO hardwareDTO ){
+//		ResultVO resultVO = new ResultVO();
+//		logger.info("接受参数1："+hardwareDTO);
+//        try {
+//		    String result = hardWareService.saveHardWareInfo(hardwareDTO);
+//		    resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            resultVO = ResultVOUtil.error(e);
+//        }
+//		logger.info("resultVO:"+resultVO);
+//		return resultVO;
+//	}
 
 	@PostMapping(value = "/gethardwareInfo")
 	public ResultVO gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO){

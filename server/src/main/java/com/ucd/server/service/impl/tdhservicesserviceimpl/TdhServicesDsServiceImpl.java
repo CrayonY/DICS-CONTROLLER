@@ -93,8 +93,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         }
          if ("A".equals(tdhDsDTO.getCentre())) {
              tdhDsDTO.setCentreTableName("tdha_ds_info");
-        }else {
+        }else if ("B".equals(tdhDsDTO.getCentre())) {
              tdhDsDTO.setCentreTableName("tdhb_ds_info");
+         }else{
+             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
          }
         Map<String, Object> models = new HashMap<String, Object>();
         models.put("pageView",pageView);
@@ -165,8 +168,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             }
             if ("A".equals(tdhDsMonthsDTO.getCentre())) {
                 tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else {
+            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
                 tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            }else{
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
             }
             TdhDsauditDTO tdhDsauditDTO = new TdhDsauditDTO();
             tdhDsauditDTO.setApplyerCode(userCode);
@@ -281,10 +287,14 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
         }
+
         if ("A".equals(tdhDsMonthsDTO.getCentre())) {
             tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-        }else {
+        }else if("B".equals(tdhDsMonthsDTO.getCentre())){
             tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+        }else{
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
         }
         Map<String, Object> models = new HashMap<String, Object>();
         models.put("pageView",pageView);
@@ -340,8 +350,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             }
             if ("A".equals(tdhDsMonthsDTO.getCentre())) {
                 tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else {
+            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
                 tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            }else{
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
             }
             if (tdhDsMonthsDTO.getAuditStatus() == 3){//通过
                 models1.put("auditStatus",tdhDsMonthsDTO.getAuditStatus());
@@ -420,8 +433,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             }
             if ("A".equals(tdhDsMonthsDTO.getCentre())) {
                 tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else {
+            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
                 tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            }else{
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
             }
             TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
             String ID = KeyUtil.genUniqueKey();
@@ -555,8 +571,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     tdhDsMonthsDTO.setStartdownTime(tdhDssyncVO.getSyncMonth());
                     if ("A".equals(tdhDsMonthsDTO.getCentre())) {
                         tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-                    }else {
+                    }else if("B".equals(tdhDsMonthsDTO.getCentre())){
                         tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+                    }else{
+                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
                     }
                     tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
                     Map<String, Object> models = new HashMap<String, Object>();
@@ -650,8 +669,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         }
         if ("A".equals(tdhDsDTO.getCentre())) {
             tdhDsDTO.setCentreTableName("tdha_ds_info");
-        }else {
+        }else if ("B".equals(tdhDsDTO.getCentre())) {
             tdhDsDTO.setCentreTableName("tdhb_ds_info");
+        }else{
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
         }
         ResultVO resultVO = daoClient.countTdhDsDataByAuditStatusAndState(tdhDsDTO);
         logger.info("resultVO=" + resultVO);

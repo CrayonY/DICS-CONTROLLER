@@ -7,7 +7,7 @@ import com.ucd.common.VO.ResultVO;
 import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
-import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
+import com.ucd.daocommon.DTO.hardwareDTO.*;
 import com.ucd.server.exception.SoftwareException;
 import com.ucd.server.service.hardwareservice.HardWareService;
 import org.slf4j.Logger;
@@ -26,13 +26,29 @@ public class HardWareServiceimpl implements HardWareService {
     public DaoClient daoClient;
     private final static Logger logger = LoggerFactory.getLogger(HardWareService.class);
 
+//    @Override
+//    public String saveHardWareInfo(HardwareDTO hardwareDTO) throws Exception {
+//        if (hardwareDTO == null || hardwareDTO.getHost() == null ||"".equals(hardwareDTO.getHost())){
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER);
+//        }
+//        hardwareDTO.setCreattime(new Date());
+//        ResultVO resultVO = daoClient.saveHardWareInfo(hardwareDTO);
+//        logger.info("resultVO=" + resultVO);
+//        if ("000000".equals(resultVO.getCode())) {
+//            return resultVO.getData().toString();
+//        } else {
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+//            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT,  "异常:" + resultVO.getMsg()+resultVO.getData());
+//        }
+//    }
+
     @Override
-    public String saveHardWareInfo(HardwareDTO hardwareDTO) throws Exception {
-        if (hardwareDTO == null || hardwareDTO.getHost() == null ||"".equals(hardwareDTO.getHost())){
+    public String saveHardWareInfo(HardwareInfoDTO hardwareInfoDTO) throws Exception {
+        if (hardwareInfoDTO == null || hardwareInfoDTO.getHost() == null ||"".equals(hardwareInfoDTO.getHost())){
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER);
         }
-        hardwareDTO.setCreattime(new Date());
-        ResultVO resultVO = daoClient.saveHardWareInfo(hardwareDTO);
+        hardwareInfoDTO.setCreattime(new Date());
+        ResultVO resultVO = daoClient.saveHardWareInfo(hardwareInfoDTO);
         logger.info("resultVO=" + resultVO);
         if ("000000".equals(resultVO.getCode())) {
             return resultVO.getData().toString();

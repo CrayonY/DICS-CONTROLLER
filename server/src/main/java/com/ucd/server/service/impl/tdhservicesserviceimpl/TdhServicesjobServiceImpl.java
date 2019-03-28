@@ -73,8 +73,11 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
         }
         if ("A".equals(tdhServicesJobDTO.getCentre())) {
             tdhServicesJobDTO.setCentreTableName("tdha_servicesjob_info");
-        } else {
+        } else if ("B".equals(tdhServicesJobDTO.getCentre())) {
             tdhServicesJobDTO.setCentreTableName("tdhb_servicesjob_info");
+        }else{
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhServicesJobDTO.getCentre());
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhServicesJobDTO.getCentre());
         }
         Map<String, Object> models = new HashMap<String, Object>();
         models.put("pageView",pageView);

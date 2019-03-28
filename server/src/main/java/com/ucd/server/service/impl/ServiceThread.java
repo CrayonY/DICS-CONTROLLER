@@ -190,7 +190,7 @@ public class ServiceThread {
             }else if ("RUBIK".equals(type)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_rubik");
             }
-        }else {
+        }else if("B".equals(centre)){
             if (type == null || "".equals(type)) {
                 tdhServicesInfoDTO.setTableName("tdhb_services_tos");
             } else if ("TOS".equals(type)) {
