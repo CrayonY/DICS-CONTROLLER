@@ -37,7 +37,7 @@ public class HardwareController {
 		logger.info("接受参数2："+hardwareInfoDTO);
 		try {
 			String result = hardWareService.saveHardWareInfo(hardwareInfoDTO);
-			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),hardwareInfoDTO);
+			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultVO = ResultVOUtil.error(e);
