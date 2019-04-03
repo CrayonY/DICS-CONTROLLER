@@ -46,16 +46,37 @@ public class HardwareController {
 		return resultVO;
 	}
 
-	@PostMapping(value = "/saveHardWareInfo1")
-	public ResultVO saveHardWareInfo1(@RequestParam(value = "param", required = false)String param ){
+	@PostMapping(value = "/gethardwareInfo")
+	public ResultVO gethardwareInfo(PageView pageView, HardwareNowDTO hardwareNowDTO){
+		logger.info("pageView:"+pageView);
+		logger.info("hardwareNowDTO:"+hardwareNowDTO);
 		ResultVO resultVO = new ResultVO();
-		logger.info("接受参数1："+param);
-		HardwareDTO result = Tools.jsonToObject(param,HardwareDTO.class);
-		logger.info("解析参数1："+result);
-		resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
-		logger.info("resultVO:"+resultVO);
-		return resultVO;
+		try {
+			if(pageView == null){
+				pageView = new PageView();
+			}
+			pageView =hardWareService.gethardwareInfo(pageView,hardwareNowDTO);
+			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
+			logger.info("resultVO:"+resultVO);
+			return resultVO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultVO = ResultVOUtil.error(e);
+			logger.info("resultVO:"+resultVO);
+			return resultVO;
+		}
 	}
+
+//	@PostMapping(value = "/saveHardWareInfo1")
+//	public ResultVO saveHardWareInfo1(@RequestParam(value = "param", required = false)String param ){
+//		ResultVO resultVO = new ResultVO();
+//		logger.info("接受参数1："+param);
+//		HardwareDTO result = Tools.jsonToObject(param,HardwareDTO.class);
+//		logger.info("解析参数1："+result);
+//		resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
+//		logger.info("resultVO:"+resultVO);
+//		return resultVO;
+//	}
 
 //	@PostMapping(value = "/saveHardWareInfo")
 //	public ResultVO saveHardWareInfo(@RequestBody HardwareDTO hardwareDTO ){
@@ -72,26 +93,26 @@ public class HardwareController {
 //		return resultVO;
 //	}
 
-	@PostMapping(value = "/gethardwareInfo")
-	public ResultVO gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO){
-		logger.info("pageView:"+pageView);
-		logger.info("hardwareDTO:"+hardwareDTO);
-		ResultVO resultVO = new ResultVO();
-		try {
-			if(pageView == null){
-				pageView = new PageView();
-			}
-			pageView =hardWareService.gethardwareInfo(pageView,hardwareDTO);
-			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-			logger.info("resultVO:"+resultVO);
-			return resultVO;
-		} catch (Exception e) {
-			e.printStackTrace();
-			resultVO = ResultVOUtil.error(e);
-			logger.info("resultVO:"+resultVO);
-			return resultVO;
-		}
-	}
+//	@PostMapping(value = "/gethardwareInfo")
+//	public ResultVO gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO){
+//		logger.info("pageView:"+pageView);
+//		logger.info("hardwareDTO:"+hardwareDTO);
+//		ResultVO resultVO = new ResultVO();
+//		try {
+//			if(pageView == null){
+//				pageView = new PageView();
+//			}
+//			pageView =hardWareService.gethardwareInfo(pageView,hardwareDTO);
+//			resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
+//			logger.info("resultVO:"+resultVO);
+//			return resultVO;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			resultVO = ResultVOUtil.error(e);
+//			logger.info("resultVO:"+resultVO);
+//			return resultVO;
+//		}
+//	}
 
 	@PostMapping(value = "/saveHardWareInfo2")
 	public ResultVO saveHardWareInfo2(@RequestBody String param ){

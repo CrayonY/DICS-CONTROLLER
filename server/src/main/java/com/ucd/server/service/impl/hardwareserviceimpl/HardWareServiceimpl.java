@@ -59,10 +59,10 @@ public class HardWareServiceimpl implements HardWareService {
     }
 
     @Override
-    public PageView gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO) throws Exception {
+    public PageView gethardwareInfo(PageView pageView, HardwareNowDTO hardwareNowDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
         models.put("pageView",pageView);
-        models.put("hardwareDTO",hardwareDTO);
+        models.put("hardwareNowDTO",hardwareNowDTO);
         ResultVO resultVO = daoClient.getHardWareInfo(models);
         logger.info("resultVO=" + resultVO);
         if("000000".equals(resultVO.getCode())){
@@ -80,4 +80,28 @@ public class HardWareServiceimpl implements HardWareService {
         }
         return  pageView;
     }
+
+
+//    @Override
+//    public PageView gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO) throws Exception {
+//        Map<String, Object> models = new HashMap<String, Object>();
+//        models.put("pageView",pageView);
+//        models.put("hardwareDTO",hardwareDTO);
+//        ResultVO resultVO = daoClient.getHardWareInfo(models);
+//        logger.info("resultVO=" + resultVO);
+//        if("000000".equals(resultVO.getCode())){
+//            Object object = resultVO.getData();
+//            if (object != null) {
+//                String pageViewString = Tools.toJson(object);
+//                Gson gs = new Gson();
+//                pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
+//                }.getType());
+//                logger.info("pageViewString:" + pageViewString);
+//            }
+//        }else {
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
+//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+//        }
+//        return  pageView;
+//    }
 }
