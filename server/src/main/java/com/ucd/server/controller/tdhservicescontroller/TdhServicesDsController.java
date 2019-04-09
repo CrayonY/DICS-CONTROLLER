@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 import java.util.List;
 @CrossOrigin
 @RestController
@@ -123,45 +124,81 @@ public class TdhServicesDsController {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             req.setCharacterEncoding("utf-8");
             //获取cookie
-            Cookie cookies[] = req.getCookies();
-            if(cookies==null || cookies.length == 0){
-                logger.info("没有cookie");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+//            Cookie cookies[] = req.getCookies();
+//            if(cookies==null || cookies.length == 0){
+//                logger.info("没有cookie");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+//            }else{
+//                for (Cookie cookie : cookies){
+//
+//                    //获取cookie的解释内容
+//                    String comment = cookie.getComment();
+//                    System.out.println("comment:"+comment);
+//                    //获取cookie的键
+//                    String key = cookie.getName();
+//                    System.out.println("key:"+key);
+//                    if ("userName".equals(key)) {
+//
+//                        //获取cookie的值
+//                        String value = cookie.getValue();
+//                        System.out.println("userNameValue:" + value);
+//                        userName = value;
+//                    }
+//                    if ("accessToken".equals(key)) {
+//
+//                        //获取cookie的值
+//                        String value = cookie.getValue();
+//                        System.out.println("accessTokenValue:" + value);
+//                        accessToken = value;
+//                    }
+//
+//                    //获取cookie的有效时间。
+//                    int time = cookie.getMaxAge();
+//                    System.out.println("time:"+time);
+//
+//                    //获取服务器的IP对应的域名
+//                    String domain = cookie.getDomain();
+//                    System.out.println("domain:"+ domain);
+//
+//                    //获取有效路径
+//                    String path = cookie.getPath();
+//                    System.out.println("path:"+ path);
+//
+//                }
+//                if("".equals(accessToken)){
+//                    logger.info("token为空");
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+//                }
+//                if("".equals(userName)){
+//                    logger.info("userName为空");
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+//                }
+//            }
+            //获取header
+            Enumeration headerNames = req.getHeaderNames();
+            if(headerNames==null){
+                logger.info("没有hearder");
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
             }else{
-                for (Cookie cookie : cookies){
+                while (headerNames.hasMoreElements()){
 
-                    //获取cookie的解释内容
-                    String comment = cookie.getComment();
-                    System.out.println("comment:"+comment);
                     //获取cookie的键
-                    String key = cookie.getName();
+                    String key = (String) headerNames.nextElement();
                     System.out.println("key:"+key);
-                    if ("userName".equals(key)) {
+                    if ("username".equals(key)) {
 
                         //获取cookie的值
-                        String value = cookie.getValue();
+                        String value = req.getHeader(key);
                         System.out.println("userNameValue:" + value);
                         userName = value;
                     }
-                    if ("accessToken".equals(key)) {
+                    if ("accesstoken".equals(key)) {
 
                         //获取cookie的值
-                        String value = cookie.getValue();
+                        String value = req.getHeader(key);
                         System.out.println("accessTokenValue:" + value);
                         accessToken = value;
                     }
-
-                    //获取cookie的有效时间。
-                    int time = cookie.getMaxAge();
-                    System.out.println("time:"+time);
-
-                    //获取服务器的IP对应的域名
-                    String domain = cookie.getDomain();
-                    System.out.println("domain:"+ domain);
-
-                    //获取有效路径
-                    String path = cookie.getPath();
-                    System.out.println("path:"+ path);
 
                 }
                 if("".equals(accessToken)){
@@ -225,46 +262,82 @@ public class TdhServicesDsController {
         try {
             //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
             req.setCharacterEncoding("utf-8");
-            //获取cookie
-            Cookie cookies[] = req.getCookies();
-            if(cookies==null || cookies.length == 0){
-                logger.info("没有cookie");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+//            //获取cookie
+//            Cookie cookies[] = req.getCookies();
+//            if(cookies==null || cookies.length == 0){
+//                logger.info("没有cookie");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_COOKIE.getCode(),ResultExceptEnum.ERROR_HTTP_COOKIE.getMessage());
+//            }else{
+//                for (Cookie cookie : cookies){
+//
+//                    //获取cookie的解释内容
+//                    String comment = cookie.getComment();
+//                    System.out.println("comment:"+comment);
+//                    //获取cookie的键
+//                    String key = cookie.getName();
+//                    System.out.println("key:"+key);
+//                    if ("userName".equals(key)) {
+//
+//                        //获取cookie的值
+//                        String value = cookie.getValue();
+//                        System.out.println("userNameValue:" + value);
+//                        userName = value;
+//                    }
+//                    if ("accessToken".equals(key)) {
+//
+//                        //获取cookie的值
+//                        String value = cookie.getValue();
+//                        System.out.println("accessTokenValue:" + value);
+//                        accessToken = value;
+//                    }
+//
+//                    //获取cookie的有效时间。
+//                    int time = cookie.getMaxAge();
+//                    System.out.println("time:"+time);
+//
+//                    //获取服务器的IP对应的域名
+//                    String domain = cookie.getDomain();
+//                    System.out.println("domain:"+ domain);
+//
+//                    //获取有效路径
+//                    String path = cookie.getPath();
+//                    System.out.println("path:"+ path);
+//
+//                }
+//                if("".equals(accessToken)){
+//                    logger.info("token为空");
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+//                }
+//                if("".equals(userName)){
+//                    logger.info("userName为空");
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+//                }
+//            }
+            //获取header
+            Enumeration headerNames = req.getHeaderNames();
+            if(headerNames==null){
+                logger.info("没有hearder");
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
             }else{
-                for (Cookie cookie : cookies){
+                while (headerNames.hasMoreElements()){
 
-                    //获取cookie的解释内容
-                    String comment = cookie.getComment();
-                    System.out.println("comment:"+comment);
                     //获取cookie的键
-                    String key = cookie.getName();
+                    String key = (String) headerNames.nextElement();
                     System.out.println("key:"+key);
-                    if ("userName".equals(key)) {
+                    if ("username".equals(key)) {
 
                         //获取cookie的值
-                        String value = cookie.getValue();
+                        String value = req.getHeader(key);
                         System.out.println("userNameValue:" + value);
                         userName = value;
                     }
-                    if ("accessToken".equals(key)) {
+                    if ("accesstoken".equals(key)) {
 
                         //获取cookie的值
-                        String value = cookie.getValue();
+                        String value = req.getHeader(key);
                         System.out.println("accessTokenValue:" + value);
                         accessToken = value;
                     }
-
-                    //获取cookie的有效时间。
-                    int time = cookie.getMaxAge();
-                    System.out.println("time:"+time);
-
-                    //获取服务器的IP对应的域名
-                    String domain = cookie.getDomain();
-                    System.out.println("domain:"+ domain);
-
-                    //获取有效路径
-                    String path = cookie.getPath();
-                    System.out.println("path:"+ path);
 
                 }
                 if("".equals(accessToken)){

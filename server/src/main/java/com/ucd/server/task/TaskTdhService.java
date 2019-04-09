@@ -62,7 +62,7 @@ public class TaskTdhService {
     //向星环发起请求，获取集群用户信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdUsersListData(){
 
         Date now = new Date();
@@ -98,7 +98,7 @@ public class TaskTdhService {
     //向星环发起请求，获取集群服务信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
 
         Date now = new Date();
@@ -134,7 +134,7 @@ public class TaskTdhService {
 
     //向星环发起请求，获取running的job信息，并判断是否需要数据同步
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
         Date now = new Date();
         logger.info("taskSaveThdServicesJobErrorData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
@@ -174,7 +174,7 @@ public class TaskTdhService {
 
     //自动开门
 //    @Scheduled(cron = "5/30 * * * * ?")
-//    @Scheduled(cron = "5/10 * * * * ?")
+    @Scheduled(cron = "5/10 * * * * ?")
     public void taskOpentaskState(){
         Date now = new Date();
         logger.info("taskOpentaskState()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
