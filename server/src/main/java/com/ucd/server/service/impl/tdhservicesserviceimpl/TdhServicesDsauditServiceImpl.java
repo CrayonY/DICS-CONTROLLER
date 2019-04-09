@@ -137,6 +137,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
             tdhDsMonthsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
             tdhDsMonthsDTO.setStartdownTime(tdhDsauditDTO.getApplysyncTime()); 
             tdhDsMonthsDTO.setCentre(centre);
+            tdhDsMonthsDTO.setAuditNotes(tdhDsauditDTO.getAuditNotes());
             tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
         }
         ResultVO resultVOTdhDsauditListVO = daoClient.getTdhDsauditListDataS(tdhDsauditDTOList);

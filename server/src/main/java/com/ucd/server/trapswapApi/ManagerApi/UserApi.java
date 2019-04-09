@@ -46,7 +46,7 @@ public class UserApi {
         ) {
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             conObject.printLineAndTitle("login");
-            System.out.println(EntityUtils.toString(response.getEntity()));
+            //System.out.println(EntityUtils.toString(response.getEntity()));
         }
         return result;
     }
@@ -63,7 +63,7 @@ public class UserApi {
         ) {
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             conObject.printLineAndTitle("logout");
-            System.out.println(EntityUtils.toString(response.getEntity()));
+            //System.out.println(EntityUtils.toString(response.getEntity()));
         }
         return result;
     }
@@ -242,7 +242,7 @@ public class UserApi {
                 CloseableHttpResponse response = conObject.get(path)
         ) {
             conObject.printLineAndTitle("getUserInfo");
-            System.out.println(EntityUtils.toString(response.getEntity()));
+            //System.out.println(EntityUtils.toString(response.getEntity()));
             boolean result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             return result;
         }
@@ -310,7 +310,7 @@ public class UserApi {
                 CloseableHttpResponse response = conObject.put(path, user.toString())
         ) {
             conObject.printLineAndTitle("editUser");
-            System.out.println(EntityUtils.toString(response.getEntity()));
+            //System.out.println(EntityUtils.toString(response.getEntity()));
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             return result;
         }
