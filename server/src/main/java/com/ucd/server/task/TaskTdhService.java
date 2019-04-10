@@ -1,11 +1,11 @@
 package com.ucd.server.task;
 
+
+import com.ucd.client.DaoClient;
 import com.ucd.server.mapper.TdhTaskParameterMapper;
 import com.ucd.server.model.TdhTaskParameter;
 import com.ucd.server.service.impl.ServiceThread;
-import com.ucd.server.trapswapApi.connection.Connection;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 @Component
 @Lazy(false)
@@ -51,6 +51,9 @@ public class TaskTdhService {
 
     @Autowired
     public ServiceThread serviceThread;
+
+    @Autowired
+    public DaoClient daoClient;
 
     private final static Logger logger = LoggerFactory.getLogger(TaskTdhService.class);
     // 每5秒启动（测试）
@@ -98,10 +101,48 @@ public class TaskTdhService {
     //向星环发起请求，获取集群服务信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+     // @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
-
         Date now = new Date();
+        logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        Map<String,Object> map = new HashMap<String,Object>();
+
+        // 初始化数据，进行开门操作
+        map.put("taskState",1);
+        map.put("taskName","taskServiceInfo");
+        int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+        logger.info("num:" + num);
+
+        // 如果返回1，说明开门操作成功，可以进行业务操作
+        if (num == 1) {
+            try{
+                logger.info("集群服务信息--成功进入");
+                // 记录定时任务运行时间
+                TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
+                tdhTaskParameter.setTaskName("taskServiceInfo");
+                tdhTaskParameter.setTaskTime(now);
+                tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
+                // 保存A中心数据
+                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda);
+                // 保存B中心数据
+                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb);
+
+                // 操作完成进行关门操作
+                Thread.sleep(5000);
+                map.put("taskState",0);
+                tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        } else {
+            logger.info("集群服务信息--没有进入");
+            return;
+        }
+
+
+      /*  Date now = new Date();
         logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
             Map<String,Object> map = new HashMap<String,Object>();
             map.put("taskState",1);
@@ -128,7 +169,7 @@ public class TaskTdhService {
                 logger.info("集群服务信息--没有进入");
                 return;
             }
-
+*/
         return ;
     }
 
@@ -223,4 +264,5 @@ public class TaskTdhService {
 //            String cc = bb;
 //        }
 //    }
+
 }
