@@ -181,6 +181,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             tdhDsauditDTO.setTableName(tdhDsMonthsDTO.getTableName());
             tdhDsauditDTO.setAuditStatus(0);
             tdhDsauditDTO.setTableNameall(tdhDsMonthsDTO.getTableNameTotal());
+            tdhDsauditDTO.setCentre(centrelocal);
             tdhDsauditDTOList.add(tdhDsauditDTO);
         }
 

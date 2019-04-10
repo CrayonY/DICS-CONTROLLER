@@ -12,6 +12,7 @@ import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
 import com.ucd.daocommon.VO.tdhDsauditVO.TdhDsauditVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsauditService;
 import com.ucd.server.utils.HttpClientUtils;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
     public String urlotherside;
     @Autowired
     public DaoClient daoClient;
+
+    @Autowired
+    public TdhServicesDsService tdhServicesDsService;
 
 //    @Autowired
 //    public LocalDaoClient localDaoClient;
@@ -56,6 +60,27 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
         ResultVO resultVO = daoClient.saveTdhDsauditData(tdhDsauditDTOList);
         logger.info("resultVO=" + resultVO);
         if ("000000".equals(resultVO.getCode())) {
+            //修改本中心对应的同步表审核状态为“审核中”
+            List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
+            for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList) {
+                TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
+                tdhDsMonthsDTO.setTableName(tdhDsauditDTO.getTableName());
+                tdhDsMonthsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
+                tdhDsMonthsDTO.setStartdownTime(tdhDsauditDTO.getApplysyncTime());
+                tdhDsMonthsDTO.setCentre(tdhDsauditDTO.getCentre());
+                tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
+            }
+            Map<String, Object> models = new HashMap<String, Object>();
+            models.put("auditStatus",1);
+            models.put("userCode",tdhDsauditDTOList.get(0).getApplyerCode());
+            models.put("tdhDsMonthsListDTO",tdhDsMonthsDTOS);
+            ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
+            if ("000000".equals(resultVO1.getCode())) {
+                logger.info("审核中！修改成功");
+            } else {
+                logger.info("审核中！修改失败");
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核中！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+            }
             return resultVO;
         } else {
             logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
@@ -179,6 +204,14 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                         } else {
                             logger.info("审核状态修改失败");
                             throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                        }
+                        //修改本中心对应的同步表状态
+                        ResultVO resultVO2 = tdhServicesDsService.updateThdDsListData(tdhDsMonthsDTOS);
+                        if ("000000".equals(resultVO2.getCode())) {
+                            logger.info("审核状态修改成功");
+                        } else {
+                            logger.info("审核状态修改失败");
+                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核状态修改失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
                         }
                     }else{
                         logger.info("审核结果通知失败");
