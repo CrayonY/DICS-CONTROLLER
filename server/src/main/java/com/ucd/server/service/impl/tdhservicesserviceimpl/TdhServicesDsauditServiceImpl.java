@@ -9,6 +9,7 @@ import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.tdhDsauditDTO.TdhDsauditDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsMonthsListDTO;
 import com.ucd.daocommon.VO.tdhDsauditVO.TdhDsauditVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
@@ -70,10 +71,12 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 tdhDsMonthsDTO.setCentre(tdhDsauditDTO.getCentre());
                 tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
             }
+            TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
+            tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
             Map<String, Object> models = new HashMap<String, Object>();
             models.put("auditStatus",1);
             models.put("userCode",tdhDsauditDTOList.get(0).getApplyerCode());
-            models.put("tdhDsMonthsListDTO",tdhDsMonthsDTOS);
+            models.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO);
             ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {
                 logger.info("审核中！修改成功");
