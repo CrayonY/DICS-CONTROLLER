@@ -69,6 +69,11 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 tdhDsMonthsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
                 tdhDsMonthsDTO.setStartdownTime(tdhDsauditDTO.getApplysyncTime());
                 tdhDsMonthsDTO.setCentre(tdhDsauditDTO.getCentre());
+                if ("A".equals(tdhDsMonthsDTO.getCentre())) {
+                    tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
+                }else if("B".equals(tdhDsMonthsDTO.getCentre())){
+                    tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+                }
                 tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
             }
             TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
