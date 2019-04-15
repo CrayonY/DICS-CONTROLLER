@@ -25,6 +25,7 @@ import com.ucd.server.trapswapApi.connection.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -38,11 +39,35 @@ import java.util.stream.Collectors;
 @Component
 public class ServiceThread {
 
-    // TODO 测试秒数 ，后期加到配置文件里
+
+    @Value("${basicparameters.transwarp.typenuma}")
+    public String typeNumA;
+
+    @Value("${basicparameters.transwarp.typenumb}")
+    public String typeNumB;
+
+    @Value("${basicparameters.transwarp.service-runtime}")
+    public String serviceRuntime;
+
+    @Value("${basicparameters.transwarp.centrea}")
+    public String centrea;
+
+    @Value("${basicparameters.transwarp.centreb}")
+    public String centreb;
+
+    @Value("${basicparameters.transwarp.service-type-a}")
+    public String serviceTypeA;
+
+    @Value("${basicparameters.transwarp.service-type-b}")
+    public String serviceTypeB;
+
     private final Integer NUM = 180;
 
     /** 状态：健康 */
     private final String HEALTHY = "HEALTHY";
+
+    /** 状态：未知 */
+    private final String UNKNOW = "UNKNOW";
 
 
     private final String TDHA_SERVICES_INFO_NOW = "tdha_services_info_now";
@@ -63,6 +88,14 @@ public class ServiceThread {
 
     private final static Logger logger = LoggerFactory.getLogger(ServiceThread.class);
 
+    /**
+     * @author Crayon
+     * @Description
+     * @date 2019/4/12 4:57 PM
+     * @params [url, centre, username, password]
+     * @exception
+     * @return void
+     */
     @Async("transwarpExecutor")
     public void saveThdServicesListDataThread(String url, String centre, String username, String password) {
 
@@ -98,13 +131,18 @@ public class ServiceThread {
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
                 }
                 ResultVO resultVO = null;
-                // 获取查询实时数据结果
+                // 1.获取查询实时数据结果
                 TdhServicesAVO thdServicesInfoNow = daoClient.getThdServicesInfoNow(centre);
                 // 当前秒数
                 String healthChecksIdNum = (String) StringTool.parsentObjectNull(thdServicesInfoNow.getHealthChecksId());
-
                 // 插入数据库，调用monitor-dao微服务，进行相应逻辑判断
                 TdhServicesListDTO tdhServicesListDTO = new TdhServicesListDTO();
+
+                // 补全未知数据，调用monitor-dao微服务，进行相应逻辑判断
+                TdhServicesListDTO tdhServicesUnknowTypeListDTO = new TdhServicesListDTO();
+
+                // 筛选接口返回的服务类型
+                List<String> typeList = result.parallelStream().map(TdhServicesInfoDTO::getType).collect(Collectors.toList());
 
                 /** 如果结果为空,证明第一次执行定时任务，直接插入第一条实时数据 */
                 if(ObjectUtils.isEmpty(healthChecksIdNum)){
@@ -115,19 +153,27 @@ public class ServiceThread {
                         // 计数器
                         tdhServicesInfoDTO.setHealthChecksId("1");
                         // 确定表名
-                        if (centre.equals("A")){
+                        if (centre.equals(centrea)){
                             tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
                         }
-
-                        if (centre.equals("B")){
+                        if (centre.equals(centreb)){
                             tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
                         }
 
                         logger.info(tdhServicesInfoDTO.toString());
                     });
+                    // 服务返回个数不正确，抛异常
+                    Integer typeNum = result.size();
 
-                    // 保存第一条实时服务数据
-                    tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+                    // 服务A个数
+                    if((centre.equals(centrea) && !typeNum.equals(typeNumA))){
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+                    }
+                    // 服务B个数
+                    if(centre.equals(centreb) && !typeNum.equals(typeNumB)){
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+                    }
+
                     resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);
                     logger.info("初始化服务 实时数据保存结果 resultVO=" + resultVO);
 
@@ -136,16 +182,48 @@ public class ServiceThread {
                         logger.info(centre + "中心异常,添加初始化信息失败：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
                         throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,添加初始化信息失败：" + resultVO.getMsg()+resultVO.getData());
                     }
-
-                    /**存储并不是健康的数据*/
+                    // 保存第一条实时服务数据
+                    tdhServicesListDTO.setTdhServicesInfoDTOList(result);
                     // 筛选result中不健康的数据
                     result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
-
                 }
 
-                /** 如果结果不为空，更新实时数据  */
+                // 如果服务实时表已有数据或者初始化数据成功后，执行以下程序
+                List<String> typeAorBList = new ArrayList<>();
+                // 查看所有服务类型
+                if (centre.equals(centrea)){
+                    typeAorBList = StringTool.stringToStrList(serviceTypeA,",");
+                }
+
+                if (centre.equals(centreb)){
+                    typeAorBList = StringTool.stringToStrList(serviceTypeB,",");
+                }
+
+                // 筛选所有未知状态的服务
+                ArrayList<String> unknowTypeList = new ArrayList<>();
+                List<String> finalTypeAorBList = typeAorBList;
+
+                // mm：finalTypeAorBList
+
+                // cc:typeList
+
+                finalTypeAorBList.forEach(allType -> {
+                    if(typeList.parallelStream().noneMatch(unknowType -> unknowType.equals(allType))){
+                        // if(typeList.parallelStream().noneMatch(allType::equals)){
+                        unknowTypeList.add(allType);
+                    }
+                });
+                logger.info(unknowTypeList.toString());
+
+                // 简化版写法
+                List<String> unknowTypeList1 = finalTypeAorBList.parallelStream().filter(allType ->
+                        typeList.parallelStream().noneMatch(allType::equals)).collect(Collectors.toList());
+
+
+                /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
 
+                    // 更新所有未知状态类型信息
                     result.forEach(tdhServicesInfoDTO -> {
                         // 修改实时数据  程序计数器 +1，修改数据
                         tdhServicesInfoDTO.setCentre(centre);
@@ -160,16 +238,38 @@ public class ServiceThread {
                             tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
                         }
                         // 确定表名
-                        if (centre.equals("A")){
+                        if (centre.equals(centrea)){
                             tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
                         }
 
-                        if (centre.equals("B")){
+                        if (centre.equals(centreb)){
                             tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
                         }
                         logger.info(tdhServicesInfoDTO.toString());
                     });
 
+                    List<TdhServicesInfoDTO> resultType = new ArrayList<>();
+                    if(unknowTypeList != null && unknowTypeList.size()>0){
+                        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+                        // 循环list获取type值
+                        unknowTypeList.forEach(type -> {
+                            tdhServicesInfoDTO.setType(type);
+                            tdhServicesInfoDTO.setHealth(UNKNOW);
+                            resultType.add(tdhServicesInfoDTO);
+                        });
+
+
+                        // 更新未知状态数据
+                        tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+                        resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
+                        logger.info("resultVO=" + resultVO);
+
+                        // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+                        if(!"000000".equals(resultVO.getCode())){
+                            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+                        }
+                    }
                     // 更新实时数据
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
                     resultVO = daoClient.updateThdServicesInfoNow(tdhServicesListDTO, healthChecksIdNum);
@@ -187,55 +287,93 @@ public class ServiceThread {
                         result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                     }
                 }
-                // 数据初始化
-                result.forEach(tdhServicesInfoDTO -> {
-                    // 与URL匹配，设置中心，初始化数据
-                    tdhServicesInfoDTO.setCentre(centre);
-                    String healthChecksId = KeyUtil.genUniqueKey();
-                    tdhServicesInfoDTO.setCreattime(now);
-                    tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
-                    tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
-                    logger.info(tdhServicesInfoDTO.toString());
 
-                    // 获取第三方json串中：healthChecks数据
-                    List<TdhServicesHealthckDTO> tdhServicesHealthckDTOList = tdhServicesInfoDTO.getHealthChecks();
+                if(result != null && result.size()>0){
+                    // 数据初始化
+                    result.forEach(tdhServicesInfoDTO -> {
+                        // 与URL匹配，设置中心，初始化数据
+                        tdhServicesInfoDTO.setCentre(centre);
+                        String healthChecksId = KeyUtil.genUniqueKey();
+                        tdhServicesInfoDTO.setCreattime(now);
+                        tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
+                        tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+                        logger.info(tdhServicesInfoDTO.toString());
 
-                    // 查询时间
-                    String lastCheck = "";
-                    if (null == tdhServicesHealthckDTOList || tdhServicesHealthckDTOList.size() == 0) {
-                        logger.info(centre + "中心：tdhServicesHealthckDTOList为空");
-                    }else {
-                        // 获取healthChecks中所需信息，并初始化信息
-                        for (TdhServicesHealthckDTO tdhServicesHealthckDTO : tdhServicesHealthckDTOList) {
-                            tdhServicesHealthckDTO.setCreattime(now);
-                            tdhServicesHealthckDTO.setHealthChecksId(healthChecksId);
-                            logger.info(centre + "中心:" + tdhServicesHealthckDTO.getType() + ": time:" + tdhServicesHealthckDTO.getLastCheck());
+                        // 获取第三方json串中：healthChecks数据
+                        List<TdhServicesHealthckDTO> tdhServicesHealthckDTOList = tdhServicesInfoDTO.getHealthChecks();
 
-                            if ("".equals(lastCheck)) {
-                                lastCheck = tdhServicesHealthckDTO.getLastCheck();
+                        // 查询时间
+                        String lastCheck = "";
+                        if (null == tdhServicesHealthckDTOList || tdhServicesHealthckDTOList.size() == 0) {
+                            logger.info(centre + "中心：tdhServicesHealthckDTOList为空");
+                        }else {
+                            // 获取healthChecks中所需信息，并初始化信息
+                            for (TdhServicesHealthckDTO tdhServicesHealthckDTO : tdhServicesHealthckDTOList) {
+                                tdhServicesHealthckDTO.setCreattime(now);
+                                tdhServicesHealthckDTO.setHealthChecksId(healthChecksId);
+                                logger.info(centre + "中心:" + tdhServicesHealthckDTO.getType() + ": time:" + tdhServicesHealthckDTO.getLastCheck());
+
+                                if ("".equals(lastCheck)) {
+                                    lastCheck = tdhServicesHealthckDTO.getLastCheck();
+                                }
+                                if ("VITAL_SIGN_CHECK".equals(tdhServicesHealthckDTO.getType())) {
+                                    lastCheck = tdhServicesHealthckDTO.getLastCheck();
+                                }
+                                tdhServicesInfoDTO.setLastCheck(lastCheck);
+                                logger.info(tdhServicesHealthckDTO.toString());
                             }
-                            if ("VITAL_SIGN_CHECK".equals(tdhServicesHealthckDTO.getType())) {
-                                lastCheck = tdhServicesHealthckDTO.getLastCheck();
-                            }
-                            tdhServicesInfoDTO.setLastCheck(lastCheck);
-                            logger.info(tdhServicesHealthckDTO.toString());
                         }
-                    }
-                    // 插入服务名称
-                    setTableName(tdhServicesInfoDTO);
-                    if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
-                        // 查表“流目前登记的状态”查看流服务的状态state1
-                        // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
-                        // 则不做操作，如果不是healthy，则修改state1的状态为healthy，且取出当前时间作为stopTime，查表“tdh_services_slipstream”以当前时间为底线，向上
-                        // 获取第一个状态为healthy的时间作为startTime，如果stopTime-startTime>2.4天（可配置），则将stopTime，startTime并把hbase的对应所有表名（或“ALL”）
-                        // 存入到“应该数据同步”的表中，并作状态“未同步”
+                        // 插入服务名称
+                        setTableName(tdhServicesInfoDTO);
+                        if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
+                            // 查表“流目前登记的状态”查看流服务的状态state1
+                            // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
+                            // 则不做操作，如果不是healthy，则修改state1的状态为healthy，且取出当前时间作为stopTime，查表“tdh_services_slipstream”以当前时间为底线，向上
+                            // 获取第一个状态为healthy的时间作为startTime，如果stopTime-startTime>2.4天（可配置），则将stopTime，startTime并把hbase的对应所有表名（或“ALL”）
+                            // 存入到“应该数据同步”的表中，并作状态“未同步”
+                        }
+
+                    });
+
+                }
+                List<TdhServicesInfoDTO> resultType = new ArrayList<>();
+                if(unknowTypeList != null && unknowTypeList.size()>0){
+                    TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+                    // 循环list获取type值
+                    unknowTypeList.forEach(type -> {
+
+                        tdhServicesInfoDTO.setCentre(centre);
+                        String healthChecksId = KeyUtil.genUniqueKey();
+                        tdhServicesInfoDTO.setCreattime(now);
+                        tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
+                        tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+                        tdhServicesInfoDTO.setType(type);
+                        tdhServicesInfoDTO.setHealth(UNKNOW);
+
+                        logger.info(tdhServicesInfoDTO.toString());
+                        // 插入服务名称
+                        setTableName(tdhServicesInfoDTO);
+                        resultType.add(tdhServicesInfoDTO);
+                    });
+
+                    // 更新未知状态数据
+                    tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+                    resultVO = daoClient.saveThdServicesListData(tdhServicesUnknowTypeListDTO);
+                    logger.info("resultVO=" + resultVO);
+
+                    // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+                    if(!"000000".equals(resultVO.getCode())){
+                        logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
                     }
 
-                });
+                }
 
-                tdhServicesListDTO.setTdhServicesInfoDTOList(result);
-                resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
-                logger.info("resultVO=" + resultVO);
+                if(result != null && result.size()>0){
+                    tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+                    resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
+                    logger.info("resultVO=" + resultVO);
+                }
 
                 // 返回值
                 if ("000000".equals(resultVO.getCode())) {
@@ -261,6 +399,8 @@ public class ServiceThread {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
+
+
     public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
         String centre = tdhServicesInfoDTO.getCentre();
         String type = tdhServicesInfoDTO.getType();
