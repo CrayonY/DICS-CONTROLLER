@@ -6,6 +6,7 @@ import com.ucd.common.VO.ResultVO;
 import com.ucd.common.enums.ResultEnum;
 import com.ucd.common.utils.ResultVOUtil;
 import com.ucd.common.utils.pager.PageView;
+
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.tdhservicesservice.TdhServicesService;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/software")
@@ -102,7 +102,38 @@ public class TdhServicesController {
     }
 
 
-//    @GetMapping(value = "/saveThdServicesLocalDao")
+
+
+    /**
+     * @author Crayon
+     * @Description 查看所有实时表数据       
+     * @date 2019/4/16 3:11 PM 
+     * @params [pageView, tdhServicesInfoDTO]
+     * @exception  
+     * @return com.ucd.common.utils.pager.PageView  
+     */
+    @PostMapping(value = "/getThdServicesListNow")
+    public PageView getThdServicesListNow(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO){
+        logger.info("tdhServicesInfoDTO:"+tdhServicesInfoDTO);
+        ResultVO resultVO = new ResultVO();
+        try {
+            if(pageView == null){
+                pageView = new PageView();
+            }
+            pageView =tdhServicesService.getThdServicesListNow(pageView,tdhServicesInfoDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
+            logger.info("resultVO:"+resultVO);
+            return pageView;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+            logger.info("resultVO:"+resultVO);
+            return pageView;
+        }
+    }
+
+
+    //    @GetMapping(value = "/saveThdServicesLocalDao")
 //    public ResultVO saveThdServicesLocalDao(HttpServletResponse httpServletResponse) {
 //        logger.info("进入controller啦——————————————");
 //        List<com.ucd.localdaocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO> result = null;
@@ -118,6 +149,9 @@ public class TdhServicesController {
 //
 //        return resultVO;
 //    }
+
+
+
 
 
 }

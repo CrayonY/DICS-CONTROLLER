@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 
 import java.util.*;
@@ -51,6 +52,12 @@ public class TdhServicesServiceImpl implements TdhServicesService {
     public String passwordb;
     @Autowired
     public DaoClient daoClient;
+
+
+    private final String TDHA_SERVICES_INFO_NOW = "tdha_services_info_now";
+
+
+    private final String TDHB_SERVICES_INFO_NOW = "tdhb_services_info_now";
 
 //    @Autowired
 //    public LocalDaoClient localDaoClient;
@@ -165,6 +172,43 @@ public class TdhServicesServiceImpl implements TdhServicesService {
     @Transactional
     public String updateDataSynchronizationState(String centre) throws Exception {
         return null;
+    }
+
+    @Override
+    public PageView getThdServicesListNow(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
+
+        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+        }
+        // 确定表名
+        if (tdhServicesInfoDTO.getCentre().equals(centrea)){
+            tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
+        }
+
+        if (tdhServicesInfoDTO.getCentre().equals(centreb)){
+            tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
+        }
+        logger.info(tdhServicesInfoDTO.toString());
+        Map<String, Object> models = new HashMap<String, Object>();
+        models.put("pageView",pageView);
+        models.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
+        ResultVO resultVO = daoClient.getThdServicesListNow(models);
+        logger.info("resultVO=" + resultVO);
+        if("000000".equals(resultVO.getCode())){
+            Object object = resultVO.getData();
+            if (object != null) {
+                String pageViewString = Tools.toJson(object);
+                Gson gs = new Gson();
+                pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
+                }.getType());
+                logger.info("pageViewString:" + pageViewString);
+            }
+        }else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        }
+        return  pageView;
     }
 
 

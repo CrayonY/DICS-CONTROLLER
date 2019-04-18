@@ -7,8 +7,6 @@ import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 
 
 
-import java.util.List;
-
 public interface TdhServicesService {
 
     //List<TdhServicesInfoDTO> saveThdServicesData() throws Exception;
@@ -24,6 +22,10 @@ public interface TdhServicesService {
      * @throws Exception
      */
     String updateDataSynchronizationState(String centre) throws Exception;
+
+    PageView getThdServicesListNow(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception;
+
+
 
     //List<com.ucd.localdaocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO> saveThdServicesLocalDao() throws Exception;
 }
