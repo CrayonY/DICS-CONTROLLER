@@ -25,6 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -133,9 +138,6 @@ public class TdhServicesServiceImpl implements TdhServicesService {
 
     }
 
-
-
-
     @Override
     public PageView getThdServicesInfo(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
         if (tdhServicesInfoDTO.getType() == null || "".equals(tdhServicesInfoDTO.getType())){
@@ -190,11 +192,72 @@ public class TdhServicesServiceImpl implements TdhServicesService {
             tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
         }
         logger.info(tdhServicesInfoDTO.toString());
-        Map<String, Object> models = new HashMap<String, Object>();
+        Map<String, Object> models = new HashMap<>(16);
         models.put("pageView",pageView);
         models.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
         ResultVO resultVO = daoClient.getThdServicesListNow(models);
         logger.info("resultVO=" + resultVO);
+
+        pageView = this.commonResult(pageView,resultVO);
+
+        return  pageView;
+    }
+
+
+    @Override
+    public PageView getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception{
+        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeStart()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeEnd()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getSecond())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",参数不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"参数不能为空");
+        }
+
+        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+        }
+
+        // 确定表名
+        ServiceThread serviceThread = new ServiceThread();
+        serviceThread.setTableName(tdhServicesInfoDTO);
+
+        // 时间处理java8
+       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+       LocalDateTime taskTimeStart1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeStart(), dtf);
+       LocalDateTime taskTimeEnd1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeEnd(), dtf);
+
+   /*    Date newDate = java.sql.Date.valueOf(String.valueOf(taskTimeStart1));
+       Date newDate1 = java.sql.Date.valueOf(String.valueOf(taskTimeEnd1));
+*/
+        // 时间处理，秒数为00
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date taskTimeStart = sdf.parse(tdhServicesInfoDTO.getTaskTimeStart());
+        Date taskTimeEnd = sdf.parse(tdhServicesInfoDTO.getTaskTimeEnd());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(taskTimeStart);
+        cal.set(Calendar.SECOND, 0);
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(taskTimeEnd);
+        cal1.set(Calendar.SECOND, 0);
+
+        tdhServicesInfoDTO.setTaskTimeStart(sdf.format(cal.getTime()));
+        tdhServicesInfoDTO.setTaskTimeEnd(sdf.format(cal1.getTime()));
+        Map<String, Object> model = new HashMap<>(16);
+
+        model.put("pageView",pageView);
+        model.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
+
+        ResultVO resultVO = daoClient.getTdhHealthStatusByTime(model);
+
+        pageView = this.commonResult(pageView,resultVO);
+
+        logger.info("resultVO=" + resultVO);
+
+        return pageView;
+    }
+
+
+    public PageView commonResult(PageView pageView,ResultVO resultVO){
         if("000000".equals(resultVO.getCode())){
             Object object = resultVO.getData();
             if (object != null) {
@@ -208,8 +271,9 @@ public class TdhServicesServiceImpl implements TdhServicesService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
             throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
+
 
 
 //    @Override

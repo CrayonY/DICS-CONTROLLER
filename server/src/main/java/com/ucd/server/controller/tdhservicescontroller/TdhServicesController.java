@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/software")
@@ -113,9 +114,9 @@ public class TdhServicesController {
      * @return com.ucd.common.utils.pager.PageView  
      */
     @PostMapping(value = "/getThdServicesListNow")
-    public PageView getThdServicesListNow(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO){
+    public ResultVO getThdServicesListNow(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO){
         logger.info("tdhServicesInfoDTO:"+tdhServicesInfoDTO);
-        ResultVO resultVO = new ResultVO();
+        ResultVO resultVO;
         try {
             if(pageView == null){
                 pageView = new PageView();
@@ -123,15 +124,46 @@ public class TdhServicesController {
             pageView =tdhServicesService.getThdServicesListNow(pageView,tdhServicesInfoDTO);
             resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
             logger.info("resultVO:"+resultVO);
-            return pageView;
+            return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
             logger.info("resultVO:"+resultVO);
-            return pageView;
+            return resultVO;
         }
     }
 
+
+    /**
+     * @author Crayon
+     * @Description 服务健康状态监测
+     * @date 2019/4/19 10:19 AM
+     * @params [pageView, second, startTime, endTime]
+     * @exception
+     * @return com.ucd.common.utils.pager.PageView
+     */
+    @PostMapping(value = "/getTdhHealthStatus")
+    public ResultVO getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO){
+/*
+        logger.info("second,startTime,endTime:"+second,startTime,endTime);
+*/
+        ResultVO resultVO = new ResultVO();
+        try{
+            if(pageView == null){
+                pageView = new PageView();
+            }
+            pageView = tdhServicesService.getTdhHealthStatus(pageView,tdhServicesInfoDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        }
+    }
 
     //    @GetMapping(value = "/saveThdServicesLocalDao")
 //    public ResultVO saveThdServicesLocalDao(HttpServletResponse httpServletResponse) {

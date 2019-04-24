@@ -23,7 +23,17 @@ public interface TdhServicesService {
      */
     String updateDataSynchronizationState(String centre) throws Exception;
 
+    /**
+     * @author Crayon
+     * @Description 得到实时数据集合
+     * @date 2019/4/19 10:06 AM
+     * @params [pageView, tdhServicesInfoDTO]
+     * @exception
+     * @return com.ucd.common.utils.pager.PageView
+     */
     PageView getThdServicesListNow(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception;
+
+    PageView getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception;
 
 
 

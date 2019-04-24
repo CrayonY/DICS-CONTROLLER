@@ -30,6 +30,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -104,6 +106,12 @@ public class ServiceThread {
         List<TdhServicesInfoDTO> result = new ArrayList<>();
         Date now = new Date();
         Gson gs = new Gson();
+
+        // 当前时间转字符串
+        LocalDateTime ldt = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String nowDate = ldt.format(dateTimeFormatter);
+
         try{
 
             if(UserApi.login(client, username, password)){
@@ -150,6 +158,9 @@ public class ServiceThread {
                         // 与URL匹配，设置中心，初始化数据
                         tdhServicesInfoDTO.setCentre(centre);
                         tdhServicesInfoDTO.setCreattime(now);
+
+
+                        tdhServicesInfoDTO.setTaskTime(nowDate);
                         // 计数器
                         tdhServicesInfoDTO.setHealthChecksId("1");
                         // 确定表名
@@ -228,6 +239,7 @@ public class ServiceThread {
                         // 修改实时数据  程序计数器 +1，修改数据
                         tdhServicesInfoDTO.setCentre(centre);
                         tdhServicesInfoDTO.setCreattime(now);
+                        tdhServicesInfoDTO.setTaskTime(nowDate);
 
                         // 判断是否达到180s,如果达到180，计数器重新修改为1
                         if(thdServicesInfoNow.getHealthChecksId().equals(NUM)){
@@ -255,9 +267,9 @@ public class ServiceThread {
                         unknowTypeList.forEach(type -> {
                             tdhServicesInfoDTO.setType(type);
                             tdhServicesInfoDTO.setHealth(UNKNOW);
+                            tdhServicesInfoDTO.setTaskTime(nowDate);
                             resultType.add(tdhServicesInfoDTO);
                         });
-
 
                         // 更新未知状态数据
                         tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
@@ -295,6 +307,7 @@ public class ServiceThread {
                         tdhServicesInfoDTO.setCentre(centre);
                         String healthChecksId = KeyUtil.genUniqueKey();
                         tdhServicesInfoDTO.setCreattime(now);
+                        tdhServicesInfoDTO.setTaskTime(nowDate);
                         tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
                         tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
                         logger.info(tdhServicesInfoDTO.toString());
@@ -310,6 +323,7 @@ public class ServiceThread {
                             // 获取healthChecks中所需信息，并初始化信息
                             for (TdhServicesHealthckDTO tdhServicesHealthckDTO : tdhServicesHealthckDTOList) {
                                 tdhServicesHealthckDTO.setCreattime(now);
+                                tdhServicesInfoDTO.setTaskTime(nowDate);
                                 tdhServicesHealthckDTO.setHealthChecksId(healthChecksId);
                                 logger.info(centre + "中心:" + tdhServicesHealthckDTO.getType() + ": time:" + tdhServicesHealthckDTO.getLastCheck());
 
@@ -345,6 +359,7 @@ public class ServiceThread {
                         tdhServicesInfoDTO.setCentre(centre);
                         String healthChecksId = KeyUtil.genUniqueKey();
                         tdhServicesInfoDTO.setCreattime(now);
+                        tdhServicesInfoDTO.setTaskTime(nowDate);
                         tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
                         tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
                         tdhServicesInfoDTO.setType(type);
