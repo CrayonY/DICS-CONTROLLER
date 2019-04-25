@@ -154,45 +154,8 @@ public class ServiceThread {
 
                 /** 如果结果为空,证明第一次执行定时任务，直接插入第一条实时数据 */
                 if(ObjectUtils.isEmpty(healthChecksIdNum)){
-                    result.forEach(tdhServicesInfoDTO -> {
-                        // 与URL匹配，设置中心，初始化数据
-                        tdhServicesInfoDTO.setCentre(centre);
-                        tdhServicesInfoDTO.setCreattime(now);
 
-
-                        tdhServicesInfoDTO.setTaskTime(nowDate);
-                        // 计数器
-                        tdhServicesInfoDTO.setHealthChecksId("1");
-                        // 确定表名
-                        if (centre.equals(centrea)){
-                            tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
-                        }
-                        if (centre.equals(centreb)){
-                            tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
-                        }
-
-                        logger.info(tdhServicesInfoDTO.toString());
-                    });
-                    // 服务返回个数不正确，抛异常
-                    Integer typeNum = result.size();
-
-                    // 服务A个数
-                    if((centre.equals(centrea) && !typeNum.equals(typeNumA))){
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
-                    }
-                    // 服务B个数
-                    if(centre.equals(centreb) && !typeNum.equals(typeNumB)){
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
-                    }
-
-                    resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);
-                    logger.info("初始化服务 实时数据保存结果 resultVO=" + resultVO);
-
-                    // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-                    if(!"000000".equals(resultVO.getCode())){
-                        logger.info(centre + "中心异常,添加初始化信息失败：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,添加初始化信息失败：" + resultVO.getMsg()+resultVO.getData());
-                    }
+                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowTypeListDTO,resultVO);
                     // 保存第一条实时服务数据
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
                     // 筛选result中不健康的数据
@@ -214,10 +177,6 @@ public class ServiceThread {
                 ArrayList<String> unknowTypeList = new ArrayList<>();
                 List<String> finalTypeAorBList = typeAorBList;
 
-                // mm：finalTypeAorBList
-
-                // cc:typeList
-
                 finalTypeAorBList.forEach(allType -> {
                     if(typeList.parallelStream().noneMatch(unknowType -> unknowType.equals(allType))){
                         // if(typeList.parallelStream().noneMatch(allType::equals)){
@@ -225,76 +184,15 @@ public class ServiceThread {
                     }
                 });
                 logger.info(unknowTypeList.toString());
-
                 // 简化版写法
                 List<String> unknowTypeList1 = finalTypeAorBList.parallelStream().filter(allType ->
                         typeList.parallelStream().noneMatch(allType::equals)).collect(Collectors.toList());
 
-
                 /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
-
-                    // 更新所有未知状态类型信息
-                    result.forEach(tdhServicesInfoDTO -> {
-                        // 修改实时数据  程序计数器 +1，修改数据
-                        tdhServicesInfoDTO.setCentre(centre);
-                        tdhServicesInfoDTO.setCreattime(now);
-                        tdhServicesInfoDTO.setTaskTime(nowDate);
-
-                        // 判断是否达到180s,如果达到180，计数器重新修改为1
-                        if(thdServicesInfoNow.getHealthChecksId().equals(NUM)){
-                            // 计数器
-                            tdhServicesInfoDTO.setHealthChecksId("1");
-                        }else {
-                            // 计数器
-                            tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
-                        }
-                        // 确定表名
-                        if (centre.equals(centrea)){
-                            tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
-                        }
-
-                        if (centre.equals(centreb)){
-                            tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
-                        }
-                        logger.info(tdhServicesInfoDTO.toString());
-                    });
-
-                    List<TdhServicesInfoDTO> resultType = new ArrayList<>();
-                    if(unknowTypeList != null && unknowTypeList.size()>0){
-                        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
-                        // 循环list获取type值
-                        unknowTypeList.forEach(type -> {
-                            tdhServicesInfoDTO.setType(type);
-                            tdhServicesInfoDTO.setHealth(UNKNOW);
-                            tdhServicesInfoDTO.setTaskTime(nowDate);
-                            resultType.add(tdhServicesInfoDTO);
-                        });
-
-                        // 更新未知状态数据
-                        tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
-                        resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
-                        logger.info("resultVO=" + resultVO);
-
-                        // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-                        if(!"000000".equals(resultVO.getCode())){
-                            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
-                        }
-                    }
-                    // 更新实时数据
-                    tdhServicesListDTO.setTdhServicesInfoDTOList(result);
-                    resultVO = daoClient.updateThdServicesInfoNow(tdhServicesListDTO, healthChecksIdNum);
-                    logger.info("resultVO=" + resultVO);
-
-                    // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-                    if(!"000000".equals(resultVO.getCode())){
-                        logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
-                    }
-
+                    result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
                     /** 判断如果不为180s时，只存储不健康数据 */
-                    if(!NUM.equals(thdServicesInfoNow.getHealthChecksId())){
+                    if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM){
                         // 筛选result中不健康的数据
                         result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                     }
@@ -352,36 +250,8 @@ public class ServiceThread {
                 }
                 List<TdhServicesInfoDTO> resultType = new ArrayList<>();
                 if(unknowTypeList != null && unknowTypeList.size()>0){
-                    TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
-                    // 循环list获取type值
-                    unknowTypeList.forEach(type -> {
 
-                        tdhServicesInfoDTO.setCentre(centre);
-                        String healthChecksId = KeyUtil.genUniqueKey();
-                        tdhServicesInfoDTO.setCreattime(now);
-                        tdhServicesInfoDTO.setTaskTime(nowDate);
-                        tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
-                        tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
-                        tdhServicesInfoDTO.setType(type);
-                        tdhServicesInfoDTO.setHealth(UNKNOW);
-
-                        logger.info(tdhServicesInfoDTO.toString());
-                        // 插入服务名称
-                        setTableName(tdhServicesInfoDTO);
-                        resultType.add(tdhServicesInfoDTO);
-                    });
-
-                    // 更新未知状态数据
-                    tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
-                    resultVO = daoClient.saveThdServicesListData(tdhServicesUnknowTypeListDTO);
-                    logger.info("resultVO=" + resultVO);
-
-                    // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-                    if(!"000000".equals(resultVO.getCode())){
-                        logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
-                    }
-
+                  this.unknowTypeList(resultType,centre,now,nowDate,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
                 }
 
                 if(result != null && result.size()>0){
@@ -687,6 +557,157 @@ public class ServiceThread {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
+
+    private List<TdhServicesInfoDTO> healthChecksIdNumIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
+                                                                 Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
+
+        result.forEach(tdhServicesInfoDTO -> {
+            // 与URL匹配，设置中心，初始化数据
+            tdhServicesInfoDTO.setCentre(centre);
+            tdhServicesInfoDTO.setCreattime(now);
+
+
+            tdhServicesInfoDTO.setTaskTime(nowDate);
+            // 计数器
+            tdhServicesInfoDTO.setHealthChecksId("1");
+            // 确定表名
+            if (centre.equals(centrea)){
+                tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
+            }
+            if (centre.equals(centreb)){
+                tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
+            }
+
+            logger.info(tdhServicesInfoDTO.toString());
+        });
+        // 服务返回个数不正确，抛异常
+        Integer typeNum = result.size();
+
+        // 服务A个数
+        if((centre.equals(centrea) && !typeNum.equals(typeNumA))){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+        }
+        // 服务B个数
+        if(centre.equals(centreb) && !typeNum.equals(typeNumB)){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+        }
+
+        resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);
+        logger.info("初始化服务 实时数据保存结果 resultVO=" + resultVO);
+
+        // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+        if(!"000000".equals(resultVO.getCode())){
+            logger.info(centre + "中心异常,添加初始化信息失败：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,添加初始化信息失败：" + resultVO.getMsg()+resultVO.getData());
+        }
+        return result;
+    }
+
+    private List<TdhServicesInfoDTO> healthChecksIdNumNotIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
+                      Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
+
+        // 更新所有未知状态类型信息
+        result.forEach(tdhServicesInfoDTO -> {
+            // 修改实时数据  程序计数器 +1，修改数据
+            tdhServicesInfoDTO.setCentre(centre);
+            tdhServicesInfoDTO.setCreattime(now);
+            tdhServicesInfoDTO.setTaskTime(nowDate);
+
+            // 判断是否达到180s,如果达到180，计数器重新修改为1
+            if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM){
+                // 计数器
+                tdhServicesInfoDTO.setHealthChecksId("1");
+            }else {
+                // 计数器
+                tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
+            }
+            // 确定表名
+            if (centre.equals(centrea)){
+                tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
+            }
+
+            if (centre.equals(centreb)){
+                tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
+            }
+            logger.info(tdhServicesInfoDTO.toString());
+        });
+
+        List<TdhServicesInfoDTO> resultType = new ArrayList<>();
+        if(unknowTypeList != null && unknowTypeList.size()>0){
+            TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+            // 循环list获取type值
+            unknowTypeList.forEach(type -> {
+                tdhServicesInfoDTO.setType(type);
+                tdhServicesInfoDTO.setHealth(UNKNOW);
+                tdhServicesInfoDTO.setTaskTime(nowDate);
+                resultType.add(tdhServicesInfoDTO);
+            });
+
+            // 更新未知状态数据
+            tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+            resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
+            logger.info("resultVO=" + resultVO);
+
+            // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+            if(!"000000".equals(resultVO.getCode())){
+                logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+            }
+        }
+        // 更新实时数据
+        tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+        resultVO = daoClient.updateThdServicesInfoNow(tdhServicesListDTO, healthChecksIdNum);
+        logger.info("resultVO=" + resultVO);
+
+        // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+        if(!"000000".equals(resultVO.getCode())){
+            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+        }
+
+        return result;
+
+    }
+
+    /**
+     * @author Crayon
+     * @Description 插入未知状态数据
+     * @date 2019/4/24 4:59 PM
+     * @params [resultType, centre, now, nowDate, unknowTypeList, tdhServicesUnknowTypeListDTO]
+     * @exception
+     * @return void
+     */
+    private void unknowTypeList(List<TdhServicesInfoDTO> resultType,String centre,
+                                Date now,String nowDate,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO,ResultVO resultVO){
+        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+        // 循环list获取type值
+        unknowTypeList.forEach(type -> {
+            tdhServicesInfoDTO.setCentre(centre);
+            String healthChecksId = KeyUtil.genUniqueKey();
+            tdhServicesInfoDTO.setCreattime(now);
+            tdhServicesInfoDTO.setTaskTime(nowDate);
+            tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
+            tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+            tdhServicesInfoDTO.setType(type);
+            tdhServicesInfoDTO.setHealth(UNKNOW);
+            logger.info(tdhServicesInfoDTO.toString());
+            // 插入服务名称
+            setTableName(tdhServicesInfoDTO);
+            resultType.add(tdhServicesInfoDTO);
+        });
+
+        // 更新未知状态数据
+        tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+        resultVO = daoClient.saveThdServicesListData(tdhServicesUnknowTypeListDTO);
+        logger.info("resultVO=" + resultVO);
+
+        // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+        if(!"000000".equals(resultVO.getCode())){
+            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+        }
+    }
+
 
     public static void main(String[] args) {
         String a = "insert into station_c2222456sdfg_201812 \n" +
