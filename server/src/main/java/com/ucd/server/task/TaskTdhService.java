@@ -195,8 +195,8 @@ public class TaskTdhService {
                 tdhTaskParameter.setTaskTime(now);
                 tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
                 if (0 == taskStatus){
-                    serviceThread.taskSaveThdServicesJobErrorData(joburla, centrea, jobsizea);
-                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb);
+                    serviceThread.taskSaveThdServicesJobErrorData(joburla, centrea, jobsizea, now);
+                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb, now);
                 }
                     Thread.sleep(5000);
                     map.put("taskState", 0);
@@ -207,6 +207,46 @@ public class TaskTdhService {
             }
         } else {
             logger.info("running的job信息没有进入");
+            return;
+        }
+
+        return ;
+    }
+
+    //每个月初将上个月还没有进行完copytable的DS数据（还剩不超过1条数据） 按照表名月份归为1条数据，类别是snapshot
+//    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0 28 17 * * ?")
+    public void taskUpdateThdDsData(){
+        Date now = new Date();
+        logger.info("taskUpdateThdDsData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("taskState",1);
+        map.put("taskName","taskDsInfo");
+        int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+        logger.info("num:" + num);
+        if (num == 1) {
+            try {
+                logger.info("修改DS数据成功进入");
+                //记录定时任务运行时间
+                TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
+                tdhTaskParameter.setTaskName("taskDsInfo");
+                List<TdhTaskParameter> tdhTaskParameters = tdhTaskParameterMapper.selectByParameter(tdhTaskParameter);
+                int taskStatus = tdhTaskParameters.get(0).getTaskStatus();
+                tdhTaskParameter.setTaskTime(now);
+                tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
+                if (0 == taskStatus){
+                    serviceThread.taskUpdateThdDsData(centrea);
+//                    serviceThread.taskUpdateThdDsData(centreb);
+                }
+                Thread.sleep(5000);
+                map.put("taskState", 0);
+                tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            logger.info("修改DS数据没有进入");
             return;
         }
 

@@ -84,39 +84,39 @@ public class TdhServicesDsController {
         }
     }
 
-    /**
-     * 按月，表名，状态对数据同步表做统计展示（配合同步审核处理操作）
-     * @param pageView
-     * @param tdhDsMonthsDTO
-     * @return
-     */
-    @PostMapping(value = "/getTdhDsMonthsInfo")
-    public ResultVO getTdhDsMonthsInfo(PageView pageView, TdhDsMonthsDTO tdhDsMonthsDTO){
-        ResultVO resultVO = new ResultVO();
-        try {
-            if(pageView == null){
-                pageView = new PageView();
-            }
-            logger.info("接受参数tdhDsMonthsDTO："+tdhDsMonthsDTO);
-            pageView =tdhServicesDsService.getTdhDsMonthsInfo(pageView,tdhDsMonthsDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
-            return resultVO;
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
-            return resultVO;
-        }
-    }
+//    /**
+//     * 按月，表名，状态对数据同步表做统计展示（配合同步审核处理操作）
+//     * @param pageView
+//     * @param tdhDsMonthsDTO
+//     * @return
+//     */
+//    @PostMapping(value = "/getTdhDsMonthsInfo")
+//    public ResultVO getTdhDsMonthsInfo(PageView pageView, TdhDsMonthsDTO tdhDsMonthsDTO){
+//        ResultVO resultVO = new ResultVO();
+//        try {
+//            if(pageView == null){
+//                pageView = new PageView();
+//            }
+//            logger.info("接受参数tdhDsMonthsDTO："+tdhDsMonthsDTO);
+//            pageView =tdhServicesDsService.getTdhDsMonthsInfo(pageView,tdhDsMonthsDTO);
+//            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
+//            logger.info("resultVO:"+resultVO);
+//            return resultVO;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            resultVO = ResultVOUtil.error(e);
+//            logger.info("resultVO:"+resultVO);
+//            return resultVO;
+//        }
+//    }
 
     /**
      * 向对端发送要进行数据同步的审核
-     * @param tdhDsMonthsDTOS
+     * @param tdhDsDTOS
      * @return
      */
     @PostMapping(value = "/auditThdDsListData")
-    public ResultVO auditThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
+    public ResultVO auditThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
         String userName = "";
         String accessToken = "";
@@ -218,7 +218,7 @@ public class TdhServicesDsController {
             if ("NO".equals(power)){
                 throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsMonthsDTOS,userName);
+            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsDTOS,userName);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {
@@ -231,14 +231,14 @@ public class TdhServicesDsController {
 
     /**
      * 向对端发送要进行数据同步的审核结果
-     * @param tdhDsMonthsDTOS
+     * @param tdhDsDTOS
      * @return
      */
     @PostMapping(value = "/updateThdDsListData")
-    public ResultVO updateThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS){
+    public ResultVO updateThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS){
         ResultVO resultVO = new ResultVO();
         try {
-            resultVO = tdhServicesDsService.updateThdDsListData(tdhDsMonthsDTOS);
+            resultVO = tdhServicesDsService.updateThdDsListData(tdhDsDTOS);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {
@@ -251,11 +251,11 @@ public class TdhServicesDsController {
 
     /**
      * 数据同步
-     * @param tdhDsMonthsDTOS
+     * @param tdhDsDTOS
      * @return
              */
     @PostMapping(value = "/syncThdDsListData")
-    public ResultVO syncThdDsListData(@RequestBody List<TdhDsMonthsDTO> tdhDsMonthsDTOS, HttpServletRequest req){
+    public ResultVO syncThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
         String userName = "";
         String accessToken = "";
@@ -357,7 +357,7 @@ public class TdhServicesDsController {
             if ("NO".equals(power)){
                 throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsMonthsDTOS,userName);
+            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsDTOS,userName);
             logger.info("resultVO:"+resultVO);
             return resultVO;
         } catch (Exception e) {
@@ -373,19 +373,21 @@ public class TdhServicesDsController {
      * @param
      * @return
      */
-    @PostMapping(value = "/syncResult")
+    @GetMapping(value = "/syncResult")
     public ResultVO syncResult(@Param("result") String result,@Param("id") String id){
         ResultVO resultVO = new ResultVO();
-        try {
-            resultVO = tdhServicesDsService.syncResult(result,id);
-            logger.info("resultVO:"+resultVO);
-            return resultVO;
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
-            return resultVO;
-        }
+        logger.info("result:"+result+"...id:"+id);
+//        try {
+//            resultVO = tdhServicesDsService.syncResult(result,id);
+//            logger.info("resultVO:"+resultVO);
+//            return resultVO;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            resultVO = ResultVOUtil.error(e);
+//            logger.info("resultVO:"+resultVO);
+//            return resultVO;
+//        }
+        return resultVO;
     }
 
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")

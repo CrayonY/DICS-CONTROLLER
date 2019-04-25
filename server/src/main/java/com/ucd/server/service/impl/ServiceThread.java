@@ -377,7 +377,7 @@ public class ServiceThread {
         }
     }
     @Async("transwarpExecutor")
-    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize) {
+    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
 
         logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
         Connection client = new Connection(joburla,centre);
@@ -387,25 +387,24 @@ public class ServiceThread {
         Gson gs = new Gson();
         try {
             //return url+"-"+centre+"-"+username+"-"+password;
-                try {
-                    String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
-                    System.out.println(jobsInfo);
-                    result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
-                    }.getType());
+            try {
+                String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
+                System.out.println(jobsInfo);
+                result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
+                }.getType());
 //                    logger.info(result.toString());
-                    client.close1();
-                }catch (Exception e){
-                    client.close1();
-                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
-                    throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
-                }
-                logger.info(centre + "中心连接关闭" );
-                logger.info("result.size():"+result.size());
-                if (result.size() == 0) {
-                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
-                    throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
-                }
-            Date now = new Date();
+                client.close1();
+            }catch (Exception e){
+                client.close1();
+                logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
+            }
+            logger.info(centre + "中心连接关闭" );
+            logger.info("result.size():"+result.size());
+            if (result.size() == 0) {
+                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
+                throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
+            }
             long t1 = now.getTime();
             String centreJobTableName = "";
             String centreDsTableName = "";
@@ -498,6 +497,39 @@ public class ServiceThread {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
+
+
+//    //测试使用
+//    @Async("transwarpExecutor")
+//    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize) {
+//                logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+//        Connection client = new Connection(joburla,centre);
+//        List<TdhServicesJobDTO> result = new ArrayList<TdhServicesJobDTO>();
+//        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
+//        DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        List<String> date = new ArrayList<String>();
+//        date.add("2019-04-16 12:25:37");
+//        date.add("2019-04-23 12:25:37");
+//        date.add("2019-03-16 12:25:37");
+//
+//        try {
+//            for (int i = 0; i < 3; i++) {
+//                TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
+//                tdhServicesJobDTO.setTableName("testds" + i);
+//                result.add(tdhServicesJobDTO);
+//            }
+//            for (int i = 0; i < 3; i++) {
+//                TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
+//                tdhServicesJobVO.setTableName("testds" + i);
+//                tdhServicesJobVO.setCreattime(format2.parse(date.get(i)));
+//                tdhServicesJobVOList.add(tdhServicesJobVO);
+//            }
+//            serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, "tdha_ds_info", "a", new Date().getTime(), new Date());
+//        }catch (Exception e){
+//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" );
+//        }
+//
+//    }
 
     @Async("transwarpExecutor")
     public void taskSaveThdUsersListDataThread(String url, String centre, String username, String password) {

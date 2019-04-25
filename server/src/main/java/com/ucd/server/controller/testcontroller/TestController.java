@@ -7,7 +7,9 @@ import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
+import com.ucd.server.utils.ForFile;
 import com.ucd.server.utils.HttpClientUtils;
+import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,50 +181,76 @@ public class TestController {
             Date resultDate=new Date(resultMis);
             System.out.println("resultDate:"+resultDate);
             System.out.println("FormatResult:"+format2.format(resultDate));
-            req.setCharacterEncoding("utf-8");
-            //获取cookie
-            Cookie cookies[] = req.getCookies();
-            if(cookies==null || cookies.length == 0){
-                System.out.println("没有cookie");
-            }else{
-                for (Cookie cookie : cookies){
-
-                    //获取cookie的解释内容
-                    String comment = cookie.getComment();
-                    System.out.println("comment:"+comment);
-                    //获取cookie的键
-                    String key = cookie.getName();
-                    System.out.println("key:"+key);
-
-                    //获取cookie的值
-                    String value = cookie.getValue();
-                    System.out.println("value:"+value);
-
-                    //获取cookie的有效时间。
-                    int time = cookie.getMaxAge();
-                    System.out.println("time:"+time);
-
-                    //获取服务器的IP对应的域名
-                    String domain = cookie.getDomain();
-                    System.out.println("domain:"+ domain);
-
-                    //获取有效路径
-                    String path = cookie.getPath();
-                    System.out.println("path:"+ path);
-
-                }
+            Date dBegin= format.parse(testTimeStr);
+            String dEndString = "2017-02-06 12:25:37";
+            Date dEnd = format.parse(dEndString);
+            List<Date> lDate = new ArrayList<Date>();
+            lDate.add(dBegin);
+            Calendar calBegin = Calendar.getInstance();
+            // 使用给定的 Date 设置此 Calendar 的时间
+            calBegin.setTime(dBegin);
+            Calendar calEnd = Calendar.getInstance();
+            // 使用给定的 Date 设置此 Calendar 的时间
+            calEnd.setTime(dEnd);
+            // 测试此日期是否在指定日期之后
+            while (dEnd.after(calBegin.getTime())){
+                // 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+                calBegin.add(Calendar.DAY_OF_MONTH, 4);
+                lDate.add(calBegin.getTime());
             }
-//            logger.info("进入testList");
-//            List<String> list = new ArrayList<String>();
-//            for (int j = 0;j <1000;j++){
-//            for(int i = 0;i < 100000;i++){
-//                UUID aa = UUID.randomUUID();
-//                list.add(aa.toString());
+            for (Date date1 : lDate){
+                System.out.println(format2.format(date1));
+            }
+
+//            req.setCharacterEncoding("utf-8");
+//            //获取cookie
+//            Cookie cookies[] = req.getCookies();
+//            if(cookies==null || cookies.length == 0){
+//                System.out.println("没有cookie");
+//            }else{
+//                for (Cookie cookie : cookies){
+//
+//                    //获取cookie的解释内容
+//                    String comment = cookie.getComment();
+//                    System.out.println("comment:"+comment);
+//                    //获取cookie的键
+//                    String key = cookie.getName();
+//                    System.out.println("key:"+key);
+//
+//                    //获取cookie的值
+//                    String value = cookie.getValue();
+//                    System.out.println("value:"+value);
+//
+//                    //获取cookie的有效时间。
+//                    int time = cookie.getMaxAge();
+//                    System.out.println("time:"+time);
+//
+//                    //获取服务器的IP对应的域名
+//                    String domain = cookie.getDomain();
+//                    System.out.println("domain:"+ domain);
+//
+//                    //获取有效路径
+//                    String path = cookie.getPath();
+//                    System.out.println("path:"+ path);
+//
+//                }
 //            }
-//            }
+////            logger.info("进入testList");
+////            List<String> list = new ArrayList<String>();
+////            for (int j = 0;j <1000;j++){
+////            for(int i = 0;i < 100000;i++){
+////                UUID aa = UUID.randomUUID();
+////                list.add(aa.toString());
+////            }
+////            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    @GetMapping(value = "/filetest")
+    public void filetest(HttpServletRequest req){
+
+
     }
 }

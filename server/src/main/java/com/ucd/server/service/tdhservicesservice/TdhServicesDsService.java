@@ -25,13 +25,13 @@ public interface TdhServicesDsService {
 
     ResultVO getThdDsListData(List<TdhDsDTO> tdhDsDTOS) throws Exception;
 
-    ResultVO auditThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception;
+    ResultVO auditThdDsListData(List<TdhDsDTO> tdhDsDTOS,String userCode) throws Exception;
 
     PageView getTdhDsMonthsInfo(PageView pageView, TdhDsMonthsDTO tdhDsMonthsDTO) throws Exception;
 
-    ResultVO updateThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) throws Exception;
+    ResultVO updateThdDsListData(List<TdhDsDTO> tdhDsDTOS) throws Exception;
 
-    ResultVO syncThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception;
+    ResultVO syncThdDsListData(List<TdhDsDTO> tdhDsDTOS,String userCode) throws Exception;
 
     ResultVO syncResult(String result, String id)  throws Exception;
 

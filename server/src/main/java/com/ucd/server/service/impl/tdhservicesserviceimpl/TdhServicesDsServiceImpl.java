@@ -16,6 +16,7 @@ import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDssyncDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsListDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsMonthsListDTO;
 import com.ucd.daocommon.VO.tdhdsVO.TdhDsVO;
 import com.ucd.daocommon.VO.tdhdsVO.TdhDssyncVO;
@@ -26,6 +27,7 @@ import com.ucd.server.mapper.TdhTaskParameterMapper;
 import com.ucd.server.service.impl.ServiceSync;
 import com.ucd.server.service.impl.ServiceThread;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
+import com.ucd.server.utils.ForFile;
 import com.ucd.server.utils.HttpClientUtils;
 import org.apache.commons.collections.ArrayStack;
 import org.slf4j.Logger;
@@ -91,6 +93,10 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
         }
+        if(tdhDsDTO.getSyncType() == null){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType参数异常："+tdhDsDTO.getSyncType());
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType参数异常："+tdhDsDTO.getSyncType());
+        }
          if ("A".equals(tdhDsDTO.getCentre())) {
              tdhDsDTO.setCentreTableName("tdha_ds_info");
         }else if ("B".equals(tdhDsDTO.getCentre())) {
@@ -138,55 +144,75 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     }
 
     @Override
-    public ResultVO auditThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception {
+    public ResultVO auditThdDsListData(List<TdhDsDTO> tdhDsDTOS,String userCode) throws Exception {
 
         //        2.修改DS的审核状态为“审核中”
         //--1.判断是否是当月要做数据同步T：从月初到当前时间为止，涉及本张表所有的记录，状态更改为“审核中”F：从月初到月末，涉及本张表所有的记录，状态更改为“审核中”
 //        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
 //        2.向对端发送http审核请求（若  请求不成功，则将审核状态为“审核失败”）
         Gson gs = new Gson();
-        if(tdhDsMonthsDTOS == null || tdhDsMonthsDTOS.size() == 0){
+        if(tdhDsDTOS == null || tdhDsDTOS.size() == 0){
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
         }
         List<TdhDsauditDTO> tdhDsauditDTOList = new ArrayList<TdhDsauditDTO>();
-        for (TdhDsMonthsDTO tdhDsMonthsDTO : tdhDsMonthsDTOS){
-            if(tdhDsMonthsDTO.getCentre() == null || "".equals(tdhDsMonthsDTO.getCentre())){
+        for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+            if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
             }
-            if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
+            if( !(centrelocal.equals(tdhDsDTO.getCentre()))){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
             }
-            if(tdhDsMonthsDTO.getTableName() == null || "".equals(tdhDsMonthsDTO.getTableName())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
+            if(tdhDsDTO.getId() == null ){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
             }
-            if(tdhDsMonthsDTO.getTableNameTotal() == null || "".equals(tdhDsMonthsDTO.getTableNameTotal())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
+            if(tdhDsDTO.getDataMonth() == null || "".equals(tdhDsDTO.getDataMonth())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间DataMonth不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间DataMonth不能为空");
             }
-            if ("A".equals(tdhDsMonthsDTO.getCentre())) {
-                tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
-                tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            if(tdhDsDTO.getTableName() == null || "".equals(tdhDsDTO.getTableName())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名TableName不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名TableName不能为空");
+            }
+            if(tdhDsDTO.getTableNameTotal() == null || "".equals(tdhDsDTO.getTableNameTotal())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名TableNameTotal不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名TableNameTotal不能为空");
+            }
+            if(tdhDsDTO.getType() == null ){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",计数type不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"计数type不能为空");
+            }
+            if(tdhDsDTO.getSyncType() == null ){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType不能为空");
+            }
+            if ("A".equals(tdhDsDTO.getCentre())) {
+                tdhDsDTO.setCentreTableName("tdha_ds_info");
+            }else if("B".equals(tdhDsDTO.getCentre())){
+                tdhDsDTO.setCentreTableName("tdhb_ds_info");
             }else{
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
             }
+
             TdhDsauditDTO tdhDsauditDTO = new TdhDsauditDTO();
             tdhDsauditDTO.setApplyerCode(userCode);
-            tdhDsauditDTO.setApplysyncTime(tdhDsMonthsDTO.getStartdownTime());
+            tdhDsauditDTO.setApplysyncTime(tdhDsDTO.getDataMonth());
             tdhDsauditDTO.setApplyTime(new Date());
-            tdhDsauditDTO.setTableName(tdhDsMonthsDTO.getTableName());
+            tdhDsauditDTO.setTableName(tdhDsDTO.getTableName());
             tdhDsauditDTO.setAuditStatus(0);
-            tdhDsauditDTO.setTableNameall(tdhDsMonthsDTO.getTableNameTotal());
+            tdhDsauditDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
             tdhDsauditDTO.setCentre(centrelocal);
+            tdhDsauditDTO.setId(tdhDsDTO.getId());
+            tdhDsauditDTO.setType(tdhDsDTO.getType());
+            tdhDsauditDTO.setSyncType(tdhDsDTO.getSyncType());
             tdhDsauditDTOList.add(tdhDsauditDTO);
         }
 
 
-        ResultVO resultVOTdhDsListVO = daoClient.getTdhDsMonthsInfoS(tdhDsMonthsDTOS);
+        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
         if("000000".equals(resultVOTdhDsListVO.getCode())) {
             List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
             Object object = resultVOTdhDsListVO.getData();
@@ -216,12 +242,12 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     }
                     //改审核状态为“审核中”
                     Map<String, Object> models = new HashMap<String, Object>();
-                    TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
-                    tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
+                    TdhDsListDTO tdhDsListDTO = new TdhDsListDTO();
+                    tdhDsListDTO.setTdhDsDTOList(tdhDsDTOS);
                     models.put("auditStatus",1);
                     models.put("userCode",userCode);
-                    models.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO);
-                    ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
+                    models.put("tdhDsDTOS",tdhDsDTOS);
+                    ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
                     if ("000000".equals(resultVO1.getCode())) {
                         logger.info("审核中！修改成功");
                     } else {
@@ -242,7 +268,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         //审核状态改为“审核失败”
                         logger.info("审核申请通知失败,接口超时等异常");
                         models.put("auditStatus",2);
-                        ResultVO resultVO2 = daoClient.updateTdhDsMonthsInfoS(models);
+                        ResultVO resultVO2 = daoClient.updateTdhDsInfoS(models);
                         if ("000000".equals(resultVO2.getCode())) {
                             logger.info("审核失败！修改成功");
                         } else {
@@ -259,7 +285,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         //审核状态改为“审核失败”
                         logger.info("审核申请通知失败");
                         models.put("auditStatus",2);
-                        ResultVO resultVO2 = daoClient.updateTdhDsMonthsInfoS(models);
+                        ResultVO resultVO2 = daoClient.updateTdhDsInfoS(models);
                         if ("000000".equals(resultVO2.getCode())) {
                             logger.info("审核失败！修改成功");
                         } else {
@@ -284,7 +310,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
         }
-        if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
+        if(tdhDsMonthsDTO.getDataMonth() == null || "".equals(tdhDsMonthsDTO.getDataMonth())){
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
         }
@@ -319,65 +345,65 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     }
 
     @Override
-    public ResultVO updateThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS) throws Exception {
+    public ResultVO updateThdDsListData(List<TdhDsDTO> tdhDsDTOS) throws Exception {
         Map<String, Object> models1 = new HashMap<String, Object>();
         Map<String, Object> models2 = new HashMap<String, Object>();
-        TdhDsMonthsListDTO tdhDsMonthsListDTO1 = new TdhDsMonthsListDTO();
-        TdhDsMonthsListDTO tdhDsMonthsListDTO2 = new TdhDsMonthsListDTO();
-        List<TdhDsMonthsDTO> tdhDsMonthsDTOList1 = new ArrayList<TdhDsMonthsDTO>();
-        List<TdhDsMonthsDTO> tdhDsMonthsDTOList2 = new ArrayList<TdhDsMonthsDTO>();
+        TdhDsListDTO tdhDsListDTO1 = new TdhDsListDTO();
+        TdhDsListDTO tdhDsListDTO2 = new TdhDsListDTO();
+        List<TdhDsDTO> tdhDsDTOList1 = new ArrayList<TdhDsDTO>();
+        List<TdhDsDTO> tdhDsDTOList2 = new ArrayList<TdhDsDTO>();
         int count1 = 0;
         int count2 = 0;
-        for (TdhDsMonthsDTO tdhDsMonthsDTO : tdhDsMonthsDTOS){
-            if(tdhDsMonthsDTO.getCentre() == null || "".equals(tdhDsMonthsDTO.getCentre())){
+        for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+            if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
             }
-            if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
+            if(tdhDsDTO.getDataMonth() == null || "".equals(tdhDsDTO.getDataMonth())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
             }
-            if(tdhDsMonthsDTO.getTableName() == null || "".equals(tdhDsMonthsDTO.getTableName())){
+            if(tdhDsDTO.getTableName() == null || "".equals(tdhDsDTO.getTableName())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
             }
-            if(tdhDsMonthsDTO.getTableNameTotal() == null || "".equals(tdhDsMonthsDTO.getTableNameTotal())){
+            if(tdhDsDTO.getTableNameTotal() == null || "".equals(tdhDsDTO.getTableNameTotal())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
             }
-            if(tdhDsMonthsDTO.getAuditStatus() == null ){
+            if(tdhDsDTO.getAuditStatus() == null ){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",审核状态不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态不能为空");
             }
-            if ("A".equals(tdhDsMonthsDTO.getCentre())) {
-                tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
-                tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+            if ("A".equals(tdhDsDTO.getCentre())) {
+                tdhDsDTO.setCentreTableName("tdha_ds_info");
+            }else if("B".equals(tdhDsDTO.getCentre())){
+                tdhDsDTO.setCentreTableName("tdhb_ds_info");
             }else{
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
             }
-            if (tdhDsMonthsDTO.getAuditStatus() == 3){//通过
-                models1.put("auditStatus",tdhDsMonthsDTO.getAuditStatus());
-                models1.put("operCode",tdhDsMonthsDTO.getUserCode());
-                tdhDsMonthsDTOList1.add(tdhDsMonthsDTO);
+            if (tdhDsDTO.getAuditStatus() == 3){//通过
+                models1.put("auditStatus",tdhDsDTO.getAuditStatus());
+                models1.put("userCode",tdhDsDTO.getUserCode());
+                tdhDsDTOList1.add(tdhDsDTO);
                 count1 ++;
-            }else if (tdhDsMonthsDTO.getAuditStatus() == 4){//拒绝
-                models2.put("auditStatus",tdhDsMonthsDTO.getAuditStatus());
-                models2.put("operCode",tdhDsMonthsDTO.getUserCode());
-                tdhDsMonthsDTOList2.add(tdhDsMonthsDTO);
+            }else if (tdhDsDTO.getAuditStatus() == 4){//拒绝
+                models2.put("auditStatus",tdhDsDTO.getAuditStatus());
+                models2.put("userCode",tdhDsDTO.getUserCode());
+                tdhDsDTOList2.add(tdhDsDTO);
                 count2 ++;
             }
         }
         logger.info("===================count1:"+count1+"--------------count2"+count2);
-        tdhDsMonthsListDTO1.setTdhDsMonthsDTOList(tdhDsMonthsDTOList1);
-        tdhDsMonthsListDTO2.setTdhDsMonthsDTOList(tdhDsMonthsDTOList2);
-        models1.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO1);
-        models2.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO2);
+        tdhDsListDTO1.setTdhDsDTOList(tdhDsDTOList1);
+        tdhDsListDTO2.setTdhDsDTOList(tdhDsDTOList2);
+        models1.put("tdhDsListDTO",tdhDsDTOList1);
+        models2.put("tdhDsListDTO",tdhDsDTOList2);
         ResultVO resultVO = new ResultVO();
         int successNum = 0;
         if (count1 != 0) {
-            ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models1);
+            ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models1);
             if ("000000".equals(resultVO1.getCode())) {
                 logger.info("审核通过！修改成功");
                 successNum ++;
@@ -389,7 +415,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("没有审核通过的请求");
         }
         if (count2 != 0) {
-            ResultVO resultVO2 = daoClient.updateTdhDsMonthsInfoS(models2);
+            ResultVO resultVO2 = daoClient.updateTdhDsInfoS(models2);
             if ("000000".equals(resultVO2.getCode())) {
                 logger.info("审核拒绝！修改成功");
                 successNum ++;
@@ -408,250 +434,266 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     }
 
     @Override
-    public ResultVO syncThdDsListData(List<TdhDsMonthsDTO> tdhDsMonthsDTOS,String userCode) throws Exception {
+    public ResultVO syncThdDsListData(List<TdhDsDTO> tdhDsDTOS,String userCode) throws Exception {
         ResultVO resultVO = new ResultVO();
-        Gson gs = new Gson();
-        if(tdhDsMonthsDTOS == null || tdhDsMonthsDTOS.size() == 0){
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-        }
-        List<TdhDssyncDTO> tdhDssyncDTOList = new ArrayList<TdhDssyncDTO>();
-        for (TdhDsMonthsDTO tdhDsMonthsDTO : tdhDsMonthsDTOS){
-            if(tdhDsMonthsDTO.getCentre() == null || "".equals(tdhDsMonthsDTO.getCentre())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
-            }
-            if(tdhDsMonthsDTO.getStartdownTime() == null || "".equals(tdhDsMonthsDTO.getStartdownTime())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
-            }
-            if(tdhDsMonthsDTO.getTableName() == null || "".equals(tdhDsMonthsDTO.getTableName())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
-            }
-            if(tdhDsMonthsDTO.getTableNameTotal() == null || "".equals(tdhDsMonthsDTO.getTableNameTotal())){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
-            }
-            if ("A".equals(tdhDsMonthsDTO.getCentre())) {
-                tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-            }else if("B".equals(tdhDsMonthsDTO.getCentre())){
-                tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
-            }else{
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
-            }
-            TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
-            String ID = KeyUtil.genUniqueKey();
-            tdhDssyncDTO.setId(ID + UUIDUtils.getUUID());
-            tdhDssyncDTO.setUserCode(userCode);
-            tdhDssyncDTO.setSyncMonth(tdhDsMonthsDTO.getStartdownTime());
-            tdhDssyncDTO.setSyncTime(new Date());
-            tdhDssyncDTO.setTableName(tdhDsMonthsDTO.getTableName());
-            tdhDssyncDTO.setState(1);
-            tdhDssyncDTO.setTableNameall(tdhDsMonthsDTO.getTableNameTotal());
-            tdhDssyncDTOList.add(tdhDssyncDTO);
-        }
-        ResultVO resultVOTdhDsListVO = daoClient.getTdhDsMonthsInfoS(tdhDsMonthsDTOS);
-        if("000000".equals(resultVOTdhDsListVO.getCode())) {
-            List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
-            Object object = resultVOTdhDsListVO.getData();
-            if (object != null) {
-                String tdhDsListVOString = Tools.toJson(object);
-                logger.info("tdhDsListVOString:" + tdhDsListVOString);
-                tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
-                }.getType());
-                logger.info("tdhDsVOS:" + tdhDsVOS);
-                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
-                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-                }else {
-                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
-                        List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
-                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
-                            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-                        }else {
-                            for (TdhDsVO TdhDsVO : tdhDsVOList) {
-                                if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
-                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
-                                }
-                                if (TdhDsVO.getAuditStatus() != 3 ){//1参数有误，审核未通过，不可同步操作
-                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getMessage());
-                                }
-                            }
-                        }
-                    }
-//调取数据同步方法
-                    String testFlag = "";
-                    try {
-                        testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTOList.get(0));
-                    }catch (Exception e){
-                        logger.info("数据同步shell脚本失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
-                    }
-                    //通知数据同步shell（异步）
-                    if("OK".equals(testFlag)) {
-                        Map<String, Object> models = new HashMap<String, Object>();
-                        TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
-                        tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
-                        models.put("syncState", 1);
-                        models.put("operCode", userCode);
-                        models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
-                        ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
-                        if ("000000".equals(resultVO1.getCode())) {
-                            logger.info("DS表同步状态“同步中”！修改成功");
-                        } else {
-                            logger.info("DS表同步状态“同步中”！修改失败");
-                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
-                        }
-                        ResultVO resultVO2 = daoClient.saveTdhDssyncData(tdhDssyncDTOList);
-                        if ("000000".equals(resultVO2.getCode())) {
-                            logger.info("添加DSSYNC表！添加成功");
-                        } else {
-                            logger.info("添加DSSYNC表！添加失败");
-                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "添加DSSYNC表！添加失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
-                        }
-                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),testFlag);
-                        return resultVO;
-                    }else {
-                        logger.info("通知数据同步shell失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
-                    }
-                }
-            }else {
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-            }
-        }else {
-            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
-        }
+//        Gson gs = new Gson();
+//        if(tdhDsDTOS == null || tdhDsDTOS.size() == 0){
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//        }
+//        List<TdhDssyncDTO> tdhDssyncDTOList = new ArrayList<TdhDssyncDTO>();
+//        StringBuffer filetext = new StringBuffer();
+//        for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+//            if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+//            }
+//            if( !(centrelocal.equals(tdhDsDTO.getCentre()))){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
+//            }
+//            if(tdhDsDTO.getDataMonth() == null || "".equals(tdhDsDTO.getDataMonth())){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
+//            }
+//            if(tdhDsDTO.getTableName() == null || "".equals(tdhDsDTO.getTableName())){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
+//            }
+//            if(tdhDsDTO.getTableNameTotal() == null || "".equals(tdhDsDTO.getTableNameTotal())){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
+//            }
+//            if ("A".equals(tdhDsDTO.getCentre())) {
+//                tdhDsDTO.setCentreTableName("tdha_ds_info");
+//            }else if("B".equals(tdhDsDTO.getCentre())){
+//                tdhDsDTO.setCentreTableName("tdhb_ds_info");
+//            }else{
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
+//            }
+//            TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
+//            String ID = KeyUtil.genUniqueKey();
+//            tdhDssyncDTO.setId(ID + UUIDUtils.getUUID());
+//            tdhDssyncDTO.setUserCode(userCode);
+//            tdhDssyncDTO.setSyncMonth(tdhDsDTO.getDataMonth());
+//            tdhDssyncDTO.setSyncTime(new Date());
+//            tdhDssyncDTO.setTableName(tdhDsDTO.getTableName());
+//            tdhDssyncDTO.setState(1);
+//            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
+//            tdhDssyncDTOList.add(tdhDssyncDTO);
+//            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+tdhDsDTO.getStartdownTime()+","+tdhDsDTO.getStartupTime()+" \r\n");
+//        }
+//        ResultVO resultVOTdhDsListVO = daoClient.getTdhDsMonthsInfoS(tdhDsMonthsDTOS);
+//        if("000000".equals(resultVOTdhDsListVO.getCode())) {
+//            List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
+//            Object object = resultVOTdhDsListVO.getData();
+//            if (object != null) {
+//                String tdhDsListVOString = Tools.toJson(object);
+//                logger.info("tdhDsListVOString:" + tdhDsListVOString);
+//                tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
+//                }.getType());
+//                logger.info("tdhDsVOS:" + tdhDsVOS);
+//                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//                }else {
+//                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
+//                        List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
+//                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
+//                            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//                        }else {
+//                            for (TdhDsVO TdhDsVO : tdhDsVOList) {
+//                                if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
+//                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
+//                                }
+//                                if (TdhDsVO.getAuditStatus() != 3 ){//1参数有误，审核未通过，不可同步操作
+//                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getMessage());
+//                                }
+//                            }
+//                        }
+//                    }
+//                    //本地生成文件
+//                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
+//                    if (!creatFileFlag){
+//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
+//                    }
+//                    //上传文件
+//
+////调取数据同步方法
+//                    String testFlag = "";
+//                    try {
+//                        testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTOList.get(0));
+//                    }catch (Exception e){
+//                        logger.info("数据同步shell脚本失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
+//                    }
+//                    //通知数据同步shell（异步）
+//                    if("OK".equals(testFlag)) {
+//                        Map<String, Object> models = new HashMap<String, Object>();
+//                        TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
+//                        tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
+//                        models.put("syncState", 1);
+//                        models.put("operCode", userCode);
+//                        models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
+//                        ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
+//                        if ("000000".equals(resultVO1.getCode())) {
+//                            logger.info("DS表同步状态“同步中”！修改成功");
+//                        } else {
+//                            logger.info("DS表同步状态“同步中”！修改失败");
+//                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+//                        }
+//                        ResultVO resultVO2 = daoClient.saveTdhDssyncData(tdhDssyncDTOList);
+//                        if ("000000".equals(resultVO2.getCode())) {
+//                            logger.info("添加DSSYNC表！添加成功");
+//                        } else {
+//                            logger.info("添加DSSYNC表！添加失败");
+//                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "添加DSSYNC表！添加失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
+//                        }
+//                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),testFlag);
+//                        return resultVO;
+//                    }else {
+//                        logger.info("通知数据同步shell失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
+//                    }
+//                }
+//            }else {
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//            }
+//        }else {
+//            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+//        }
+        return null;
     }
 
     @Override
     public ResultVO syncResult(String result, String id) throws Exception {
         ResultVO resultVO = new ResultVO();
-        Gson gs = new Gson();
-        if (result == null || "".equals(result)){
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",result不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"result不能为空");
-        }
-        if (id == null || "".equals(id)){
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
-        }
-        TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
-        tdhDssyncDTO.setId(id);
-        if("Y".equals(result)){
-            tdhDssyncDTO.setState(2);
-        }else {
-            tdhDssyncDTO.setState(3);
-        }
-        ResultVO resultVOtdhDssyncVO = daoClient.getTdhDssyncInfoById(tdhDssyncDTO);
-        if("000000".equals(resultVOtdhDssyncVO.getCode())) {
-            TdhDssyncVO tdhDssyncVO = new TdhDssyncVO();
-            Object object = resultVOtdhDssyncVO.getData();
-            if (object != null) {
-                String tdhDssyncVOString = Tools.toJson(object);
-                logger.info("tdhDssyncVOString:" + tdhDssyncVOString);
-                tdhDssyncVO = gs.fromJson(tdhDssyncVOString, new TypeToken<TdhDssyncVO>() {
-                }.getType());
-                logger.info("tdhDssyncVO:" + tdhDssyncVO);
-                if (tdhDssyncVO == null) {
-                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
-                } else {
-                    ResultVO resultVO1 = daoClient.updateTdhDssyncData(tdhDssyncDTO);
-                    if ("000000".equals(resultVO1.getCode())) {
-                        logger.info("DSsync表同步状态修改成功");
-                    } else {
-                        logger.info("DSsync表同步状态修改失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
-                    }
-                    List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
-                    TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
-                    tdhDsMonthsDTO.setCentre(centrelocal);
-                    tdhDsMonthsDTO.setTableName(tdhDssyncVO.getTableName());
-                    tdhDsMonthsDTO.setTableNameTotal(tdhDssyncVO.getTableNameall());
-                    tdhDsMonthsDTO.setStartdownTime(tdhDssyncVO.getSyncMonth());
-                    if ("A".equals(tdhDsMonthsDTO.getCentre())) {
-                        tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-                    }else if("B".equals(tdhDsMonthsDTO.getCentre())){
-                        tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
-                    }else{
-                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
-                    }
-                    tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
-                    Map<String, Object> models = new HashMap<String, Object>();
-                    TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
-                    tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
-                    models.put("syncState", tdhDssyncDTO.getState());
-                    models.put("operCode", "gwm");
-                    models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
-                    ResultVO resultVO2 = daoClient.updateTdhDsMonthsInfoS(models);
-                    if ("000000".equals(resultVO1.getCode())) {
-                        logger.info("DS表同步状态修改成功");
-                    } else {
-                        logger.info("DS表同步状态修改失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态修改失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
-                    }
-                    ResultVO resultVOtdhDssyncVO1 = daoClient.getTdhDssyncInfoByState(1);
-                    if ("000000".equals(resultVO1.getCode())) {
-                        logger.info("DSsync表信息获取成功");
-                        List<TdhDssyncVO> tdhDssyncVOS = new ArrayList<TdhDssyncVO>();
-                        Object object1 = resultVOtdhDssyncVO1.getData();
-                        if (object1 != null) {
-                            String tdhDssyncVO1String = Tools.toJson(object1);
-                            logger.info("tdhDssyncVO1String:" + tdhDssyncVO1String);
-                            tdhDssyncVOS = gs.fromJson(tdhDssyncVO1String, new TypeToken<List<TdhDssyncVO>>() {
-                            }.getType());
-                            logger.info("tdhDssyncVO:" + tdhDssyncVO);
-                            if (tdhDssyncVOS == null || tdhDssyncVOS.size() == 0) {
-                                logger.info("目前没有审核通过且没有同步的数据");
-                                resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"目前没有审核通过且没有同步的数据");
-                                return resultVO;
-                            } else {
-                                logger.info("进行下一条数据同步表单数据");
-                                //调取数据同步方法
-                                TdhDssyncDTO tdhDssyncDTO1 = new TdhDssyncDTO();
-                                tdhDssyncDTO1.setId(tdhDssyncVOS.get(0).getId());
-                                tdhDssyncDTO1.setUserCode(tdhDssyncVOS.get(0).getUserCode());
-                                tdhDssyncDTO1.setSyncMonth(tdhDssyncVOS.get(0).getSyncMonth());
-                                tdhDssyncDTO1.setSyncTime(tdhDssyncVOS.get(0).getSyncTime());
-                                tdhDssyncDTO1.setTableName(tdhDssyncVOS.get(0).getTableName());
-                                tdhDssyncDTO1.setState(tdhDssyncVOS.get(0).getState());
-                                tdhDssyncDTO1.setTableNameall(tdhDssyncVOS.get(0).getTableNameall());
-                                String testFlag = "";
-                                try {
-                                    testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTO1);
-                                } catch (Exception e) {
-                                    logger.info("数据同步shell脚本失败");
-                                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
-                                }
-                                //通知数据同步shell（异步）
-                                if ("OK".equals(testFlag)) {
-                                    logger.info("通知数据同步shell成功");
-                                    resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"通知数据同步shell成功");
-                                    return resultVO;
-                                    } else {
-                                    logger.info("通知数据同步shell失败");
-                                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
-                                }
-                            }
-                        } else {
-                            logger.info("DSsync表信息获取失败");
-                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DSsync表信息获取失败异常：:" + resultVOtdhDssyncVO1.getMsg() + resultVOtdhDssyncVO1.getData());
-                        }
-                    }else {
-                        logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOtdhDssyncVO1.getMsg()+resultVOtdhDssyncVO1.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOtdhDssyncVO1.getMsg()+resultVOtdhDssyncVO1.getData());
-                    }
-                }
-            }else {
-                logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-            }
-        }else {
-            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
-        }
+//        Gson gs = new Gson();
+//        if (result == null || "".equals(result)){
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",result不能为空");
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"result不能为空");
+//        }
+//        if (id == null || "".equals(id)){
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
+//        }
+//        TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
+//        tdhDssyncDTO.setId(id);
+//        if("Y".equals(result)){
+//            tdhDssyncDTO.setState(2);
+//        }else {
+//            tdhDssyncDTO.setState(3);
+//        }
+//        ResultVO resultVOtdhDssyncVO = daoClient.getTdhDssyncInfoById(tdhDssyncDTO);
+//        if("000000".equals(resultVOtdhDssyncVO.getCode())) {
+//            TdhDssyncVO tdhDssyncVO = new TdhDssyncVO();
+//            Object object = resultVOtdhDssyncVO.getData();
+//            if (object != null) {
+//                String tdhDssyncVOString = Tools.toJson(object);
+//                logger.info("tdhDssyncVOString:" + tdhDssyncVOString);
+//                tdhDssyncVO = gs.fromJson(tdhDssyncVOString, new TypeToken<TdhDssyncVO>() {
+//                }.getType());
+//                logger.info("tdhDssyncVO:" + tdhDssyncVO);
+//                if (tdhDssyncVO == null) {
+//                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//                } else {
+//                    ResultVO resultVO1 = daoClient.updateTdhDssyncData(tdhDssyncDTO);
+//                    if ("000000".equals(resultVO1.getCode())) {
+//                        logger.info("DSsync表同步状态修改成功");
+//                    } else {
+//                        logger.info("DSsync表同步状态修改失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+//                    }
+//                    List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
+//                    TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
+//                    tdhDsMonthsDTO.setCentre(centrelocal);
+//                    tdhDsMonthsDTO.setTableName(tdhDssyncVO.getTableName());
+//                    tdhDsMonthsDTO.setTableNameTotal(tdhDssyncVO.getTableNameall());
+//                    tdhDsMonthsDTO.setDataMonth(tdhDssyncVO.getSyncMonth());
+//                    if ("A".equals(tdhDsMonthsDTO.getCentre())) {
+//                        tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
+//                    }else if("B".equals(tdhDsMonthsDTO.getCentre())){
+//                        tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+//                    }else{
+//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsMonthsDTO.getCentre());
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsMonthsDTO.getCentre());
+//                    }
+//                    tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
+//                    Map<String, Object> models = new HashMap<String, Object>();
+//                    TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
+//                    tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
+//                    models.put("syncState", tdhDssyncDTO.getState());
+//                    models.put("operCode", "gwm");
+//                    models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
+//                    ResultVO resultVO2 = daoClient.updateTdhDsMonthsInfoS(models);
+//                    if ("000000".equals(resultVO1.getCode())) {
+//                        logger.info("DS表同步状态修改成功");
+//                    } else {
+//                        logger.info("DS表同步状态修改失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态修改失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
+//                    }
+//                    ResultVO resultVOtdhDssyncVO1 = daoClient.getTdhDssyncInfoByState(1);
+//                    if ("000000".equals(resultVO1.getCode())) {
+//                        logger.info("DSsync表信息获取成功");
+//                        List<TdhDssyncVO> tdhDssyncVOS = new ArrayList<TdhDssyncVO>();
+//                        Object object1 = resultVOtdhDssyncVO1.getData();
+//                        if (object1 != null) {
+//                            String tdhDssyncVO1String = Tools.toJson(object1);
+//                            logger.info("tdhDssyncVO1String:" + tdhDssyncVO1String);
+//                            tdhDssyncVOS = gs.fromJson(tdhDssyncVO1String, new TypeToken<List<TdhDssyncVO>>() {
+//                            }.getType());
+//                            logger.info("tdhDssyncVO:" + tdhDssyncVO);
+//                            if (tdhDssyncVOS == null || tdhDssyncVOS.size() == 0) {
+//                                logger.info("目前没有审核通过且没有同步的数据");
+//                                resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"目前没有审核通过且没有同步的数据");
+//                                return resultVO;
+//                            } else {
+//                                logger.info("进行下一条数据同步表单数据");
+//                                //调取数据同步方法
+//                                TdhDssyncDTO tdhDssyncDTO1 = new TdhDssyncDTO();
+//                                tdhDssyncDTO1.setId(tdhDssyncVOS.get(0).getId());
+//                                tdhDssyncDTO1.setUserCode(tdhDssyncVOS.get(0).getUserCode());
+//                                tdhDssyncDTO1.setSyncMonth(tdhDssyncVOS.get(0).getSyncMonth());
+//                                tdhDssyncDTO1.setSyncTime(tdhDssyncVOS.get(0).getSyncTime());
+//                                tdhDssyncDTO1.setTableName(tdhDssyncVOS.get(0).getTableName());
+//                                tdhDssyncDTO1.setState(tdhDssyncVOS.get(0).getState());
+//                                tdhDssyncDTO1.setTableNameall(tdhDssyncVOS.get(0).getTableNameall());
+//                                String testFlag = "";
+//                                try {
+//                                    testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTO1);
+//                                } catch (Exception e) {
+//                                    logger.info("数据同步shell脚本失败");
+//                                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
+//                                }
+//                                //通知数据同步shell（异步）
+//                                if ("OK".equals(testFlag)) {
+//                                    logger.info("通知数据同步shell成功");
+//                                    resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"通知数据同步shell成功");
+//                                    return resultVO;
+//                                    } else {
+//                                    logger.info("通知数据同步shell失败");
+//                                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
+//                                }
+//                            }
+//                        } else {
+//                            logger.info("DSsync表信息获取失败");
+//                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DSsync表信息获取失败异常：:" + resultVOtdhDssyncVO1.getMsg() + resultVOtdhDssyncVO1.getData());
+//                        }
+//                    }else {
+//                        logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOtdhDssyncVO1.getMsg()+resultVOtdhDssyncVO1.getData());
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOtdhDssyncVO1.getMsg()+resultVOtdhDssyncVO1.getData());
+//                    }
+//                }
+//            }else {
+//                logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+//            }
+//        }else {
+//            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
+//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
+//        }
+        return resultVO;
     }
 
     @Override

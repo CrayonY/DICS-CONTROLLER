@@ -8,7 +8,9 @@ import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.tdhDsauditDTO.TdhDsauditDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
+import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsListDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.tdhdsListDTO.TdhDsMonthsListDTO;
 import com.ucd.daocommon.VO.tdhDsauditVO.TdhDsauditVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
@@ -62,27 +64,29 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
         logger.info("resultVO=" + resultVO);
         if ("000000".equals(resultVO.getCode())) {
             //修改本中心对应的同步表审核状态为“审核中”
-            List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
+            List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
             for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList) {
-                TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
-                tdhDsMonthsDTO.setTableName(tdhDsauditDTO.getTableName());
-                tdhDsMonthsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
-                tdhDsMonthsDTO.setStartdownTime(tdhDsauditDTO.getApplysyncTime());
-                tdhDsMonthsDTO.setCentre(tdhDsauditDTO.getCentre());
-                if ("A".equals(tdhDsMonthsDTO.getCentre())) {
-                    tdhDsMonthsDTO.setCentreTableName("tdha_ds_info");
-                }else if("B".equals(tdhDsMonthsDTO.getCentre())){
-                    tdhDsMonthsDTO.setCentreTableName("tdhb_ds_info");
+                TdhDsDTO tdhDsDTO = new TdhDsDTO();
+                tdhDsDTO.setTableName(tdhDsauditDTO.getTableName());
+                tdhDsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
+                tdhDsDTO.setDataMonth(tdhDsauditDTO.getApplysyncTime());
+                tdhDsDTO.setCentre(tdhDsauditDTO.getCentre());
+                tdhDsDTO.setType(tdhDsauditDTO.getType());
+                tdhDsDTO.setSyncType(tdhDsauditDTO.getSyncType());
+                if ("A".equals(tdhDsDTO.getCentre())) {
+                    tdhDsDTO.setCentreTableName("tdha_ds_info");
+                }else if("B".equals(tdhDsDTO.getCentre())){
+                    tdhDsDTO.setCentreTableName("tdhb_ds_info");
                 }
-                tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
+                tdhDsDTOS.add(tdhDsDTO);
             }
-            TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
-            tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
+            TdhDsListDTO tdhDsListDTO = new TdhDsListDTO();
+            tdhDsListDTO.setTdhDsDTOList(tdhDsDTOS);
             Map<String, Object> models = new HashMap<String, Object>();
             models.put("auditStatus",1);
             models.put("userCode",tdhDsauditDTOList.get(0).getApplyerCode());
-            models.put("tdhDsMonthsListDTO",tdhDsMonthsListDTO);
-            ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
+            models.put("tdhDsDTOS",tdhDsDTOS);
+            ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {
                 logger.info("审核中！修改成功");
             } else {
@@ -149,9 +153,9 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
         if(tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0){
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
         }
-        List<TdhDsMonthsDTO> tdhDsMonthsDTOS = new ArrayList<TdhDsMonthsDTO>();
+        List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
         for (TdhDsauditDTO tdhDsauditDTO:tdhDsauditDTOList){
-            if(tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null){
+            if(tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null || tdhDsauditDTO.getType() == null || tdhDsauditDTO.getSyncType() == null){
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
             }
             boolean flag = true;
@@ -163,15 +167,17 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态输入错误");
             }
             tdhDsauditDTO.setAuditerCode(userCode);
-            TdhDsMonthsDTO tdhDsMonthsDTO = new TdhDsMonthsDTO();
-            tdhDsMonthsDTO.setAuditStatus(tdhDsauditDTO.getAuditStatus());
-            tdhDsMonthsDTO.setUserCode(tdhDsauditDTO.getAuditerCode());
-            tdhDsMonthsDTO.setTableName(tdhDsauditDTO.getTableName());
-            tdhDsMonthsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
-            tdhDsMonthsDTO.setStartdownTime(tdhDsauditDTO.getApplysyncTime()); 
-            tdhDsMonthsDTO.setCentre(centre);
-            tdhDsMonthsDTO.setAuditNotes(tdhDsauditDTO.getAuditNotes());
-            tdhDsMonthsDTOS.add(tdhDsMonthsDTO);
+            TdhDsDTO tdhDsDTO = new TdhDsDTO();
+            tdhDsDTO.setAuditStatus(tdhDsauditDTO.getAuditStatus());
+            tdhDsDTO.setUserCode(tdhDsauditDTO.getAuditerCode());
+            tdhDsDTO.setTableName(tdhDsauditDTO.getTableName());
+            tdhDsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
+            tdhDsDTO.setDataMonth(tdhDsauditDTO.getApplysyncTime());
+            tdhDsDTO.setCentre(centre);
+            tdhDsDTO.setAuditNotes(tdhDsauditDTO.getAuditNotes());
+            tdhDsDTO.setType(tdhDsauditDTO.getType());
+            tdhDsDTO.setSyncType(tdhDsauditDTO.getSyncType());
+            tdhDsDTOS.add(tdhDsDTO);
         }
         ResultVO resultVOTdhDsauditListVO = daoClient.getTdhDsauditListDataS(tdhDsauditDTOList);
         if("000000".equals(resultVOTdhDsauditListVO.getCode())) {
@@ -195,7 +201,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                     ResultVO resultDsauditVO = new ResultVO();
                     String resultDsaudit = "";
                     try {
-                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsMonthsDTOS), "application/json", null);
+                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
                         resultDsauditVO = gs.fromJson(resultDsaudit, new TypeToken<ResultVO>() {
                         }.getType());
                     }catch (Exception e){
@@ -214,7 +220,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                             throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
                         }
                         //修改本中心对应的同步表状态
-                        ResultVO resultVO2 = tdhServicesDsService.updateThdDsListData(tdhDsMonthsDTOS);
+                        ResultVO resultVO2 = tdhServicesDsService.updateThdDsListData(tdhDsDTOS);
                         if ("000000".equals(resultVO2.getCode())) {
                             logger.info("审核状态修改成功");
                         } else {
