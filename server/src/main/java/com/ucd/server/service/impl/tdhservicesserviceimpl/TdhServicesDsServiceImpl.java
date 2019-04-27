@@ -193,6 +193,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"DataTimes不能为空");
             }
             if (tdhDsDTO.getSyncType() == 0){
+                //测试----------
+                tdhDsDTO.setStartdownTime(new Date());
+                //---------------
                 if (tdhDsDTO.getStartdownTime() == null){
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
                     throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"StartdownTime不能为空");
@@ -259,7 +262,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     tdhDsListDTO.setTdhDsDTOList(tdhDsDTOS);
                     models.put("auditStatus",1);
                     models.put("userCode",userCode);
-                    models.put("tdhDsDTOS",tdhDsDTOS);
+                    models.put("tdhDsDTOS",tdhDsListDTO);
                     ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
                     if ("000000".equals(resultVO1.getCode())) {
                         logger.info("审核中！修改成功");

@@ -85,7 +85,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
             Map<String, Object> models = new HashMap<String, Object>();
             models.put("auditStatus",1);
             models.put("userCode",tdhDsauditDTOList.get(0).getApplyerCode());
-            models.put("tdhDsDTOS",tdhDsDTOS);
+            models.put("tdhDsDTOS",tdhDsListDTO);
             ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {
                 logger.info("审核中！修改成功");

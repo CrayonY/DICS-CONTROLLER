@@ -224,7 +224,7 @@ public class TdhServicesDsController {
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVOe:"+resultVO);
             return resultVO;
         }
     }
