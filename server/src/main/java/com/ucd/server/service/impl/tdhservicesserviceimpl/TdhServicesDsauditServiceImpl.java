@@ -71,7 +71,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 tdhDsDTO.setTableNameTotal(tdhDsauditDTO.getTableNameall());
                 tdhDsDTO.setDataMonth(tdhDsauditDTO.getApplysyncTime());
                 tdhDsDTO.setCentre(tdhDsauditDTO.getCentre());
-                tdhDsDTO.setType(tdhDsauditDTO.getType());
+                tdhDsDTO.setDataDay(tdhDsauditDTO.getDataDay());
                 tdhDsDTO.setSyncType(tdhDsauditDTO.getSyncType());
                 if ("A".equals(tdhDsDTO.getCentre())) {
                     tdhDsDTO.setCentreTableName("tdha_ds_info");
@@ -155,7 +155,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
         }
         List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
         for (TdhDsauditDTO tdhDsauditDTO:tdhDsauditDTOList){
-            if(tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null || tdhDsauditDTO.getType() == null || tdhDsauditDTO.getSyncType() == null){
+            if(tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null || tdhDsauditDTO.getSyncType() == null){
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
             }
             boolean flag = true;
@@ -175,8 +175,9 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
             tdhDsDTO.setDataMonth(tdhDsauditDTO.getApplysyncTime());
             tdhDsDTO.setCentre(centre);
             tdhDsDTO.setAuditNotes(tdhDsauditDTO.getAuditNotes());
-            tdhDsDTO.setType(tdhDsauditDTO.getType());
+//            tdhDsDTO.setId(tdhDsauditDTO.getId());
             tdhDsDTO.setSyncType(tdhDsauditDTO.getSyncType());
+            tdhDsDTO.setDataDay(tdhDsauditDTO.getDataDay());
             tdhDsDTOS.add(tdhDsDTO);
         }
         ResultVO resultVOTdhDsauditListVO = daoClient.getTdhDsauditListDataS(tdhDsauditDTOList);

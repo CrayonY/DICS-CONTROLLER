@@ -37,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -70,6 +72,8 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     public DaoClient daoClient;
     @Autowired
     public ServiceSync serviceSync;
+
+    public DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
 //    @Autowired
 //    public LocalDaoClient localDaoClient;
@@ -180,13 +184,20 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名TableNameTotal不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名TableNameTotal不能为空");
             }
-            if(tdhDsDTO.getType() == null ){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",计数type不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"计数type不能为空");
-            }
             if(tdhDsDTO.getSyncType() == null ){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType不能为空");
+            }
+            if(tdhDsDTO.getDataTimes() == null || "".equals(tdhDsDTO.getDataTimes())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",DataTimes不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"DataTimes不能为空");
+            }
+            if (tdhDsDTO.getSyncType() == 0){
+                if (tdhDsDTO.getStartdownTime() == null){
+                    logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"StartdownTime不能为空");
+                }
+                tdhDsDTO.setDataDay(format.format(tdhDsDTO.getStartdownTime()));
             }
             if ("A".equals(tdhDsDTO.getCentre())) {
                 tdhDsDTO.setCentreTableName("tdha_ds_info");
@@ -206,8 +217,10 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             tdhDsauditDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
             tdhDsauditDTO.setCentre(centrelocal);
             tdhDsauditDTO.setId(tdhDsDTO.getId());
-            tdhDsauditDTO.setType(tdhDsDTO.getType());
             tdhDsauditDTO.setSyncType(tdhDsDTO.getSyncType());
+            tdhDsauditDTO.setDataDay(tdhDsDTO.getDataDay());
+            tdhDsauditDTO.setId(tdhDsDTO.getId());
+            tdhDsauditDTO.setDataTimes(tdhDsDTO.getDataTimes());
             tdhDsauditDTOList.add(tdhDsauditDTO);
         }
 

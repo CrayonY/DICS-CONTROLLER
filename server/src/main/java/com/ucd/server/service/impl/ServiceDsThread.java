@@ -226,12 +226,11 @@ public class ServiceDsThread {
         // 使用给定的 Date 设置此 Calendar 的时间
         calEnd.setTime(dEnd);
         // 测试此日期是否在指定日期之后
-        int i = 1;
         while (dEnd1.after(calBegin.getTime())){
 //            logger.info("进入循环");
             // 根据日历的规则，为给定的日历字段添加或减去指定的时间量
             TdhDsDTO tdhDsDTOcopy = new TdhDsDTO();
-            tdhDsDTOcopy.setType(i);//计数
+            tdhDsDTOcopy.setType(0);
             tdhDsDTOcopy.setState(0);
             tdhDsDTOcopy.setTableName(tdhDsDTO.getTableName());
             tdhDsDTOcopy.setCreattime(dEnd1);
@@ -245,7 +244,6 @@ public class ServiceDsThread {
             tdhDsDTOcopy.setStartupTime(calBegin.getTime());
             tdhDsDTOcopy.setDataTimes(format2.format(tdhDsDTOcopy.getStartdownTime())+"-"+format2.format(tdhDsDTOcopy.getStartupTime()));
             tdhDsDTOList.add(tdhDsDTOcopy);
-            i++;
         }
         tdhDsDTOList.get(tdhDsDTOList.size() - 1).setStartupTime(dEnd1);
         tdhDsDTOList.get(tdhDsDTOList.size() - 1).setDataTimes(format2.format(tdhDsDTOList.get(tdhDsDTOList.size() - 1).getStartdownTime())+"-"+format2.format(tdhDsDTOList.get(tdhDsDTOList.size() - 1).getStartupTime()));

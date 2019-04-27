@@ -590,6 +590,19 @@ public class ServiceThread {
         }
     }
 
+    public void taskUpdateThdDsData(String centre) {
+        logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+        ResultVO resultVO = daoClient.updateThdDsData(centre);
+        logger.info("resultVO=" + resultVO);
+        if ("000000".equals(resultVO.getCode())) {
+            // return resultVO.getData().toString();
+        } else {
+            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_UPDATE + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+        }
+    }
+
+
     private List<TdhServicesInfoDTO> healthChecksIdNumIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
                                                                  Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
 
@@ -765,6 +778,7 @@ public class ServiceThread {
         System.out.println("t1:"+t1);//
         System.out.println(a.indexOf("insert"));//0
     }
+
 
 
 }
