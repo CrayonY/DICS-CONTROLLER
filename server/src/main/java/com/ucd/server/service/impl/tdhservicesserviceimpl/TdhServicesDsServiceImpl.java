@@ -219,7 +219,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             tdhDsauditDTO.setAuditStatus(0);
             tdhDsauditDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
             tdhDsauditDTO.setCentre(centrelocal);
-            tdhDsauditDTO.setId(tdhDsDTO.getId());
+            tdhDsauditDTO.setLastCheck(tdhDsDTO.getId());
             tdhDsauditDTO.setSyncType(tdhDsDTO.getSyncType());
             tdhDsauditDTO.setDataDay(tdhDsDTO.getDataDay());
             tdhDsauditDTO.setId(tdhDsDTO.getId());
@@ -247,6 +247,20 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
                         }else {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
+                                //测试使用--------------------------------------------------------------------
+                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+                                    if(tdhDsDTO.getId().equals(TdhDsVO.getId())){
+                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
+                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+                                    }
+                                }
+                                for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList){
+                                    if (tdhDsauditDTO.getId().equals(TdhDsVO.getId())){
+                                        tdhDsauditDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+                                    }
+                                }
+
+                               //------------------------------------------------------------------------------
                                 if (TdhDsVO.getState() == 1){//处理中，说明此表已经审核过了，不需要再次审核
                                     throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getCode(),ResultExceptEnum.ERROR_PARAMETER_SYNCSTATE.getMessage());
                                 }
@@ -414,8 +428,8 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         logger.info("===================count1:"+count1+"--------------count2"+count2);
         tdhDsListDTO1.setTdhDsDTOList(tdhDsDTOList1);
         tdhDsListDTO2.setTdhDsDTOList(tdhDsDTOList2);
-        models1.put("tdhDsListDTO",tdhDsDTOList1);
-        models2.put("tdhDsListDTO",tdhDsDTOList2);
+        models1.put("tdhDsDTOS",tdhDsListDTO1);
+        models2.put("tdhDsDTOS",tdhDsListDTO2);
         ResultVO resultVO = new ResultVO();
         int successNum = 0;
         if (count1 != 0) {
