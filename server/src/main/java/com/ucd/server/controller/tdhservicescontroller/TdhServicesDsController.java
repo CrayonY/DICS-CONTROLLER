@@ -377,17 +377,16 @@ public class TdhServicesDsController {
     public ResultVO syncResult(@Param("result") String result,@Param("id") String id){
         ResultVO resultVO = new ResultVO();
         logger.info("result:"+result+"...id:"+id);
-//        try {
-//            resultVO = tdhServicesDsService.syncResult(result,id);
-//            logger.info("resultVO:"+resultVO);
-//            return resultVO;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            resultVO = ResultVOUtil.error(e);
-//            logger.info("resultVO:"+resultVO);
-//            return resultVO;
-//        }
-        return resultVO;
+        try {
+            resultVO = tdhServicesDsService.syncResult(result,id);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        }
     }
 
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")

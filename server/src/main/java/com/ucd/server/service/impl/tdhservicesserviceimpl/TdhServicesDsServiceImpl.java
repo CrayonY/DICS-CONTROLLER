@@ -529,6 +529,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",DataTimes不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"DataTimes不能为空");
             }
+            tdhDsDTO.setUserCode(userCode);
             if (tdhDsDTO.getSyncType() == 0){
                 //测试----------
                 tdhDsDTO.setStartdownTime(new Date());
@@ -612,6 +613,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         try {
                             for(TdhDsDTO tdhDsDTO : tdhDsDTOS){
                                 tdhDsDTO.setState(1);
+                                tdhDsDTO.setId(null);
                             }
                             resultDsSync = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
                             resultDsSyncVO = gs.fromJson(resultDsSync, new TypeToken<ResultVO>() {
@@ -713,6 +715,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     tdhDsDTO.setSyncType(tdhDsVO.getSyncType());
                     tdhDsDTO.setDataDay(tdhDsVO.getDataDay());
                     tdhDsDTO.setCentre(centrelocal);
+                    tdhDsDTO.setUserCode("XH");
                     if ("YES".equals(result)){
                         tdhDsDTO.setState(2);
                         models.put("syncState", 2);
