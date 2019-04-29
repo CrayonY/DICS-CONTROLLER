@@ -610,6 +610,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         ResultVO resultDsSyncVO = new ResultVO();
                         String resultDsSync = "";
                         try {
+                            for(TdhDsDTO tdhDsDTO : tdhDsDTOS){
+                                tdhDsDTO.setState(1);
+                            }
                             resultDsSync = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
                             resultDsSyncVO = gs.fromJson(resultDsSync, new TypeToken<ResultVO>() {
                             }.getType());
