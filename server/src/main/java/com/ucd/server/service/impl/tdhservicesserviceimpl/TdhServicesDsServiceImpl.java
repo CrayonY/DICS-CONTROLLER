@@ -404,10 +404,10 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
             }
-            if(tdhDsDTO.getAuditStatus() == null ){
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",审核状态不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态不能为空");
-            }
+//            if(tdhDsDTO.getAuditStatus() == null ){
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",审核状态不能为空");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态不能为空");
+//            }
             if ("A".equals(tdhDsDTO.getCentre())) {
                 tdhDsDTO.setCentreTableName("tdha_ds_info");
             }else if("B".equals(tdhDsDTO.getCentre())){
@@ -598,7 +598,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     //调取数据同步方法
                     String testFlag = "";
                     try {
-                        testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTOList.get(0));
+                        testFlag = serviceSync.SyncThdListDataThread();
                     }catch (Exception e){
                         logger.info("数据同步shell脚本失败");
                         throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);

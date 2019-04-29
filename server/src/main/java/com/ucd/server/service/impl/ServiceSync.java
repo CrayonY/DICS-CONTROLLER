@@ -23,8 +23,8 @@ public class ServiceSync {
     private final static Logger logger = LoggerFactory.getLogger(ServiceSync.class);
 
 
-    public String SyncThdListDataThread(TdhDssyncDTO tdhDssyncDTO) {
-        logger.info("tdhDssyncDTO:"+tdhDssyncDTO);
+    public String SyncThdListDataThread() {
+        logger.info("测试！！！！");
         return "OK";
     }
 
