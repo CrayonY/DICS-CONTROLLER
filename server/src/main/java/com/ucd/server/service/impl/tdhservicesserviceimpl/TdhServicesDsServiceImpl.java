@@ -219,10 +219,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             tdhDsauditDTO.setAuditStatus(0);
             tdhDsauditDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
             tdhDsauditDTO.setCentre(centrelocal);
-            tdhDsauditDTO.setLastCheck(tdhDsDTO.getId());
             tdhDsauditDTO.setSyncType(tdhDsDTO.getSyncType());
             tdhDsauditDTO.setDataDay(tdhDsDTO.getDataDay());
-            tdhDsauditDTO.setId(tdhDsDTO.getId());
+            tdhDsauditDTO.setLastCheck(tdhDsDTO.getId());
             tdhDsauditDTO.setDataTimes(tdhDsDTO.getDataTimes());
             tdhDsauditDTOList.add(tdhDsauditDTO);
         }
@@ -249,13 +248,13 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
                                 //测试使用--------------------------------------------------------------------
                                 for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
-                                    if(tdhDsDTO.getId().equals(TdhDsVO.getId())){
+                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
                                         tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
                                         tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
                                     }
                                 }
                                 for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList){
-                                    if (tdhDsauditDTO.getId().equals(TdhDsVO.getId())){
+                                    if ((tdhDsauditDTO.getLastCheck().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
                                         tdhDsauditDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
                                     }
                                 }
@@ -378,12 +377,16 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     public ResultVO updateThdDsListData(List<TdhDsDTO> tdhDsDTOS) throws Exception {
         Map<String, Object> models1 = new HashMap<String, Object>();
         Map<String, Object> models2 = new HashMap<String, Object>();
+        Map<String, Object> models3 = new HashMap<String, Object>();
         TdhDsListDTO tdhDsListDTO1 = new TdhDsListDTO();
         TdhDsListDTO tdhDsListDTO2 = new TdhDsListDTO();
+        TdhDsListDTO tdhDsListDTO3 = new TdhDsListDTO();
         List<TdhDsDTO> tdhDsDTOList1 = new ArrayList<TdhDsDTO>();
         List<TdhDsDTO> tdhDsDTOList2 = new ArrayList<TdhDsDTO>();
+        List<TdhDsDTO> tdhDsDTOList3 = new ArrayList<TdhDsDTO>();
         int count1 = 0;
         int count2 = 0;
+        int count3 = 0;
         for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
             if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
@@ -413,23 +416,32 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
             }
-            if (tdhDsDTO.getAuditStatus() == 3){//通过
-                models1.put("auditStatus",tdhDsDTO.getAuditStatus());
-                models1.put("userCode",tdhDsDTO.getUserCode());
-                tdhDsDTOList1.add(tdhDsDTO);
-                count1 ++;
-            }else if (tdhDsDTO.getAuditStatus() == 4){//拒绝
-                models2.put("auditStatus",tdhDsDTO.getAuditStatus());
-                models2.put("userCode",tdhDsDTO.getUserCode());
-                tdhDsDTOList2.add(tdhDsDTO);
-                count2 ++;
+            if (tdhDsDTO.getState() == null || 0 == tdhDsDTO.getState()) {
+                if (tdhDsDTO.getAuditStatus() == 3) {//通过
+                    models1.put("auditStatus", tdhDsDTO.getAuditStatus());
+                    models1.put("userCode", tdhDsDTO.getUserCode());
+                    tdhDsDTOList1.add(tdhDsDTO);
+                    count1++;
+                } else if (tdhDsDTO.getAuditStatus() == 4) {//拒绝
+                    models2.put("auditStatus", tdhDsDTO.getAuditStatus());
+                    models2.put("userCode", tdhDsDTO.getUserCode());
+                    tdhDsDTOList2.add(tdhDsDTO);
+                    count2++;
+                }
+            }else{
+                models3.put("syncState", tdhDsDTO.getState());
+                models3.put("userCode", tdhDsDTO.getUserCode());
+                tdhDsDTOList3.add(tdhDsDTO);
+                count3++;
             }
         }
-        logger.info("===================count1:"+count1+"--------------count2"+count2);
+        logger.info("===================count1:"+count1+"--------------count2"+count2+"--------------count3"+count3);
         tdhDsListDTO1.setTdhDsDTOList(tdhDsDTOList1);
         tdhDsListDTO2.setTdhDsDTOList(tdhDsDTOList2);
+        tdhDsListDTO3.setTdhDsDTOList(tdhDsDTOList3);
         models1.put("tdhDsDTOS",tdhDsListDTO1);
         models2.put("tdhDsDTOS",tdhDsListDTO2);
+        models3.put("tdhDsDTOS",tdhDsListDTO3);
         ResultVO resultVO = new ResultVO();
         int successNum = 0;
         if (count1 != 0) {
@@ -456,6 +468,18 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         }else {
             logger.info("没有审核拒绝的请求");
         }
+        if (count3 != 0) {
+            ResultVO resultVO3 = daoClient.updateTdhDsInfoS(models3);
+            if ("000000".equals(resultVO3.getCode())) {
+                logger.info("同步状态！修改成功");
+                successNum ++;
+            } else {
+                logger.info("同步状态！修改失败");
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "同步状态！修改失败异常：:" + resultVO3.getMsg() + resultVO3.getData());
+            }
+        }else{
+            logger.info("没有修改同步状态的请求");
+        }
         if (successNum != 0){
             resultVO.setData(count1+count2);
             resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(),count1+count2);
@@ -466,41 +490,63 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     @Override
     public ResultVO syncThdDsListData(List<TdhDsDTO> tdhDsDTOS,String userCode) throws Exception {
         ResultVO resultVO = new ResultVO();
-//        Gson gs = new Gson();
-//        if(tdhDsDTOS == null || tdhDsDTOS.size() == 0){
-//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-//        }
-//        List<TdhDssyncDTO> tdhDssyncDTOList = new ArrayList<TdhDssyncDTO>();
-//        StringBuffer filetext = new StringBuffer();
-//        for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
-//            if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
-//            }
-//            if( !(centrelocal.equals(tdhDsDTO.getCentre()))){
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
-//            }
-//            if(tdhDsDTO.getDataMonth() == null || "".equals(tdhDsDTO.getDataMonth())){
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间不能为空");
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间不能为空");
-//            }
-//            if(tdhDsDTO.getTableName() == null || "".equals(tdhDsDTO.getTableName())){
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
-//            }
-//            if(tdhDsDTO.getTableNameTotal() == null || "".equals(tdhDsDTO.getTableNameTotal())){
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名不能为空");
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名不能为空");
-//            }
-//            if ("A".equals(tdhDsDTO.getCentre())) {
-//                tdhDsDTO.setCentreTableName("tdha_ds_info");
-//            }else if("B".equals(tdhDsDTO.getCentre())){
-//                tdhDsDTO.setCentreTableName("tdhb_ds_info");
-//            }else{
-//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
-//            }
+        Gson gs = new Gson();
+        if(tdhDsDTOS == null || tdhDsDTOS.size() == 0){
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        }
+        List<TdhDssyncDTO> tdhDssyncDTOList = new ArrayList<TdhDssyncDTO>();
+        StringBuffer filetext = new StringBuffer();
+        for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+            if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+            }
+            if( !(centrelocal.equals(tdhDsDTO.getCentre()))){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,centrelocal+"中心不能申请"+tdhDsDTO.getCentre()+"中心数据");
+            }
+            if(tdhDsDTO.getId() == null ){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
+            }
+            if(tdhDsDTO.getDataMonth() == null || "".equals(tdhDsDTO.getDataMonth())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",查询时间DataMonth不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"查询时间DataMonth不能为空");
+            }
+            if(tdhDsDTO.getTableName() == null || "".equals(tdhDsDTO.getTableName())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名TableName不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名TableName不能为空");
+            }
+            if(tdhDsDTO.getTableNameTotal() == null || "".equals(tdhDsDTO.getTableNameTotal())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",完整表名TableNameTotal不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"完整表名TableNameTotal不能为空");
+            }
+            if(tdhDsDTO.getSyncType() == null ){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType不能为空");
+            }
+            if(tdhDsDTO.getDataTimes() == null || "".equals(tdhDsDTO.getDataTimes())){
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",DataTimes不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"DataTimes不能为空");
+            }
+            if (tdhDsDTO.getSyncType() == 0){
+                //测试----------
+                tdhDsDTO.setStartdownTime(new Date());
+                //---------------
+                if (tdhDsDTO.getStartdownTime() == null){
+                    logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"StartdownTime不能为空");
+                }
+                tdhDsDTO.setDataDay(format.format(tdhDsDTO.getStartdownTime()));
+            }
+            if ("A".equals(tdhDsDTO.getCentre())) {
+                tdhDsDTO.setCentreTableName("tdha_ds_info");
+            }else if("B".equals(tdhDsDTO.getCentre())){
+                tdhDsDTO.setCentreTableName("tdhb_ds_info");
+            }else{
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
+            }
 //            TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
 //            String ID = KeyUtil.genUniqueKey();
 //            tdhDssyncDTO.setId(ID + UUIDUtils.getUUID());
@@ -511,67 +557,92 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            tdhDssyncDTO.setState(1);
 //            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
 //            tdhDssyncDTOList.add(tdhDssyncDTO);
-//            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+tdhDsDTO.getStartdownTime()+","+tdhDsDTO.getStartupTime()+" \r\n");
-//        }
-//        ResultVO resultVOTdhDsListVO = daoClient.getTdhDsMonthsInfoS(tdhDsMonthsDTOS);
-//        if("000000".equals(resultVOTdhDsListVO.getCode())) {
-//            List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
-//            Object object = resultVOTdhDsListVO.getData();
-//            if (object != null) {
-//                String tdhDsListVOString = Tools.toJson(object);
-//                logger.info("tdhDsListVOString:" + tdhDsListVOString);
-//                tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
-//                }.getType());
-//                logger.info("tdhDsVOS:" + tdhDsVOS);
-//                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
-//                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-//                }else {
-//                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
-//                        List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
-//                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
-//                            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-//                        }else {
-//                            for (TdhDsVO TdhDsVO : tdhDsVOList) {
-//                                if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
-//                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
-//                                }
-//                                if (TdhDsVO.getAuditStatus() != 3 ){//1参数有误，审核未通过，不可同步操作
-//                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getMessage());
-//                                }
-//                            }
-//                        }
-//                    }
-//                    //本地生成文件
-//                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
-//                    if (!creatFileFlag){
-//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
-//                    }
-//                    //上传文件
-//
-////调取数据同步方法
-//                    String testFlag = "";
-//                    try {
-//                        testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTOList.get(0));
-//                    }catch (Exception e){
-//                        logger.info("数据同步shell脚本失败");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
-//                    }
-//                    //通知数据同步shell（异步）
-//                    if("OK".equals(testFlag)) {
-//                        Map<String, Object> models = new HashMap<String, Object>();
-//                        TdhDsMonthsListDTO tdhDsMonthsListDTO = new TdhDsMonthsListDTO();
-//                        tdhDsMonthsListDTO.setTdhDsMonthsDTOList(tdhDsMonthsDTOS);
-//                        models.put("syncState", 1);
-//                        models.put("operCode", userCode);
-//                        models.put("tdhDsMonthsListDTO", tdhDsMonthsListDTO);
-//                        ResultVO resultVO1 = daoClient.updateTdhDsMonthsInfoS(models);
-//                        if ("000000".equals(resultVO1.getCode())) {
-//                            logger.info("DS表同步状态“同步中”！修改成功");
-//                        } else {
-//                            logger.info("DS表同步状态“同步中”！修改失败");
-//                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
-//                        }
+            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+tdhDsDTO.getStartdownTime()+","+tdhDsDTO.getStartupTime()+" \r\n");
+        }
+        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
+        if("000000".equals(resultVOTdhDsListVO.getCode())) {
+            List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
+            Object object = resultVOTdhDsListVO.getData();
+            if (object != null) {
+                String tdhDsListVOString = Tools.toJson(object);
+                logger.info("tdhDsListVOString:" + tdhDsListVOString);
+                tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
+                }.getType());
+                logger.info("tdhDsVOS:" + tdhDsVOS);
+                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                }else {
+                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
+                        List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
+                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
+                            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                        }else {
+                            for (TdhDsVO TdhDsVO : tdhDsVOList) {
+                                if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
+                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
+                                }
+                                if (TdhDsVO.getAuditStatus() != 3 ){//1参数有误，审核未通过，不可同步操作
+                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATEFAIL.getMessage());
+                                }
+                            }
+                        }
+                    }
+                    //本地生成文件
+                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
+                    if (!creatFileFlag){
+                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
+                    }
+                    //上传文件
+
+                    //调取数据同步方法
+                    String testFlag = "";
+                    try {
+                        testFlag = serviceSync.SyncThdListDataThread(tdhDssyncDTOList.get(0));
+                    }catch (Exception e){
+                        logger.info("数据同步shell脚本失败");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
+                    }
+                    //通知数据同步shell（异步）
+                    if("OK".equals(testFlag)) {
+
+// 向对端发送http同步请求  修改同步状态
+                        ResultVO resultDsSyncVO = new ResultVO();
+                        String resultDsSync = "";
+                        try {
+                            resultDsSync = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
+                            resultDsSyncVO = gs.fromJson(resultDsSync, new TypeToken<ResultVO>() {
+                            }.getType());
+                        }catch (Exception e){
+                            logger.info("同步状态通知失败,接口超时等异常");
+                            throw new SoftwareException(ResultExceptEnum.ERROR_HTTP,"同步状态通知失败,接口超时等异常：:" + e);
+                        }
+                        logger.info("resultDsSyncVO:"+resultDsSyncVO);
+                        if("000000".equals(resultDsSyncVO.getCode())) {
+                            logger.info("同步状态已通知对端");
+                            //修改审核表对应状态
+                            Map<String, Object> models = new HashMap<String, Object>();
+                            TdhDsListDTO tdhDssListDTO = new TdhDsListDTO();
+                            tdhDssListDTO.setTdhDsDTOList(tdhDsDTOS);
+                            models.put("syncState", 1);
+                            models.put("userCode", userCode);
+                            models.put("tdhDsDTOS", tdhDssListDTO);
+                            ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
+                            if ("000000".equals(resultVO1.getCode())) {
+                                logger.info("DS表同步状态“同步中”！修改成功");
+                            } else {
+                                logger.info("DS表同步状态“同步中”！修改失败");
+                                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                            }
+                        }else{
+                                logger.info("同步状态通知失败");
+                                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"同步状态通知失败异常：:" + resultDsSyncVO.getMsg() + resultDsSyncVO.getData());
+                        }
+
+
+
+
+
 //                        ResultVO resultVO2 = daoClient.saveTdhDssyncData(tdhDssyncDTOList);
 //                        if ("000000".equals(resultVO2.getCode())) {
 //                            logger.info("添加DSSYNC表！添加成功");
@@ -579,35 +650,110 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //                            logger.info("添加DSSYNC表！添加失败");
 //                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "添加DSSYNC表！添加失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
 //                        }
-//                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),testFlag);
-//                        return resultVO;
-//                    }else {
-//                        logger.info("通知数据同步shell失败");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
-//                    }
-//                }
-//            }else {
-//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-//            }
-//        }else {
-//            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
-//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
-//        }
-        return null;
+                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),testFlag);
+                        return resultVO;
+                    }else {
+                        logger.info("通知数据同步shell失败");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
+                    }
+                }
+            }else {
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+            }
+        }else {
+            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+        }
     }
 
     @Override
     public ResultVO syncResult(String result, String id) throws Exception {
         ResultVO resultVO = new ResultVO();
-//        Gson gs = new Gson();
-//        if (result == null || "".equals(result)){
-//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",result不能为空");
-//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"result不能为空");
-//        }
-//        if (id == null || "".equals(id)){
-//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
-//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
-//        }
+        Gson gs = new Gson();
+        if (result == null || "".equals(result)){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",result不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"result不能为空");
+        }
+        if (id == null || "".equals(id)){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",id不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"id不能为空");
+        }
+        List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
+        TdhDsDTO tdhDsDTO = new TdhDsDTO();
+        tdhDsDTO.setId(id);
+        if (centrelocal.equals("A")){
+            tdhDsDTO.setCentreTableName("tdha_ds_info");
+        }else {
+            tdhDsDTO.setCentreTableName("tdhb_ds_info");
+        }
+        tdhDsDTOS.add(tdhDsDTO);
+        TdhDsListDTO tdhDssListDTO = new TdhDsListDTO();
+        Map<String, Object> models = new HashMap<String, Object>();
+        ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
+        if("000000".equals(resultVOTdhDsListVO.getCode())) {
+            List<TdhDsListVO> tdhDsListVOS = new ArrayList<TdhDsListVO>();
+            Object object = resultVOTdhDsListVO.getData();
+            if (object != null) {
+                String tdhDsListVOString = Tools.toJson(object);
+                logger.info("tdhDsListVOString:" + tdhDsListVOString);
+                tdhDsListVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
+                }.getType());
+                logger.info("tdhDsListVOS:" + tdhDsListVOS);
+                if (tdhDsListVOS == null || tdhDsListVOS.size() == 0) {
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                } else {
+                    TdhDsVO tdhDsVO = tdhDsListVOS.get(0).getTdhDsVOList().get(0);
+                    tdhDsDTO.setId(null);
+                    tdhDsDTO.setTableName(tdhDsVO.getTableName());
+                    tdhDsDTO.setTableNameTotal(tdhDsVO.getTableNameTotal());
+                    tdhDsDTO.setDataMonth(tdhDsVO.getDataMonth());
+                    tdhDsDTO.setSyncType(tdhDsVO.getSyncType());
+                    tdhDsDTO.setDataDay(tdhDsVO.getDataDay());
+                    tdhDsDTO.setCentre(centrelocal);
+                    if ("YES".equals(result)){
+                        tdhDsDTO.setState(2);
+                        models.put("syncState", 2);
+                    }else {
+                        tdhDsDTO.setState(3);
+                        models.put("syncState", 3);
+                    }
+                    tdhDsDTOS.clear();
+                    tdhDsDTOS.add(tdhDsDTO);
+                    tdhDssListDTO.setTdhDsDTOList(tdhDsDTOS);
+                }
+            }else {
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+            }
+        }else {
+                logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsListVO.getMsg()+resultVOTdhDsListVO.getData());
+        }
+        ResultVO resultDsSyncVO = new ResultVO();
+        String resultDsSync = "";
+        try {
+            resultDsSync = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
+            resultDsSyncVO = gs.fromJson(resultDsSync, new TypeToken<ResultVO>() {
+            }.getType());
+        }catch (Exception e){
+            logger.info("同步状态通知失败,接口超时等异常");
+            throw new SoftwareException(ResultExceptEnum.ERROR_HTTP,"同步状态通知失败,接口超时等异常：:" + e);
+        }
+        logger.info("resultDsSyncVO:"+resultDsSyncVO);
+        if("000000".equals(resultDsSyncVO.getCode())) {
+            models.put("userCode", "XH");
+            models.put("tdhDsDTOS", tdhDssListDTO);
+            ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
+            if ("000000".equals(resultVO1.getCode())) {
+                logger.info("DS表同步状态" + result + "！修改成功");
+                return ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"OK");
+            } else {
+                logger.info("DS表同步状态" + result + "！修改失败");
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+            }
+        }else{
+            logger.info("同步状态通知失败");
+            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"同步状态通知失败异常：:" + resultDsSyncVO.getMsg() + resultDsSyncVO.getData());
+        }
 //        TdhDssyncDTO tdhDssyncDTO = new TdhDssyncDTO();
 //        tdhDssyncDTO.setId(id);
 //        if("Y".equals(result)){
@@ -723,7 +869,6 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
 //            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOtdhDssyncVO.getMsg()+resultVOtdhDssyncVO.getData());
 //        }
-        return resultVO;
     }
 
     @Override
