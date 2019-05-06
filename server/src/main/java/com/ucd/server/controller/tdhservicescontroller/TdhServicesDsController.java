@@ -48,7 +48,14 @@ public class TdhServicesDsController {
 
 
 
-
+/**
+ * @author gongweimin
+ * @Description 获取数据同步列表（分页）       
+ * @date 2019/5/6 17:19 
+ * @params [pageView, tdhSDsDTO]
+ * @exception  
+ * @return com.ucd.common.VO.ResultVO  
+ */
     @PostMapping(value = "/getThdServicesDsInfo")
     public ResultVO getThdServicesDsInfo(PageView pageView, TdhDsDTO tdhSDsDTO){
         ResultVO resultVO = new ResultVO();
@@ -69,6 +76,14 @@ public class TdhServicesDsController {
         }
     }
 
+    /**
+     * @author gongweimin
+     * @Description 获取数据同步列表       
+     * @date 2019/5/6 17:19 
+     * @params [tdhDsDTOS]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
+     */
     @PostMapping(value = "/getThdDsListData")
     public ResultVO getThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS){
         ResultVO resultVO = new ResultVO();
@@ -111,9 +126,12 @@ public class TdhServicesDsController {
 //    }
 
     /**
-     * 向对端发送要进行数据同步的审核
-     * @param tdhDsDTOS
-     * @return
+     * @author gongweimin
+     * @Description 向对端发送要进行数据同步的审核       
+     * @date 2019/5/6 17:18 
+     * @params [tdhDsDTOS, req]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/auditThdDsListData")
     public ResultVO auditThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
@@ -230,9 +248,12 @@ public class TdhServicesDsController {
     }
 
     /**
-     * 向对端发送要进行数据同步的审核结果
-     * @param tdhDsDTOS
-     * @return
+     * @author gongweimin
+     * @Description 向对端发送要进行数据同步的审核结果       
+     * @date 2019/5/6 17:18 
+     * @params [tdhDsDTOS]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/updateThdDsListData")
     public ResultVO updateThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS){
@@ -249,11 +270,14 @@ public class TdhServicesDsController {
         }
     }
 
-    /**
-     * 数据同步
-     * @param tdhDsDTOS
-     * @return
-             */
+/**
+ * @author gongweimin
+ * @Description 数据同步       
+ * @date 2019/5/6 17:18 
+ * @params [tdhDsDTOS, req]
+ * @exception  
+ * @return com.ucd.common.VO.ResultVO  
+ */
     @PostMapping(value = "/syncThdDsListData")
     public ResultVO syncThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
@@ -369,9 +393,12 @@ public class TdhServicesDsController {
     }
 
     /**
-     * 数据同步回复结果
-     * @param
-     * @return
+     * @author gongweimin
+     * @Description 数据同步回复结果       
+     * @date 2019/5/6 17:18 
+     * @params [result, id]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
      */
     @GetMapping(value = "/syncResult")
     public ResultVO syncResult(@Param("result") String result,@Param("id") String id){
@@ -389,6 +416,79 @@ public class TdhServicesDsController {
         }
     }
 
+
+    @GetMapping(value = "/closeSync")
+    public ResultVO closeSync(@Param("result") String result,@Param("centre") String centre,HttpServletRequest req){
+        ResultVO resultVO = new ResultVO();
+        logger.info("result:"+result+"...centre:"+centre);
+        String userName = "";
+        String accessToken = "";
+        try {
+            //通过cookie获得用户信息与数据库做校验，不满足直接返回失败，满足进行下一步操作
+            req.setCharacterEncoding("utf-8");
+//获取header
+            Enumeration headerNames = req.getHeaderNames();
+            if(headerNames==null){
+                logger.info("没有hearder");
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
+            }else{
+                while (headerNames.hasMoreElements()){
+
+                    //获取cookie的键
+                    String key = (String) headerNames.nextElement();
+                    logger.info("key:"+key);
+                    if ("username".equals(key)) {
+
+                        //获取cookie的值
+                        String value = req.getHeader(key);
+                        logger.info("userNameValue:" + value);
+                        userName = value;
+                    }
+                    if ("accesstoken".equals(key)) {
+
+                        //获取cookie的值
+                        String value = req.getHeader(key);
+                        logger.info("accessTokenValue:" + value);
+                        accessToken = value;
+                    }
+
+                }
+                if("".equals(accessToken)){
+                    logger.info("token为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                }
+                if("".equals(userName)){
+                    logger.info("userName为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                }
+            }
+            OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
+            operationLogInfoDTO.setUserCode(userName);
+            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.closeSync.getMessage()+"，原因："+result);
+            operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
+            String power = userService.checkUserPower(userName);
+            if ("NO".equals(power)){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            }
+            resultVO = tdhServicesDsService.closeSync(centre,userName);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        }
+    }
+
+    /**
+     * @author gongweimin
+     * @Description 根据审核状态得到对应数量       
+     * @date 2019/5/6 17:20 
+     * @params [tdhDsDTO]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
+     */
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")
     public  ResultVO countTdhDsauditDataoByAuditStatus(TdhDsDTO tdhDsDTO) {
         logger.info("进入countTdhDsauditDataoByAuditStatuscontroller啦——————————————");

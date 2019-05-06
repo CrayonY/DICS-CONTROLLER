@@ -13,6 +13,7 @@ import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesJobDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesListDTO;
 import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsDTO;
+import com.ucd.daocommon.VO.tdhdsVO.TdhDsVO;
 import com.ucd.daocommon.VO.thdServicesVO.TdhServicesJobVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
@@ -33,7 +34,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+/**
+    *@ClassName: ServiceDsThread
+    *@Description: TODO
+    *@Author: gongweimin
+    *@CreateDate: 2019/5/5 12:36
+    *@Version 1.0
+    *@Copyright:  Copyright2018- BJCJ Inc. All rights reserved. 
+**/
 @Component
 public class ServiceDsThread {
 
@@ -69,6 +77,7 @@ public class ServiceDsThread {
                     //当月的数据进行数据拆分（根据时间按照n天一条进行拆分）类别为0（copytable）状态为0（可见）
                     //隔月数据直接存入库中类别为1（snapshot）状态为0（可见）
                     List<TdhDsDTO> tdhDsDTOList = new ArrayList<TdhDsDTO>();
+                    List<TdhDsDTO> tdhDsDTOupdateList = new ArrayList<TdhDsDTO>();
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(now);
                     int monthNow = calendar.get(Calendar.MONTH) + 1;
@@ -117,22 +126,75 @@ public class ServiceDsThread {
                                          tdhDsDTOtotal1.setCheckStatus(1);//可不可见不可操作
                                          tdhDsDTOtotal1.setDataMonth(format3.format(tdhServicesJobVO.getCreattime()));//数据月份
                                          tdhDsDTOtotal1.setDataTimes(format2.format(tdhDsDTOtotal1.getStartdownTime())+"-"+format2.format(tdhDsDTOtotal1.getStartupTime()));
-                                         tdhDsDTOList.add(tdhDsDTOtotal1);
+
 
                                          TdhDsDTO tdhDsDTO1 = new TdhDsDTO();
-                                         tdhDsDTO1.setState(0);
-                                         tdhDsDTO1.setTableName(tdhServicesJobDTO.getTableName());
-                                         tdhDsDTO1.setCreattime(now);
-                                         tdhDsDTO1.setStartupTime(startupTime);
-                                         tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
-                                         tdhDsDTO1.setCentreTableName(centreDsTableName);
-                                         tdhDsDTO1.setType(0);
                                          tdhDsDTO1.setSyncType(1);//snapshot
-                                         tdhDsDTO1.setCheckStatus(0);//可见可操作
                                          tdhDsDTO1.setDataMonth(format3.format(tdhServicesJobVO.getCreattime()));//数据月份
-                                         tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
-                                         tdhDsDTO1.setDataTimes(format2.format(tdhDsDTO1.getStartdownTime())+"-"+format2.format(tdhDsDTO1.getStartupTime()));
-                                         tdhDsDTOList.add(tdhDsDTO1);
+                                         tdhDsDTO1.setTableName(tdhServicesJobDTO.getTableName());
+                                         tdhDsDTO1.setCentreTableName(centreDsTableName);
+                                         ResultVO resultVO = daoClient.getThdDsListData(tdhDsDTO1);
+                                         logger.info("resultVO=" + resultVO);
+                                         if ("000000".equals(resultVO.getCode())) {
+                                             List<TdhDsVO> tdhDsVOS = new ArrayList<TdhDsVO>();
+                                             Object object = resultVO.getData();
+                                             if (object != null) {
+                                              //修改
+                                                 String tdhDsVOString = Tools.toJson(object);
+                                                 logger.info("tdhDsVOString:" + tdhDsVOString);
+                                                 tdhDsVOS = gs.fromJson(tdhDsVOString, new TypeToken<List<TdhDsVO>>() {
+                                                 }.getType());
+                                                 logger.info("tdhDsVOS:" + tdhDsVOS);
+                                                 if (tdhDsVOS == null || tdhDsVOS.size() == 0) {
+                                                     //添加
+                                                     tdhDsDTO1.setState(0);
+                                                     tdhDsDTO1.setCreattime(now);
+                                                     tdhDsDTO1.setStartupTime(startupTime);
+                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                                     tdhDsDTO1.setType(0);
+                                                     tdhDsDTO1.setCheckStatus(0);//可见可操作
+                                                     tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
+                                                     tdhDsDTO1.setDataTimes(format2.format(tdhDsDTO1.getStartdownTime())+"-"+format2.format(tdhDsDTO1.getStartupTime()));
+                                                     tdhDsDTOList.add(tdhDsDTO1);
+                                                     tdhDsDTOtotal1.setState(0);
+                                                     tdhDsDTOList.add(tdhDsDTOtotal1);
+                                                 } else {
+                                                     //修改
+                                                     TdhDsVO tdhDsVO = tdhDsVOS.get(0);
+//                                                     tdhDsDTO1.setState(0);
+//                                                     tdhDsDTO1.setCreattime(now);
+//                                                     tdhDsDTO1.setStartupTime(startupTime);
+//                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+//                                                     tdhDsDTO1.setType(0);
+//                                                     tdhDsDTO1.setCheckStatus(0);//可见可操作
+                                                     tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
+                                                     tdhDsDTO1.setDataTimes(tdhDsVO.getDataTimes()+","+format2.format(tdhServicesJobVO.getCreattime())+"-"+format2.format(startupTime));
+                                                     tdhDsDTO1.setId(tdhDsVO.getId());
+                                                     tdhDsDTOupdateList.add(tdhDsDTO1);
+                                                     tdhDsDTOtotal1.setState(2);
+                                                     tdhDsDTOList.add(tdhDsDTOtotal1);
+                                                 }
+                                             }else {
+                                                 //添加
+                                                 tdhDsDTO1.setState(0);
+                                                 tdhDsDTO1.setCreattime(now);
+                                                 tdhDsDTO1.setStartupTime(startupTime);
+                                                 tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                                 tdhDsDTO1.setType(0);
+                                                 tdhDsDTO1.setCheckStatus(0);//可见可操作
+                                                 tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
+                                                 tdhDsDTO1.setDataTimes(format2.format(tdhDsDTO1.getStartdownTime())+"-"+format2.format(tdhDsDTO1.getStartupTime()));
+                                                 tdhDsDTOList.add(tdhDsDTO1);
+                                                 tdhDsDTOtotal1.setState(0);
+                                                 tdhDsDTOList.add(tdhDsDTOtotal1);
+                                             }
+                                         } else {
+                                             logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                                             throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                                         }
+
+
+
 
                                          Date startdownTime = LastOrFirstSecoundOfMonth(tdhServicesJobVO.getCreattime(),2);//下月0s对应的时间
                                          TdhDsDTO tdhDsDTO2 = new TdhDsDTO();
@@ -192,12 +254,33 @@ public class ServiceDsThread {
                             throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
                         }
                     }
+            if(null == tdhDsDTOupdateList || tdhDsDTOupdateList.size() == 0){
+                logger.info(centre + "中心，没有需要修改数据同步的数据");
+            }else {
+                //修改“数据同步”数据
+                ResultVO resultVO = new ResultVO();
+                resultVO = daoClient.updateTdhDsInfoByIds(tdhDsDTOupdateList);
+                if ("000000".equals(resultVO.getCode())) {
+                    logger.info(centre + "中心,添加完成"+resultVO.getData().toString());
+//                            return;
+                } else {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                }
+            }
         }catch (Exception e){
             logger.info(centre + "中心异常：e="+e.toString());
             return;
         }
     }
-
+/**
+ * @author gongweimin
+ * @Description        
+ * @date 2019/5/5 11:38 
+ * @params [date, type]
+ * @exception  
+ * @return java.util.Date  
+ */
     public Date LastOrFirstSecoundOfMonth(Date date,int type) throws Exception {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

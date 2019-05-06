@@ -75,6 +75,8 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 
     public DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
+    public DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 //    @Autowired
 //    public LocalDaoClient localDaoClient;
 
@@ -533,10 +535,15 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             if (tdhDsDTO.getSyncType() == 0){
                 //测试----------
                 tdhDsDTO.setStartdownTime(new Date());
+                tdhDsDTO.setStartupTime(new Date());
                 //---------------
                 if (tdhDsDTO.getStartdownTime() == null){
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
                     throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"StartdownTime不能为空");
+                }
+                if (tdhDsDTO.getStartupTime() == null){
+                    logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartupTime不能为空");
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"StartupTime不能为空");
                 }
                 tdhDsDTO.setDataDay(format.format(tdhDsDTO.getStartdownTime()));
             }
@@ -558,7 +565,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            tdhDssyncDTO.setState(1);
 //            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
 //            tdhDssyncDTOList.add(tdhDssyncDTO);
-            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+tdhDsDTO.getStartdownTime()+","+tdhDsDTO.getStartupTime()+" \r\n");
+            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+format2.format(tdhDsDTO.getStartdownTime())+","+format2.format(tdhDsDTO.getStartupTime())+" \r\n");
         }
         ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
         if("000000".equals(resultVOTdhDsListVO.getCode())) {
@@ -579,6 +586,15 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
                         }else {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
+
+//                                测试使用------------------------
+                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
+                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
+                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+                                    }
+                                }
+//                                -------------------------------------
                                 if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
                                     throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
                                 }
@@ -673,7 +689,6 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 
     @Override
     public ResultVO syncResult(String result, String id) throws Exception {
-        ResultVO resultVO = new ResultVO();
         Gson gs = new Gson();
         if (result == null || "".equals(result)){
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",result不能为空");
@@ -715,12 +730,15 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                     tdhDsDTO.setSyncType(tdhDsVO.getSyncType());
                     tdhDsDTO.setDataDay(tdhDsVO.getDataDay());
                     tdhDsDTO.setCentre(centrelocal);
-                    tdhDsDTO.setUserCode("XH");
+
+                    tdhDsDTO.setPid(tdhDsVO.getPid());
                     if ("YES".equals(result)){
                         tdhDsDTO.setState(2);
+                        tdhDsDTO.setUserCode("XH");
                         models.put("syncState", 2);
                     }else {
                         tdhDsDTO.setState(3);
+                        tdhDsDTO.setUserCode("XH");
                         models.put("syncState", 3);
                     }
                     tdhDsDTOS.clear();
@@ -750,11 +768,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             models.put("tdhDsDTOS", tdhDssListDTO);
             ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {
-                logger.info("DS表同步状态" + result + "！修改成功");
+                logger.info("DS表同步状态:" + result + "！修改成功");
                 return ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"OK");
             } else {
-                logger.info("DS表同步状态" + result + "！修改失败");
-                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步中”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                logger.info("DS表同步状态:" + result + "！修改失败");
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态:"+ result + "！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
             }
         }else{
             logger.info("同步状态通知失败");
@@ -906,6 +924,57 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         } else {
             logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
             throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+        }
+    }
+
+    @Override
+    public ResultVO closeSync(String centre,String userName) throws Exception {
+
+        //调用星环关闭进程脚本
+
+        Gson gs = new Gson();
+        TdhDsDTO tdhDsDTO = new TdhDsDTO();
+        List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
+        TdhDsListDTO tdhDssListDTO = new TdhDsListDTO();
+        if ("A".equals(centre)) {
+            tdhDsDTO.setCentreTableName("tdha_ds_info");
+        }else if ("B".equals(centre)) {
+            tdhDsDTO.setCentreTableName("tdhb_ds_info");
+        }else{
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+centre);
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+centre);
+        }
+        tdhDsDTO.setCentre(centre);
+        tdhDsDTO.setState(3);
+        tdhDsDTO.setUserCode(userName);
+        tdhDsDTOS.add(tdhDsDTO);
+        tdhDssListDTO.setTdhDsDTOList(tdhDsDTOS);
+        Map<String, Object> models = new HashMap<String, Object>();
+        String resultDsSync = "";
+        ResultVO resultDsSyncVO = new ResultVO();
+        try {
+            resultDsSync = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
+            resultDsSyncVO = gs.fromJson(resultDsSync, new TypeToken<ResultVO>() {
+            }.getType());
+        }catch (Exception e){
+            logger.info("同步状态通知失败,接口超时等异常");
+            throw new SoftwareException(ResultExceptEnum.ERROR_HTTP,"同步状态通知失败,接口超时等异常：:" + e);
+        }
+        logger.info("resultDsSyncVO:"+resultDsSyncVO);
+        if("000000".equals(resultDsSyncVO.getCode())) {
+            models.put("userCode", userName);
+            models.put("tdhDsDTOS", tdhDssListDTO);
+            ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
+            if ("000000".equals(resultVO1.getCode())) {
+                logger.info("DS表同步状态“同步失败”" + "！修改成功");
+                return ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),"OK");
+            } else {
+                logger.info("DS表同步状态“同步失败”" + "！修改失败");
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "DS表同步状态“同步失败”！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+            }
+        }else{
+            logger.info("同步状态通知失败");
+            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"同步状态通知失败异常：:" + resultDsSyncVO.getMsg() + resultDsSyncVO.getData());
         }
     }
 }

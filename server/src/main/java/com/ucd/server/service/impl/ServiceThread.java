@@ -30,6 +30,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -376,143 +378,143 @@ public class ServiceThread {
             }
         }
     }
-    @Async("transwarpExecutor")
-    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
-
-        logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
-        Connection client = new Connection(joburla,centre);
-        List<TdhServicesJobDTO> result = new ArrayList<TdhServicesJobDTO>();
-        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
-
-        Gson gs = new Gson();
-        try {
-            //return url+"-"+centre+"-"+username+"-"+password;
-            try {
-                String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
-                System.out.println(jobsInfo);
-                result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
-                }.getType());
-//                    logger.info(result.toString());
-                client.close1();
-            }catch (Exception e){
-                client.close1();
-                logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
-                throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
-            }
-            logger.info(centre + "中心连接关闭" );
-            logger.info("result.size():"+result.size());
-            if (result.size() == 0) {
-                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
-                throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
-            }
-            long t1 = now.getTime();
-            String centreJobTableName = "";
-            String centreDsTableName = "";
-            if ("B".equals(centre)){
-                centreJobTableName = "tdhb_servicesjob_info";
-                centreDsTableName = "tdhb_ds_info";
-            }else{
-                centreJobTableName = "tdha_servicesjob_info";
-                centreDsTableName = "tdha_ds_info";
-            }
-            Iterator<TdhServicesJobDTO> tdhServicesJobIter = result.iterator();
-            while(tdhServicesJobIter.hasNext()){
-                TdhServicesJobDTO tdhServicesJobDTO = tdhServicesJobIter.next();
-                String description = tdhServicesJobDTO.getDescription();
-                if (description == null || description.indexOf("insert") != 0){
-                    tdhServicesJobIter.remove();
-                }else{
-                    tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
-                    tdhServicesJobDTO.setCentreTableName(centreJobTableName);
-                    tdhServicesJobDTO.setCreattime(now);
-                    int index2 = description.indexOf("_",description.indexOf("_")+1);
-                    String tablename = description.substring(12,index2+1);
-                    tdhServicesJobDTO.setTableName(tablename);
-                    logger.info(tdhServicesJobDTO.toString());
-                }
-            }
-
-            //1.查询job表所有job信息，若为空,则判断result的list.size,若size等于规定的数，将所有的result插入数据库，如小于则不做操作。
-            TdhServicesJobDTO tdhServicesJobDTO1 = new TdhServicesJobDTO();
-            tdhServicesJobDTO1.setCentreTableName(centreJobTableName);
-            ResultVO resultVOTdhServicesJobVO = daoClient.getThdServicesjobListData(tdhServicesJobDTO1);
-            logger.info("resultVOTdhServicesJobVO=" + resultVOTdhServicesJobVO);
-            if("000000".equals(resultVOTdhServicesJobVO.getCode())){
-                Object object = resultVOTdhServicesJobVO.getData();
-                String tdhServicesJobVOString = Tools.toJson(object);
-                logger.info("tdhServicesJobVOString:" + tdhServicesJobVOString);
-                tdhServicesJobVOList = gs.fromJson(tdhServicesJobVOString, new TypeToken<List<TdhServicesJobVO>>() {
-                }.getType());
-                logger.info("tdhServicesJobVOList:" + tdhServicesJobVOList+"  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
-                if (null == tdhServicesJobVOList || tdhServicesJobVOList.size() == 0) {
-                    //job表为空
-                    logger.info("job表为空");
-                    if(result.size() == Integer.valueOf(jobsize)){
-                        ResultVO resultVO = daoClient.saveThdServicesjobListData(result);
-                        if ("000000".equals(resultVO.getCode())) {
-                            logger.info(centre + "中心,添加完成");
-                            return;
-                        } else {
-                            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
-                        }
-                    }else{
-                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + ",result.size()异常:" + result.size());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:result.size()异常:" + result.size());
-                    }
-                }else {//job表不为空
-                    logger.info("job表不为空");
-                    //2.遍历resultjob，根据表名修改对应的job在表中的记录，并且比较resultjob与job的时间差time，如果time大于规定的时间，则将此条记录存入“数据同步”表中
-                    serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, centreDsTableName, centre, t1, now);
-                    //修改数据库数据
-                    for (TdhServicesJobDTO tdhServicesJobDTO : result) {
-                        for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList) {
-                            if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName())){
-                                tdhServicesJobDTO.setId(tdhServicesJobVO.getId());
-                            }
-                        }
-                    }
-                    ResultVO resultVO = daoClient.updateThdServicesjobListData(result);
-                    if ("000000".equals(resultVO.getCode())) {
-                        logger.info(centre + "中心,修改完成:"+resultVO.getData().toString());
-                        return;
-                    } else {
-                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
-                    }
-                }
-            }else {
-                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
-            }
-        }catch (Exception e){
-            logger.info(centre + "中心异常：e="+e.toString());
-            try {
-                client.close1();
-            }catch (Exception e1){
-                logger.info(centre + "中心退出异常：e="+e1.toString());
-            }
-            return;
-        }finally {
-            //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
-        }
-    }
-
-
-//    //测试使用
 //    @Async("transwarpExecutor")
-//    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize) {
-//                logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+//    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
+//
+//        logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
 //        Connection client = new Connection(joburla,centre);
 //        List<TdhServicesJobDTO> result = new ArrayList<TdhServicesJobDTO>();
 //        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
-//        DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        List<String> date = new ArrayList<String>();
-//        date.add("2019-04-16 12:25:37");
-//        date.add("2019-04-23 12:25:37");
-//        date.add("2019-03-16 12:25:37");
 //
+//        Gson gs = new Gson();
 //        try {
+//            //return url+"-"+centre+"-"+username+"-"+password;
+//            try {
+//                String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
+//                System.out.println(jobsInfo);
+//                result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
+//                }.getType());
+////                    logger.info(result.toString());
+//                client.close1();
+//            }catch (Exception e){
+//                client.close1();
+//                logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+//                throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
+//            }
+//            logger.info(centre + "中心连接关闭" );
+//            logger.info("result.size():"+result.size());
+//            if (result.size() == 0) {
+//                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
+//                throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
+//            }
+//            long t1 = now.getTime();
+//            String centreJobTableName = "";
+//            String centreDsTableName = "";
+//            if ("B".equals(centre)){
+//                centreJobTableName = "tdhb_servicesjob_info";
+//                centreDsTableName = "tdhb_ds_info";
+//            }else{
+//                centreJobTableName = "tdha_servicesjob_info";
+//                centreDsTableName = "tdha_ds_info";
+//            }
+//            Iterator<TdhServicesJobDTO> tdhServicesJobIter = result.iterator();
+//            while(tdhServicesJobIter.hasNext()){
+//                TdhServicesJobDTO tdhServicesJobDTO = tdhServicesJobIter.next();
+//                String description = tdhServicesJobDTO.getDescription();
+//                if (description == null || description.indexOf("insert") != 0){
+//                    tdhServicesJobIter.remove();
+//                }else{
+//                    tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
+//                    tdhServicesJobDTO.setCentreTableName(centreJobTableName);
+//                    tdhServicesJobDTO.setCreattime(now);
+//                    int index2 = description.indexOf("_",description.indexOf("_")+1);
+//                    String tablename = description.substring(12,index2+1);
+//                    tdhServicesJobDTO.setTableName(tablename);
+//                    logger.info(tdhServicesJobDTO.toString());
+//                }
+//            }
+//
+//            //1.查询job表所有job信息，若为空,则判断result的list.size,若size等于规定的数，将所有的result插入数据库，如小于则不做操作。
+//            TdhServicesJobDTO tdhServicesJobDTO1 = new TdhServicesJobDTO();
+//            tdhServicesJobDTO1.setCentreTableName(centreJobTableName);
+//            ResultVO resultVOTdhServicesJobVO = daoClient.getThdServicesjobListData(tdhServicesJobDTO1);
+//            logger.info("resultVOTdhServicesJobVO=" + resultVOTdhServicesJobVO);
+//            if("000000".equals(resultVOTdhServicesJobVO.getCode())){
+//                Object object = resultVOTdhServicesJobVO.getData();
+//                String tdhServicesJobVOString = Tools.toJson(object);
+//                logger.info("tdhServicesJobVOString:" + tdhServicesJobVOString);
+//                tdhServicesJobVOList = gs.fromJson(tdhServicesJobVOString, new TypeToken<List<TdhServicesJobVO>>() {
+//                }.getType());
+//                logger.info("tdhServicesJobVOList:" + tdhServicesJobVOList+"  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
+//                if (null == tdhServicesJobVOList || tdhServicesJobVOList.size() == 0) {
+//                    //job表为空
+//                    logger.info("job表为空");
+//                    if(result.size() == Integer.valueOf(jobsize)){
+//                        ResultVO resultVO = daoClient.saveThdServicesjobListData(result);
+//                        if ("000000".equals(resultVO.getCode())) {
+//                            logger.info(centre + "中心,添加完成");
+//                            return;
+//                        } else {
+//                            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+//                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+//                        }
+//                    }else{
+//                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + ",result.size()异常:" + result.size());
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:result.size()异常:" + result.size());
+//                    }
+//                }else {//job表不为空
+//                    logger.info("job表不为空");
+//                    //2.遍历resultjob，根据表名修改对应的job在表中的记录，并且比较resultjob与job的时间差time，如果time大于规定的时间，则将此条记录存入“数据同步”表中
+//                    serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, centreDsTableName, centre, t1, now);
+//                    //修改数据库数据
+//                    for (TdhServicesJobDTO tdhServicesJobDTO : result) {
+//                        for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList) {
+//                            if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName())){
+//                                tdhServicesJobDTO.setId(tdhServicesJobVO.getId());
+//                            }
+//                        }
+//                    }
+//                    ResultVO resultVO = daoClient.updateThdServicesjobListData(result);
+//                    if ("000000".equals(resultVO.getCode())) {
+//                        logger.info(centre + "中心,修改完成:"+resultVO.getData().toString());
+//                        return;
+//                    } else {
+//                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+//                    }
+//                }
+//            }else {
+//                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
+//                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
+//            }
+//        }catch (Exception e){
+//            logger.info(centre + "中心异常：e="+e.toString());
+//            try {
+//                client.close1();
+//            }catch (Exception e1){
+//                logger.info(centre + "中心退出异常：e="+e1.toString());
+//            }
+//            return;
+//        }finally {
+//            //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
+//        }
+//    }
+
+
+    //测试使用
+    @Async("transwarpExecutor")
+    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
+                logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
+        Connection client = new Connection(joburla,centre);
+        List<TdhServicesJobDTO> result = new ArrayList<TdhServicesJobDTO>();
+        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
+        DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<String> date = new ArrayList<String>();
+//        date.add("2019-04-16 12:25:37");
+        date.add("2019-04-23 12:25:37");
+//        date.add("2019-03-16 12:25:37");
+
+        try {
 //            for (int i = 0; i < 3; i++) {
 //                TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
 //                tdhServicesJobDTO.setTableName("testds" + i);
@@ -524,12 +526,19 @@ public class ServiceThread {
 //                tdhServicesJobVO.setCreattime(format2.parse(date.get(i)));
 //                tdhServicesJobVOList.add(tdhServicesJobVO);
 //            }
-//            serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, "tdha_ds_info", "a", new Date().getTime(), new Date());
-//        }catch (Exception e){
-//            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" );
-//        }
-//
-//    }
+            TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
+                tdhServicesJobDTO.setTableName("testds0");
+                result.add(tdhServicesJobDTO);
+            TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
+                tdhServicesJobVO.setTableName("testds0");
+                tdhServicesJobVO.setCreattime(format2.parse(date.get(0)));
+                tdhServicesJobVOList.add(tdhServicesJobVO);
+            serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, "tdha_ds_info", "a", now.getTime(), now);
+        }catch (Exception e){
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" );
+        }
+
+    }
 
     @Async("transwarpExecutor")
     public void taskSaveThdUsersListDataThread(String url, String centre, String username, String password) {

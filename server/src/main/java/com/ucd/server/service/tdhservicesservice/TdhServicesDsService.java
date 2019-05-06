@@ -36,4 +36,6 @@ public interface TdhServicesDsService {
     ResultVO syncResult(String result, String id)  throws Exception;
 
     ResultVO countTdhDsauditDataoByAuditStatus(TdhDsDTO tdhDsDTO) throws Exception;
+
+    ResultVO closeSync(String cencer,String userName) throws Exception;
 }

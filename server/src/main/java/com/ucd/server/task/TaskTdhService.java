@@ -196,7 +196,7 @@ public class TaskTdhService {
                 tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
                 if (0 == taskStatus){
                     serviceThread.taskSaveThdServicesJobErrorData(joburla, centrea, jobsizea, now);
-                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb, now);
+//                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb, now);
                 }
                     Thread.sleep(5000);
                     map.put("taskState", 0);
@@ -236,7 +236,7 @@ public class TaskTdhService {
                 tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
                 if (0 == taskStatus){
                     serviceThread.taskUpdateThdDsData(centrea);
-//                    serviceThread.taskUpdateThdDsData(centreb);
+                    serviceThread.taskUpdateThdDsData(centreb);
                 }
                 Thread.sleep(5000);
                 map.put("taskState", 0);
