@@ -96,7 +96,7 @@ public class HardWareServiceimpl implements HardWareService {
     public ResultVO<Map<String, Object>> getHardWareListNow(String host){
         ResultVO resultVO;
         Map<String, Object> result = Maps.newHashMap();
-        result.put("cpu-disk-mem",Lists.newArrayList());
+        result.put("cpuDiskMem",Lists.newArrayList());
         result.put("nic",Lists.newArrayList());
         result.put("thread",Lists.newArrayList());
         try{
@@ -108,7 +108,7 @@ public class HardWareServiceimpl implements HardWareService {
                 String hardWareInfoNowList = Tools.toJson(object);
                 // 转成list
                 List<HardwareNowVO> hardwareNowVOList = JSON.parseArray(hardWareInfoNowList,HardwareNowVO.class);
-                result.put("cpu-disk-mem",object);
+                result.put("cpuDiskMem",object);
             }
 
             // nic
