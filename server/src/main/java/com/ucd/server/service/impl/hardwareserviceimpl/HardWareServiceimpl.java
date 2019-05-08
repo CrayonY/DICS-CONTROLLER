@@ -233,8 +233,8 @@ public class HardWareServiceimpl implements HardWareService {
                         // 将LinkedHashMap类型转换成可以识别的实体类
                         hardwareThreadVOList3 = gson.fromJson(ListVOString, new TypeToken<List<HardwareThreadVO>>() {}.getType());
                         // 对数据进行筛选
-                        hardwareThreadVOList = hardwareThreadVOList3.stream().filter(a -> a.getPidname().equals(string)).collect(Collectors.toList());
-                        result.put(string, hardwareThreadVOList);
+                        hardwareThreadVOList3 = hardwareThreadVOList3.stream().filter(a -> a.getPidname().equals(string)).collect(Collectors.toList());
+                        result.put(string, hardwareThreadVOList3);
                     });
                 }
             }
