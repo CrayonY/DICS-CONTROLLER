@@ -104,11 +104,10 @@ public class TdhServicesServiceImplTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime taskTimeStart1 = LocalDateTime.parse("2008-08-10 05:50:11", dtf);
         LocalDateTime taskTimeEnd1 = LocalDateTime.parse("2008-08-11 10:57:21", dtf);
-
+/*
         LocalDate aa = taskTimeStart1.toLocalDate();
         Date newDate = java.sql.Date.valueOf(String.valueOf(taskTimeStart1));
-        Date newDate1 = java.sql.Date.valueOf(String.valueOf(taskTimeEnd1));
-
+        Date newDate1 = java.sql.Date.valueOf(String.valueOf(taskTimeEnd1));*/
 
 
         try {

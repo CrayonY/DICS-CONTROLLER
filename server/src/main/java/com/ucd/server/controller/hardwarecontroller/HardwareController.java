@@ -187,7 +187,7 @@ public class HardwareController {
 	 * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>  
 	 */
 	@PostMapping(value = "/getHardWareListNow")
-	public ResultVO<Map<String, Object>> getHardWareListNow(@RequestBody String host){
+	public ResultVO<Map<String, Object>> getHardWareListNow(String host){
 		ResultVO resultVO = new ResultVO();
 		try {
 			resultVO = hardWareService.getHardWareListNow(host);
@@ -210,7 +210,7 @@ public class HardwareController {
 	 * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>
 	 */
 	@PostMapping(value = "/getHardWareStatusByTime")
-	public ResultVO<Map<String,Object>> getHardWareStatusByTime(@RequestBody String type,String nipsOrThreadNames,HardwareCpuDTO hardwareCpuDTO){
+	public ResultVO<Map<String,Object>> getHardWareStatusByTime(String type,String nipsOrThreadNames,HardwareCpuDTO hardwareCpuDTO){
 
 		 return hardWareService.getHardWareStatusByTime(type,nipsOrThreadNames,hardwareCpuDTO);
 	}

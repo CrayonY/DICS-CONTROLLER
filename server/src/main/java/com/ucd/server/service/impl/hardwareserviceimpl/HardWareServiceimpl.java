@@ -15,7 +15,6 @@ import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.hardwareDTO.*;
 import com.ucd.daocommon.VO.hardwareVO.*;
-import com.ucd.daocommon.VO.tdhDsauditVO.TdhDsauditVO;
 import com.ucd.server.exception.SoftwareException;
 import com.ucd.server.service.hardwareservice.HardWareService;
 import org.slf4j.Logger;
@@ -99,7 +98,7 @@ public class HardWareServiceimpl implements HardWareService {
         Map<String, Object> result = Maps.newHashMap();
         result.put("cpu-disk-mem",Lists.newArrayList());
         result.put("nic",Lists.newArrayList());
-        result.put("pid",Lists.newArrayList());
+        result.put("thread",Lists.newArrayList());
         try{
 
             // cpu、disk、mem
@@ -124,11 +123,9 @@ public class HardWareServiceimpl implements HardWareService {
             resultVO = daoClient.getHardWareThreadNow(host);
             Object objectPid = resultVO.getData();
             if(!ObjectUtils.isEmpty(objectNic)){
-                result.put("pid",objectPid);
+                result.put("thread",objectPid);
             }
-
-            return ResultVO.SUCC(result);
-
+            return ResultVO.SUCC(ApiResultType.SUCCESS.code,ApiResultType.SUCCESS.message,result);
         }catch (Exception e){
             logger.error("硬件进行查询异常：", e);
             return ResultVO.FAIL(result).initErrCodeAndMsg(ApiResultType.SYS_ERROR.code,
@@ -145,8 +142,8 @@ public class HardWareServiceimpl implements HardWareService {
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeStart())
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeEnd())
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getSecond()) || ObjectUtils.isEmpty(nipsOrThreadNames)){
-                 return ResultVO.FAIL(result).initErrCodeAndMsg(ApiResultType.PARAMETER_ILLEGAL.code,
-                         ApiResultType.PARAMETER_ILLEGAL.message);
+
+                 return ResultVO.FAIL(ApiResultType.PARAMETER_ILLEGAL.code,ApiResultType.PARAMETER_ILLEGAL.message,result);
              }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date checkTimeStart = sdf.parse(hardwareCpuDTO.getChecktimeStart());
@@ -169,7 +166,7 @@ public class HardWareServiceimpl implements HardWareService {
             model.put("type",type);
             // 获取DAO层返回信息
             resultVO = daoClient.getHardWareStatusByTime(model);
-            String pageViewString11 = Tools.toJson(resultVO);
+
             if(!ObjectUtils.isEmpty(resultVO.getCode()) && !"000000".equals(resultVO.getCode())){
                 throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
             }
@@ -241,12 +238,13 @@ public class HardWareServiceimpl implements HardWareService {
                     });
                 }
             }
-            return ResultVO.SUCC(result);
+            return ResultVO.SUCC(ApiResultType.SUCCESS.code,ApiResultType.SUCCESS.message,result);
 
         }catch (Exception e){
             logger.error("硬件进行查询异常：", e);
-            return ResultVO.FAIL(result).initErrCodeAndMsg(ApiResultType.SYS_ERROR.code,
-                    ApiResultType.SYS_ERROR.message);
+            return ResultVO.FAIL(ApiResultType.SYS_ERROR.code,
+                    ApiResultType.SYS_ERROR.message,result);
+
         }
     }
 
