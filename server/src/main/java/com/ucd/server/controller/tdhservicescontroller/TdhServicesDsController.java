@@ -416,7 +416,14 @@ public class TdhServicesDsController {
         }
     }
 
-
+/**
+ * @author gongweimin
+ * @Description 关闭同步进程       
+ * @date 2019/5/7 18:13 
+ * @params [result, centre, req]
+ * @exception  
+ * @return com.ucd.common.VO.ResultVO  
+ */
     @GetMapping(value = "/closeSync")
     public ResultVO closeSync(@Param("result") String result,@Param("centre") String centre,HttpServletRequest req){
         ResultVO resultVO = new ResultVO();

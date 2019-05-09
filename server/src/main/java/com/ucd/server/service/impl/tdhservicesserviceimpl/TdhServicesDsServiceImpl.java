@@ -565,7 +565,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            tdhDssyncDTO.setState(1);
 //            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
 //            tdhDssyncDTOList.add(tdhDssyncDTO);
-            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableName()+","+format2.format(tdhDsDTO.getStartdownTime())+","+format2.format(tdhDsDTO.getStartupTime())+" \r\n");
+            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableNameTotal()+","+format2.format(tdhDsDTO.getStartdownTime())+","+format2.format(tdhDsDTO.getStartupTime())+" \r\n");
         }
         ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
         if("000000".equals(resultVOTdhDsListVO.getCode())) {
@@ -610,8 +610,18 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
                         throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
                     }
-                    //上传文件
-
+                    //删除原有文件上传文件
+                    Thread.sleep(2000);
+                    boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
+                    if (!tdhdeleteFileFlag){
+                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+                    }
+                    boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
+                    if (!tdhcreateFileFlag){
+                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
+                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+                    }
                     //调取数据同步方法
                     String testFlag = "";
                     try {

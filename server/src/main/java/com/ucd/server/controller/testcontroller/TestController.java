@@ -4,12 +4,13 @@ import com.ucd.common.VO.ResultVO;
 import com.ucd.common.utils.ResultVOUtil;
 import com.ucd.common.utils.Tools;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
-import com.ucd.daocommon.DTO.tdhdsDTO.TdhDsMonthsDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.utils.ForFile;
 import com.ucd.server.utils.HttpClientUtils;
-import org.apache.http.client.HttpClient;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.DeleteMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,14 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+
 
 @CrossOrigin
 @RestController
@@ -248,9 +253,44 @@ public class TestController {
             e.printStackTrace();
         }
     }
-    @GetMapping(value = "/filetest")
-    public void filetest(HttpServletRequest req){
+    @GetMapping(value = "/filetestcreate")
+    public void filetestcreate(HttpServletRequest req){
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/ccc?op=CREATE&data=TRUE&user.name=hdfs";
+//        String url = "hdfs://10.28.3.45:8020/tmp/ccc?op=CREATE&data=TRUE&guardian_access_token=CMjaaNFrKDATxzowF1mY-880TDCA.TDH";
+        HttpClient client = new HttpClient();
+        int status = -1;
+        PutMethod method = new PutMethod(url);
+        method.setRequestHeader("Content-Type","application/octet-stream");
+        try {
+            // 设置上传文件
+            File targetFile  = new File("D:\\new\\testFile.txt");
+           FileInputStream in =new FileInputStream(targetFile);
+			method.setRequestBody(in);
+			status = client.executeMethod(method);
+			System.out.println(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        method.releaseConnection();
 
+    }
+
+    @GetMapping(value = "/filetestdelete")
+    public void filetestdelete(HttpServletRequest req){
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/ccc?op=DELETE&user.name=hdfs";
+//        String url = "hdfs://10.28.3.45:8020/tmp/ccc?op=CREATE&data=TRUE&guardian_access_token=CMjaaNFrKDATxzowF1mY-880TDCA.TDH";
+        HttpClient client = new HttpClient();
+        int status = -1;
+        DeleteMethod method = new DeleteMethod(url);
+//        method.setRequestHeader("Content-Type","application/octet-stream");
+        try {
+
+            status = client.executeMethod(method);
+            System.out.println(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        method.releaseConnection();
 
     }
 }

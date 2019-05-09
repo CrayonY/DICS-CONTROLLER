@@ -1,5 +1,11 @@
 package com.ucd.server.utils;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.DeleteMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +20,7 @@ import java.util.UUID;
  * @version 2016年7月8日 上午10:38:49
  */
 public class ForFile {
+    private final static Logger logger = LoggerFactory.getLogger(ForFile.class);
     //生成文件路径
     private static String path = "D:\\new\\";
 
@@ -133,10 +140,69 @@ public class ForFile {
         }
         return bool;
     }
+/**
+ * @author gongweimin
+ * @Description 将文件上传到星环服务器
+ * @date 2019/5/8 17:27
+ * @params [fileName]
+ * @exception
+ * @return boolean
+ */
+    public static boolean TDHcreate(String fileName){
+        Boolean bool = false;
+        filenameTemp = path+fileName+".txt";
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=CREATE&data=TRUE&user.name=hdfs";
+//        String url = "hdfs://10.28.3.45:8020/tmp/ccc?op=CREATE&data=TRUE&guardian_access_token=CMjaaNFrKDATxzowF1mY-880TDCA.TDH";
+        HttpClient client = new HttpClient();
+        int status = -1;
+        PutMethod method = new PutMethod(url);
+        method.setRequestHeader("Content-Type","application/octet-stream");
+        try {
+            // 设置上传文件
+            File targetFile  = new File(filenameTemp);
+            FileInputStream in =new FileInputStream(targetFile);
+            method.setRequestBody(in);
+            status = client.executeMethod(method);
+            if (status == 0){
+                bool = false;
+            }
+            logger.info(String.valueOf(status));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        method.releaseConnection();
+        if (String.valueOf(status).startsWith("20")){
+            bool = true;
+        }
+        return bool;
+    }
+
+
+    public static boolean TDHdelete(String fileName){
+        Boolean bool = false;
+        filenameTemp = path+fileName+".txt";
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=DELETE&user.name=hdfs";
+        HttpClient client = new HttpClient();
+        int status = -1;
+        DeleteMethod method = new DeleteMethod(url);
+        try {
+            status = client.executeMethod(method);
+            System.out.println(status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        method.releaseConnection();
+        if (String.valueOf(status).startsWith("20")){
+            bool = true;
+        }
+        return bool;
+    }
     public static void main(String[] args) {
         //UUID uuid = UUID.randomUUID();
         createFile("myfile", "我的梦说别停留等待,就让光芒折射泪湿的瞳孔\r\n"+"映出心中最想拥有的彩虹,带我奔向那片有你的天空,因为你是我的梦 我的梦");
     }
+
+
 
 
 
