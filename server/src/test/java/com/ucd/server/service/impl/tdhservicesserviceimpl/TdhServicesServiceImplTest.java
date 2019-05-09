@@ -5,21 +5,36 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.KeyUtil;
+import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesHealthckDTO;
 import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
-import com.ucd.server.enums.SoftwareExceptEnum;
 import com.ucd.server.exception.SoftwareException;
+import com.ucd.server.service.impl.ServiceThread;
+import com.ucd.server.service.tdhservicesservice.TdhServicesService;
 import com.ucd.server.trapswapApi.ManagerApi.ServicesApi;
 import com.ucd.server.trapswapApi.ManagerApi.UserApi;
 import com.ucd.server.trapswapApi.connection.Connection;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class TdhServicesServiceImplTest {
+
+    @Autowired
+    private TdhServicesService tdhServicesService;
 
     @Test
     public void saveThdServicesData() {
@@ -57,16 +72,80 @@ public class TdhServicesServiceImplTest {
                         }
                     }
                 }
-
-
-
-
             }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+
+
+    /**
+     * @author Crayon
+     * @Description 按时间段查看健康数据       
+     * @date 2019/4/22 3:47 PM 
+     * @params []
+     * @exception  
+     * @return void  
+     */
+    @Test
+    public void getTdhHealthStatusTest(){
+
+        PageView pageView = new PageView();
+        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+        tdhServicesInfoDTO.setSecond(30);
+        tdhServicesInfoDTO.setTaskTimeStart("2008-08-10 05:50:00");
+        tdhServicesInfoDTO.setCentre("A");
+        tdhServicesInfoDTO.setTaskTimeEnd("2008-08-11 10:57:21");
+        tdhServicesInfoDTO.setType("TOS");
+
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime taskTimeStart1 = LocalDateTime.parse("2008-08-10 05:50:11", dtf);
+        LocalDateTime taskTimeEnd1 = LocalDateTime.parse("2008-08-11 10:57:21", dtf);
+/*
+        LocalDate aa = taskTimeStart1.toLocalDate();
+        Date newDate = java.sql.Date.valueOf(String.valueOf(taskTimeStart1));
+        Date newDate1 = java.sql.Date.valueOf(String.valueOf(taskTimeEnd1));*/
+
+
+        try {
+            tdhServicesService.getTdhHealthStatus(pageView,tdhServicesInfoDTO);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
+
+    /**
+     * @author Crayon
+     * @Description  查看所有实时表数据
+     * @date 2019/4/22 4:18 PM
+     * @params []
+     * @exception
+     * @return com.ucd.common.utils.pager.PageView
+     */
+    @Test
+    public void getThdServicesListNow(){
+        PageView pageView = new PageView();
+        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
+        tdhServicesInfoDTO.setCentre("A");
+
+        ServiceThread serviceThread = new ServiceThread();
+        LocalDateTime ldt = LocalDateTime.now();
+        System.out.println(ldt);
+        DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss");
+        String format = ldt.format(dtf1);
+        try {
+            pageView = tdhServicesService.getThdServicesListNow(pageView,tdhServicesInfoDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("获取数据内容为"+pageView.toString());
+
+    }
+
+
 }

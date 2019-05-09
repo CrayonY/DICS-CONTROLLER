@@ -144,9 +144,6 @@ public class TdhServicesController {
      */
     @PostMapping(value = "/getTdhHealthStatus")
     public ResultVO getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO){
-/*
-        logger.info("second,startTime,endTime:"+second,startTime,endTime);
-*/
         ResultVO resultVO = new ResultVO();
         try{
             if(pageView == null){

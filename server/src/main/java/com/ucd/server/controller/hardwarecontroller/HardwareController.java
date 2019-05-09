@@ -4,21 +4,29 @@ import com.ucd.common.VO.ResultVO;
 import com.ucd.common.utils.ResultVOUtil;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
+import com.ucd.daocommon.DTO.hardwareDTO.HardwareCpuDTO;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareDTO;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareInfoDTO;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareNowDTO;
-import com.ucd.daocommon.DTO.tdhServicesDTO.TdhServicesInfoDTO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.hardwareservice.HardWareService;
 import com.ucd.server.utils.HttpClientUtils;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
-
+/**
+ *@ClassName: HardwareController
+ *@Description: 硬件
+ *@Author: Crayon
+ *@CreateDate: 2019/5/5 11:22 AM
+ *@Version 1.0
+ *@Copyright:  Copyright©2018-2019 BJCJ Inc. All rights reserved.
+ **/
 @CrossOrigin
 @RestController
 @RequestMapping("/hardware")
@@ -45,6 +53,7 @@ public class HardwareController {
 		logger.info("resultVO:"+resultVO);
 		return resultVO;
 	}
+
 
 	@PostMapping(value = "/gethardwareInfo")
 	public ResultVO gethardwareInfo(PageView pageView, HardwareNowDTO hardwareNowDTO){
@@ -141,8 +150,6 @@ public class HardwareController {
 		return resultVO;
 	}
 
-
-
 	@GetMapping(value = "/test1")
 	public ResultVO test1(){
 		ResultVO resultVO = new ResultVO();
@@ -171,5 +178,41 @@ public class HardwareController {
 		return resultVO;
 	}
 
+	/**
+	 * @author Crayon
+	 * @Description 获取所有硬件实时状态信息
+	 * @date 2019/4/28 10:42 AM 
+	 * @params [host]
+	 * @exception  
+	 * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>  
+	 */
+	@PostMapping(value = "/getHardWareListNow")
+	public ResultVO<Map<String, Object>> getHardWareListNow(String host){
+		ResultVO resultVO = new ResultVO();
+		try {
+			resultVO = hardWareService.getHardWareListNow(host);
+			return resultVO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultVO = ResultVOUtil.error(e);
+			logger.info("resultVO:"+resultVO);
+			return resultVO;
+		}
+	}
+
+
+	/**
+	 * @author Crayon
+	 * @Description 根据时间区间查看硬件状态
+	 * @date 2019/5/5 2:00 PM
+	 * @params [host, type]
+	 * @exception
+	 * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>
+	 */
+	@PostMapping(value = "/getHardWareStatusByTime")
+	public ResultVO<Map<String,Object>> getHardWareStatusByTime(String type,String nipsOrThreadNames,HardwareCpuDTO hardwareCpuDTO){
+
+		 return hardWareService.getHardWareStatusByTime(type,nipsOrThreadNames,hardwareCpuDTO);
+	}
 
 }

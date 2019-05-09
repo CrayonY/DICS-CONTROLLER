@@ -113,7 +113,6 @@ public class ServiceThread {
         LocalDateTime ldt = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String nowDate = ldt.format(dateTimeFormatter);
-
         try{
 
             if(UserApi.login(client, username, password)){
@@ -164,24 +163,22 @@ public class ServiceThread {
                     result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                 }
 
-                // 如果服务实时表已有数据或者初始化数据成功后，执行以下程序
+                /** 如果服务实时表已有数据或者初始化数据成功后，执行以下程序 */
                 List<String> typeAorBList = new ArrayList<>();
                 // 查看所有服务类型
                 if (centre.equals(centrea)){
                     typeAorBList = StringTool.stringToStrList(serviceTypeA,",");
                 }
-
                 if (centre.equals(centreb)){
                     typeAorBList = StringTool.stringToStrList(serviceTypeB,",");
                 }
-
                 // 筛选所有未知状态的服务
                 ArrayList<String> unknowTypeList = new ArrayList<>();
                 List<String> finalTypeAorBList = typeAorBList;
 
                 finalTypeAorBList.forEach(allType -> {
                     if(typeList.parallelStream().noneMatch(unknowType -> unknowType.equals(allType))){
-                        // if(typeList.parallelStream().noneMatch(allType::equals)){
+                        // 简化版 if(typeList.parallelStream().noneMatch(allType::equals)){
                         unknowTypeList.add(allType);
                     }
                 });
@@ -193,6 +190,7 @@ public class ServiceThread {
                 /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
                     result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
+
                     /** 判断如果不为180s时，只存储不健康数据 */
                     if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM){
                         // 筛选result中不健康的数据
@@ -214,7 +212,6 @@ public class ServiceThread {
 
                         // 获取第三方json串中：healthChecks数据
                         List<TdhServicesHealthckDTO> tdhServicesHealthckDTOList = tdhServicesInfoDTO.getHealthChecks();
-
                         // 查询时间
                         String lastCheck = "";
                         if (null == tdhServicesHealthckDTOList || tdhServicesHealthckDTOList.size() == 0) {
@@ -250,10 +247,11 @@ public class ServiceThread {
                     });
 
                 }
+
+                /** 插入未知状态数据 */
                 List<TdhServicesInfoDTO> resultType = new ArrayList<>();
                 if(unknowTypeList != null && unknowTypeList.size()>0){
-
-                  this.unknowTypeList(resultType,centre,now,nowDate,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
+                   this.unknowTypeList(resultType,centre,now,nowDate,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
                 }
 
                 if(result != null && result.size()>0){
@@ -261,14 +259,12 @@ public class ServiceThread {
                     resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
                     logger.info("resultVO=" + resultVO);
                 }
-
                 // 返回值
-                if ("000000".equals(resultVO.getCode())) {
-                    // return resultVO.getData().toString();
-                } else {
+                if ( !"000000".equals(resultVO.getCode())) {
                     logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
                     throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
                 }
+
             }else {
                 logger.info(centre + "中心异常：e=" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR);
                 throw new SoftwareException(TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getCode(), centre + "中心异常:" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getMessage());
@@ -286,7 +282,6 @@ public class ServiceThread {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
-
 
     public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
         String centre = tdhServicesInfoDTO.getCentre();
