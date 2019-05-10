@@ -48,7 +48,14 @@ public class TdhServicesDsauditController {
 
 
 
-
+/**
+ * @author gongweimin
+ * @Description 获得审核列表（分页）       
+ * @date 2019/5/10 9:38 
+ * @params [pageView, tdhDsauditDTO]
+ * @exception  
+ * @return com.ucd.common.VO.ResultVO  
+ */
     @PostMapping(value = "/getTdhDsauditInfo")
     public ResultVO getTdhDsauditInfo(PageView pageView, TdhDsauditDTO tdhDsauditDTO){
         ResultVO resultVO = new ResultVO();
@@ -68,6 +75,14 @@ public class TdhServicesDsauditController {
         }
     }
 
+    /**
+     * @author gongweimin
+     * @Description 添加审核数据       
+     * @date 2019/5/10 9:38 
+     * @params [tdhDsauditDTOList]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
+     */
     @PostMapping(value = "/saveTdhDsauditData")
     public  ResultVO saveTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList) {
         logger.info("进入controller啦——————————————");
@@ -84,6 +99,14 @@ public class TdhServicesDsauditController {
         }
     }
 
+    /**
+     * @author gongweimin
+     * @Description 获得审核列表
+     * @date 2019/5/10 9:39 
+     * @params [tdhDsauditDTOList]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
+     */
     @PostMapping(value = "/getTdhDsauditData")
     public ResultVO getTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList){
         ResultVO resultVO = new ResultVO();
@@ -124,11 +147,14 @@ public class TdhServicesDsauditController {
 //        }
 //    }
 //
+
     /**
-     * 审核对端数据同步得请求
-     *
-     * @param tdhDsauditDTOList
-     * @return
+     * @author gongweimin
+     * @Description 审核对端数据同步得请求
+     * @date 2019/5/10 9:39
+     * @params [tdhDsauditDTOList, req]
+     * @exception
+     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/auditTdhDsauditListData")
     public ResultVO auditTdhDsauditListData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList, HttpServletRequest req){
@@ -244,6 +270,14 @@ public class TdhServicesDsauditController {
         }
     }
 
+    /**
+     * @author gongweimin
+     * @Description 按照审核状态统计数量
+     * @date 2019/5/10 9:44 
+     * @params [auditStatus]
+     * @exception  
+     * @return com.ucd.common.VO.ResultVO  
+     */
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")
     public  ResultVO countTdhDsauditDataoByAuditStatus(@Param("auditStatus") Integer auditStatus) {
         logger.info("进入countTdhDsauditDataoByAuditStatuscontroller啦——————————————");

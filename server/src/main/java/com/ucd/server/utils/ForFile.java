@@ -37,18 +37,19 @@ public class ForFile {
         filenameTemp = path+fileName+".txt";//文件路径+名称+文件类型
         File file = new File(filenameTemp);
         try {
+            logger.info("文件存在："+file.exists());
             //如果文件不存在，则创建新的文件,反之删除源文件，再创建新的文件
             if(!file.exists()){
                 file.createNewFile();
                 bool = true;
-                System.out.println("success create file,the file is "+filenameTemp);
+                logger.info("success create file,the file is "+filenameTemp);
                 //创建文件成功后，写入内容到文件里
                 writeFileContent(filenameTemp, filecontent);
             }else{
                 delFile(fileName);
                 file.createNewFile();
                 bool = true;
-                System.out.println("success create file,the file is "+filenameTemp);
+                logger.info("success create file,the file is "+filenameTemp);
                 //创建文件成功后，写入内容到文件里
                 writeFileContent(filenameTemp, filecontent);
             }
