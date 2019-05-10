@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import sun.security.x509.AttributeNameEnumeration;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -141,9 +142,20 @@ public class HardWareServiceimpl implements HardWareService {
              if(ObjectUtils.isEmpty(hardwareCpuDTO.getSecond()) || ObjectUtils.isEmpty(type)
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeStart())
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeEnd())
-                     || ObjectUtils.isEmpty(hardwareCpuDTO.getSecond()) || ObjectUtils.isEmpty(nipsOrThreadNames)){
+                     || ObjectUtils.isEmpty(hardwareCpuDTO.getSecond())){
 
                  return ResultVO.FAIL(ApiResultType.PARAMETER_ILLEGAL.code,ApiResultType.PARAMETER_ILLEGAL.message,result);
+             }
+
+            List<String> list = new ArrayList<>();
+            // 判断如果类型为nic或者thread时，nipsOrThreadNames是否为空
+             if(HardWareTypeEnum.NIC.getValue().equals(type) || HardWareTypeEnum.THREAD.getValue().equals(type)){
+                 if (ObjectUtils.isEmpty(nipsOrThreadNames)){
+                     return ResultVO.FAIL(ApiResultType.PARAMETER_ILLEGAL.code,ApiResultType.PARAMETER_ILLEGAL.message,result);
+                 }
+
+                 // 格式化处理nipsOrThreadNames字段信息
+                list = StringTool.stringToStrList(nipsOrThreadNames,",");
              }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date checkTimeStart = sdf.parse(hardwareCpuDTO.getChecktimeStart());
@@ -198,8 +210,6 @@ public class HardWareServiceimpl implements HardWareService {
                     result.put("hardWareList", hardWareMemVOList);
                 }
 
-                // 格式化处理nipsOrThreadNames字段信息
-                List<String> list = StringTool.stringToStrList(nipsOrThreadNames,",");
 
                 if(HardWareTypeEnum.NIC.getValue().equals(type)){
                     PageView finalPageView = pageView;
@@ -224,7 +234,6 @@ public class HardWareServiceimpl implements HardWareService {
                     PageView finalPageView = pageView;
                     list.stream().forEach((String string) ->{
                         List<HardwareThreadVO> hardwareThreadVOList = finalPageView.getRecords();
-
                         // 转换类型
                         String ListVOString = Tools.toJson(hardwareThreadVOList);
 
