@@ -99,10 +99,10 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
         }
-        if(tdhDsDTO.getSyncType() == null){
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType参数异常："+tdhDsDTO.getSyncType());
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType参数异常："+tdhDsDTO.getSyncType());
-        }
+//        if(tdhDsDTO.getSyncType() == null){
+//            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",SyncType参数异常："+tdhDsDTO.getSyncType());
+//            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"SyncType参数异常："+tdhDsDTO.getSyncType());
+//        }
          if ("A".equals(tdhDsDTO.getCentre())) {
              tdhDsDTO.setCentreTableName("tdha_ds_info");
         }else if ("B".equals(tdhDsDTO.getCentre())) {

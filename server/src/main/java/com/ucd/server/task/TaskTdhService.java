@@ -174,7 +174,7 @@ public class TaskTdhService {
     }
 
     //向星环发起请求，获取running的job信息，并判断是否需要数据同步
-//    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
 //    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
         Date now = new Date();
@@ -196,7 +196,7 @@ public class TaskTdhService {
                 tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
                 if (0 == taskStatus){
                     serviceThread.taskSaveThdServicesJobErrorData(joburla, centrea, jobsizea, now);
-//                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb, now);
+                    serviceThread.taskSaveThdServicesJobErrorData(joburlb, centreb, jobsizeb, now);
                 }
                     Thread.sleep(5000);
                     map.put("taskState", 0);

@@ -83,13 +83,13 @@ public class ServiceDsThread {
                     int monthNow = calendar.get(Calendar.MONTH) + 1;
                     for (TdhServicesJobDTO tdhServicesJobDTO : result){
                         for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList){
-                             if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName())){
-                                 long mmsecounds = t1 - tdhServicesJobVO.getCreattime().getTime();
+                             if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName()) && "running".equals(tdhServicesJobDTO.getStatus()) && "down".equals(tdhServicesJobVO.getStatus())){
+                                 long mmsecounds = t1 - tdhServicesJobVO.getHealthtime().getTime();
                                  logger.info(centre + "中心,mmsecounds:"+mmsecounds);
                                  if (mmsecounds > kafkamsecounds){
                                      //需要进行数据同步
-                                     //如果now 与 tdhServicesJobVO.getCreattime()是同一月份则填入一条数据，若是上下两个月，则填入两条数据（snapshot）
-                                     calendar.setTime(tdhServicesJobVO.getCreattime());
+                                     //如果now 与 tdhServicesJobVO.getHealthtime()是同一月份则填入一条数据，若是上下两个月，则填入两条数据（snapshot）
+                                     calendar.setTime(tdhServicesJobVO.getHealthtime());
                                      int monthVO = calendar.get(Calendar.MONTH) + 1;
                                      if (monthNow == monthVO) {
 //                                         logger.info("monthNow == monthVO:"+(monthNow == monthVO));
@@ -99,38 +99,38 @@ public class ServiceDsThread {
                                          tdhDsDTO.setTableName(tdhServicesJobDTO.getTableName());
                                          tdhDsDTO.setCreattime(now);
                                          tdhDsDTO.setStartupTime(now);
-                                         tdhDsDTO.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                         tdhDsDTO.setStartdownTime(tdhServicesJobVO.getHealthtime());
                                          tdhDsDTO.setCentreTableName(centreDsTableName);
                                          tdhDsDTO.setType(0);
                                          tdhDsDTO.setSyncType(2);//total
                                          tdhDsDTO.setCheckStatus(1);//不可见不可操作
-                                         tdhDsDTO.setDataMonth(format3.format(tdhServicesJobVO.getCreattime()));//数据月份
+                                         tdhDsDTO.setDataMonth(format3.format(tdhServicesJobVO.getHealthtime()));//数据月份
                                          tdhDsDTO.setDataTimes(format2.format(tdhDsDTO.getStartdownTime())+"-"+format2.format(tdhDsDTO.getStartupTime()));
                                          tdhDsDTOList.add(tdhDsDTO);
                                          //根据时间按照n天一条进行拆分
-                                         findDates(tdhDsDTOList,tdhDsDTO,tdhServicesJobVO.getCreattime(),now,n);
+                                         findDates(tdhDsDTOList,tdhDsDTO,tdhServicesJobVO.getHealthtime(),now,n);
                                      }else {
 //                                         logger.info("monthNow == monthVO:"+(monthNow == monthVO));
                                          //上个月0s对应的时间
-                                         Date startupTime = LastOrFirstSecoundOfMonth(tdhServicesJobVO.getCreattime(),2);
+                                         Date startupTime = LastOrFirstSecoundOfMonth(tdhServicesJobVO.getHealthtime(),2);
                                          TdhDsDTO tdhDsDTOtotal1 = new TdhDsDTO();
                                          tdhDsDTOtotal1.setId(KeyUtil.genUniqueKey()+ UUIDUtils.getUUID());
                                          tdhDsDTOtotal1.setState(0);
                                          tdhDsDTOtotal1.setTableName(tdhServicesJobDTO.getTableName());
                                          tdhDsDTOtotal1.setCreattime(now);
                                          tdhDsDTOtotal1.setStartupTime(startupTime);
-                                         tdhDsDTOtotal1.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                         tdhDsDTOtotal1.setStartdownTime(tdhServicesJobVO.getHealthtime());
                                          tdhDsDTOtotal1.setCentreTableName(centreDsTableName);
                                          tdhDsDTOtotal1.setType(0);
                                          tdhDsDTOtotal1.setSyncType(2);//total
                                          tdhDsDTOtotal1.setCheckStatus(1);//可不可见不可操作
-                                         tdhDsDTOtotal1.setDataMonth(format3.format(tdhServicesJobVO.getCreattime()));//数据月份
+                                         tdhDsDTOtotal1.setDataMonth(format3.format(tdhServicesJobVO.getHealthtime()));//数据月份
                                          tdhDsDTOtotal1.setDataTimes(format2.format(tdhDsDTOtotal1.getStartdownTime())+"-"+format2.format(tdhDsDTOtotal1.getStartupTime()));
 
 
                                          TdhDsDTO tdhDsDTO1 = new TdhDsDTO();
                                          tdhDsDTO1.setSyncType(1);//snapshot
-                                         tdhDsDTO1.setDataMonth(format3.format(tdhServicesJobVO.getCreattime()));//数据月份
+                                         tdhDsDTO1.setDataMonth(format3.format(tdhServicesJobVO.getHealthtime()));//数据月份
                                          tdhDsDTO1.setTableName(tdhServicesJobDTO.getTableName());
                                          tdhDsDTO1.setCentreTableName(centreDsTableName);
                                          ResultVO resultVO = daoClient.getThdDsListData(tdhDsDTO1);
@@ -150,7 +150,7 @@ public class ServiceDsThread {
                                                      tdhDsDTO1.setState(0);
                                                      tdhDsDTO1.setCreattime(now);
                                                      tdhDsDTO1.setStartupTime(startupTime);
-                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
                                                      tdhDsDTO1.setType(0);
                                                      tdhDsDTO1.setCheckStatus(0);//可见可操作
                                                      tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
@@ -164,11 +164,11 @@ public class ServiceDsThread {
 //                                                     tdhDsDTO1.setState(0);
 //                                                     tdhDsDTO1.setCreattime(now);
 //                                                     tdhDsDTO1.setStartupTime(startupTime);
-//                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+//                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
 //                                                     tdhDsDTO1.setType(0);
 //                                                     tdhDsDTO1.setCheckStatus(0);//可见可操作
                                                      tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
-                                                     tdhDsDTO1.setDataTimes(tdhDsVO.getDataTimes()+","+format2.format(tdhServicesJobVO.getCreattime())+"-"+format2.format(startupTime));
+                                                     tdhDsDTO1.setDataTimes(tdhDsVO.getDataTimes()+","+format2.format(tdhServicesJobVO.getHealthtime())+"-"+format2.format(startupTime));
                                                      tdhDsDTO1.setId(tdhDsVO.getId());
                                                      tdhDsDTOupdateList.add(tdhDsDTO1);
                                                      tdhDsDTOtotal1.setState(2);
@@ -179,7 +179,7 @@ public class ServiceDsThread {
                                                  tdhDsDTO1.setState(0);
                                                  tdhDsDTO1.setCreattime(now);
                                                  tdhDsDTO1.setStartupTime(startupTime);
-                                                 tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getCreattime());
+                                                 tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
                                                  tdhDsDTO1.setType(0);
                                                  tdhDsDTO1.setCheckStatus(0);//可见可操作
                                                  tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
@@ -196,7 +196,7 @@ public class ServiceDsThread {
 
 
 
-                                         Date startdownTime = LastOrFirstSecoundOfMonth(tdhServicesJobVO.getCreattime(),2);//下月0s对应的时间
+                                         Date startdownTime = LastOrFirstSecoundOfMonth(tdhServicesJobVO.getHealthtime(),2);//下月0s对应的时间
                                          TdhDsDTO tdhDsDTO2 = new TdhDsDTO();
                                          tdhDsDTO2.setId(KeyUtil.genUniqueKey()+ UUIDUtils.getUUID());
                                          tdhDsDTO2.setState(0);
