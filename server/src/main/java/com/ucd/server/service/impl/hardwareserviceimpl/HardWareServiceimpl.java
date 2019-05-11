@@ -142,7 +142,8 @@ public class HardWareServiceimpl implements HardWareService {
              if(ObjectUtils.isEmpty(hardwareCpuDTO.getSecond()) || ObjectUtils.isEmpty(type)
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeStart())
                      || ObjectUtils.isEmpty(hardwareCpuDTO.getChecktimeEnd())
-                     || ObjectUtils.isEmpty(hardwareCpuDTO.getSecond())){
+                     || ObjectUtils.isEmpty(hardwareCpuDTO.getSecond())
+                     || ObjectUtils.isEmpty(hardwareCpuDTO.getHost())){
 
                  return ResultVO.FAIL(ApiResultType.PARAMETER_ILLEGAL.code,ApiResultType.PARAMETER_ILLEGAL.message,result);
              }
