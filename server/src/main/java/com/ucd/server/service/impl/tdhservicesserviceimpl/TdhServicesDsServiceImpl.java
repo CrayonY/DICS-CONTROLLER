@@ -196,7 +196,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             }
             if (tdhDsDTO.getSyncType() == 0){
                 //测试----------
-                tdhDsDTO.setStartdownTime(new Date());
+//                tdhDsDTO.setStartdownTime(new Date());
                 //---------------
                 if (tdhDsDTO.getStartdownTime() == null){
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
@@ -249,17 +249,17 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                         }else {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
                                 //测试使用--------------------------------------------------------------------
-                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
-                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
-                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
-                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
-                                    }
-                                }
-                                for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList){
-                                    if ((tdhDsauditDTO.getLastCheck().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
-                                        tdhDsauditDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
-                                    }
-                                }
+//                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+//                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
+//                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
+//                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+//                                    }
+//                                }
+//                                for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList){
+//                                    if ((tdhDsauditDTO.getLastCheck().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
+//                                        tdhDsauditDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+//                                    }
+//                                }
 
                                //------------------------------------------------------------------------------
                                 if (TdhDsVO.getState() == 1){//处理中，说明此表已经审核过了，不需要再次审核
@@ -534,8 +534,8 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             tdhDsDTO.setUserCode(userCode);
             if (tdhDsDTO.getSyncType() == 0){
                 //测试----------
-                tdhDsDTO.setStartdownTime(new Date());
-                tdhDsDTO.setStartupTime(new Date());
+//                tdhDsDTO.setStartdownTime(new Date());
+//                tdhDsDTO.setStartupTime(new Date());
                 //---------------
                 if (tdhDsDTO.getStartdownTime() == null){
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",StartdownTime不能为空");
@@ -588,12 +588,12 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
 
 //                                测试使用------------------------
-                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
-                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
-                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
-                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
-                                    }
-                                }
+//                                for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
+//                                    if((tdhDsDTO.getId().equals(TdhDsVO.getId())) && TdhDsVO.getSyncType() == 0){
+//                                        tdhDsDTO.setStartdownTime(TdhDsVO.getStartdownTime());
+//                                        tdhDsDTO.setDataDay(format.format(TdhDsVO.getStartdownTime()));
+//                                    }
+//                                }
 //                                -------------------------------------
                                 if (TdhDsVO.getState() == 1 ){//同步中，说明此表正在处理，不可再次同步
                                     throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
