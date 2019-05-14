@@ -3,7 +3,7 @@ package com.ucd.server.enums;
 import lombok.Getter;
 
 /**
- * 异常枚举类
+ * 操作记录枚举类
  * <p>Title: ExceptionEnum</p>  
  * @author  lx  
  * @date    

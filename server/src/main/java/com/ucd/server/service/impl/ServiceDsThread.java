@@ -60,6 +60,8 @@ public class ServiceDsThread {
 
     public DateFormat format3=new SimpleDateFormat("yyyy-MM");
 
+    public DateFormat format4=new SimpleDateFormat("yyyyMM");
+
     private final static Logger logger = LoggerFactory.getLogger(ServiceDsThread.class);
 
     @Async("transwarpExecutor")
@@ -97,6 +99,7 @@ public class ServiceDsThread {
                                          tdhDsDTO.setId(KeyUtil.genUniqueKey()+ UUIDUtils.getUUID());
                                          tdhDsDTO.setState(0);
                                          tdhDsDTO.setTableName(tdhServicesJobDTO.getTableName());
+                                         tdhDsDTO.setTableNameTotal(tdhDsDTO.getTableName()+format4.format(tdhServicesJobVO.getHealthtime()));
                                          tdhDsDTO.setCreattime(now);
                                          tdhDsDTO.setStartupTime(now);
                                          tdhDsDTO.setStartdownTime(tdhServicesJobVO.getHealthtime());
@@ -117,6 +120,7 @@ public class ServiceDsThread {
                                          tdhDsDTOtotal1.setId(KeyUtil.genUniqueKey()+ UUIDUtils.getUUID());
                                          tdhDsDTOtotal1.setState(0);
                                          tdhDsDTOtotal1.setTableName(tdhServicesJobDTO.getTableName());
+                                         tdhDsDTOtotal1.setTableNameTotal(tdhDsDTOtotal1.getTableName()+format4.format(tdhServicesJobVO.getHealthtime()));
                                          tdhDsDTOtotal1.setCreattime(now);
                                          tdhDsDTOtotal1.setStartupTime(startupTime);
                                          tdhDsDTOtotal1.setStartdownTime(tdhServicesJobVO.getHealthtime());
@@ -151,6 +155,7 @@ public class ServiceDsThread {
                                                      tdhDsDTO1.setCreattime(now);
                                                      tdhDsDTO1.setStartupTime(startupTime);
                                                      tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
+                                                     tdhDsDTO1.setTableNameTotal(tdhDsDTO1.getTableName()+format4.format(tdhServicesJobVO.getHealthtime()));
                                                      tdhDsDTO1.setType(0);
                                                      tdhDsDTO1.setCheckStatus(0);//可见可操作
                                                      tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
@@ -177,6 +182,7 @@ public class ServiceDsThread {
                                              }else {
                                                  //添加
                                                  tdhDsDTO1.setState(0);
+                                                 tdhDsDTO1.setTableNameTotal(tdhDsDTO1.getTableName()+format4.format(tdhServicesJobVO.getHealthtime()));
                                                  tdhDsDTO1.setCreattime(now);
                                                  tdhDsDTO1.setStartupTime(startupTime);
                                                  tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
@@ -201,6 +207,7 @@ public class ServiceDsThread {
                                          tdhDsDTO2.setId(KeyUtil.genUniqueKey()+ UUIDUtils.getUUID());
                                          tdhDsDTO2.setState(0);
                                          tdhDsDTO2.setTableName(tdhServicesJobDTO.getTableName());
+                                         tdhDsDTO2.setTableNameTotal(tdhDsDTO2.getTableName()+format4.format(startdownTime));
                                          tdhDsDTO2.setCreattime(now);
                                          tdhDsDTO2.setStartupTime(now);
                                          tdhDsDTO2.setStartdownTime(startdownTime);
@@ -323,6 +330,7 @@ public class ServiceDsThread {
             tdhDsDTOcopy.setCheckStatus(0);//可见可操作
             tdhDsDTOcopy.setPid(tdhDsDTO.getId());
             tdhDsDTOcopy.setDataMonth(format3.format(calBegin.getTime()));//数据月份
+            tdhDsDTOcopy.setTableNameTotal(tdhDsDTOcopy.getTableName()+format4.format(calBegin.getTime()));
             calBegin.add(Calendar.DAY_OF_MONTH, n);
             tdhDsDTOcopy.setStartupTime(calBegin.getTime());
             tdhDsDTOcopy.setDataTimes(format2.format(tdhDsDTOcopy.getStartdownTime())+"-"+format2.format(tdhDsDTOcopy.getStartupTime()));
