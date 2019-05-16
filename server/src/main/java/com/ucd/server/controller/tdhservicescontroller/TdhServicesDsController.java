@@ -424,7 +424,7 @@ public class TdhServicesDsController {
  * @exception  
  * @return com.ucd.common.VO.ResultVO  
  */
-    @GetMapping(value = "/closeSync")
+    @PostMapping(value = "/closeSync")
     public ResultVO closeSync(@Param("result") String result,@Param("centre") String centre,HttpServletRequest req){
         ResultVO resultVO = new ResultVO();
         logger.info("result:"+result+"...centre:"+centre);

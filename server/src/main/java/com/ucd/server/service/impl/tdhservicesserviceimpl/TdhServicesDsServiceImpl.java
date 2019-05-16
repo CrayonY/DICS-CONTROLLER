@@ -565,7 +565,11 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            tdhDssyncDTO.setState(1);
 //            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
 //            tdhDssyncDTOList.add(tdhDssyncDTO);
-            filetext.append(tdhDsDTO.getId()+","+tdhDsDTO.getSyncType()+","+tdhDsDTO.getTableNameTotal()+","+format2.format(tdhDsDTO.getStartdownTime())+","+format2.format(tdhDsDTO.getStartupTime())+" \r\n");
+            if (tdhDsDTO.getSyncType() == 0) {
+                filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal() + "," + format2.format(tdhDsDTO.getStartdownTime()) + "," + format2.format(tdhDsDTO.getStartupTime()) + " \r\n");
+            }else {
+                filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal()  + " \r\n");
+            }
         }
         ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
         if("000000".equals(resultVOTdhDsListVO.getCode())) {
@@ -957,6 +961,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         tdhDsDTO.setCentre(centre);
         tdhDsDTO.setState(3);
         tdhDsDTO.setUserCode(userName);
+        tdhDsDTO.setDataMonth("1");
+        tdhDsDTO.setTableName("1");
+        tdhDsDTO.setTableNameTotal("1");
         tdhDsDTOS.add(tdhDsDTO);
         tdhDssListDTO.setTdhDsDTOList(tdhDsDTOS);
         Map<String, Object> models = new HashMap<String, Object>();
@@ -973,6 +980,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         logger.info("resultDsSyncVO:"+resultDsSyncVO);
         if("000000".equals(resultDsSyncVO.getCode())) {
             models.put("userCode", userName);
+            models.put("syncState", 3);
             models.put("tdhDsDTOS", tdhDssListDTO);
             ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {

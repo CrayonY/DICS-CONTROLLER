@@ -431,7 +431,8 @@ public class ServiceThread {
                 TdhServicesJobDTO tdhServicesJobDTO = tdhServicesJobIter.next();
                 String description = tdhServicesJobDTO.getDescription();
                 logger.info("insert.indexof:"+description.indexOf("insert"));
-                if (description == null || description.indexOf("insert") != -1){
+                if (description == null || description.indexOf("insert") == -1){
+                    logger.info("remove");
                     tdhServicesJobIter.remove();
                 }else{
                     tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
@@ -439,7 +440,7 @@ public class ServiceThread {
                     tdhServicesJobDTO.setCreattime(now);
                     tdhServicesJobDTO.setHealthtime(now);
                     int index2 = description.indexOf("_",description.indexOf("_")+1);
-                    String tablename = description.substring(12,index2+1);
+                    String tablename = description.substring(index2-10,index2+1);
                     tdhServicesJobDTO.setTableName(tablename);
                     logger.info(tdhServicesJobDTO.toString());
                 }
@@ -458,6 +459,7 @@ public class ServiceThread {
                 if (null == tdhServicesJobVOList || tdhServicesJobVOList.size() == 0) {
                     //job表为空
                     logger.info("job表为空");
+                    logger.info("jobsize:"+jobsize);
                     if(result.size() == Integer.valueOf(jobsize)){
                         ResultVO resultVO = daoClient.saveThdServicesjobListData(result);
                         if ("000000".equals(resultVO.getCode())) {
@@ -533,7 +535,7 @@ public class ServiceThread {
     }
 
 
-    //测试使用
+////    测试使用
 //    @Async("transwarpExecutor")
 //    public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
 //                logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
@@ -542,34 +544,37 @@ public class ServiceThread {
 //        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
 //        DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        List<String> date = new ArrayList<String>();
-//        date.add("2019-04-16 12:25:37");
-//        date.add("2019-04-23 12:25:37");
-//        date.add("2019-03-16 12:25:37");
+//        date.add("2019-05-06 12:25:37");
+//        date.add("2019-05-14 12:25:37");
+//        date.add("2019-04-26 12:25:37");
 //
 //        try {
 //            for (int i = 0; i < 3; i++) {
 //                TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
 //                tdhServicesJobDTO.setTableName("testds" + i);
+//                tdhServicesJobDTO.setStatus("running");
 //                result.add(tdhServicesJobDTO);
 //            }
 //            for (int i = 0; i < 3; i++) {
 //                TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
 //                tdhServicesJobVO.setTableName("testds" + i);
+//                tdhServicesJobVO.setStatus("down");
 //                tdhServicesJobVO.setCreattime(format2.parse(date.get(i)));
+//                tdhServicesJobVO.setHealthtime(format2.parse(date.get(i)));
 //                tdhServicesJobVOList.add(tdhServicesJobVO);
 //            }
-//            TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
-//                tdhServicesJobDTO.setTableName("testds0");
-//                result.add(tdhServicesJobDTO);
-//            TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
-//                tdhServicesJobVO.setTableName("testds0");
-//                tdhServicesJobVO.setCreattime(format2.parse(date.get(0)));
-//                tdhServicesJobVOList.add(tdhServicesJobVO);
+////            TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
+////                tdhServicesJobDTO.setTableName("testds0");
+////                result.add(tdhServicesJobDTO);
+////            TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
+////                tdhServicesJobVO.setTableName("testds0");
+////                tdhServicesJobVO.setHealthtime(format2.parse(date.get(0)));
+////                tdhServicesJobVOList.add(tdhServicesJobVO);
 //            serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, "tdha_ds_info", "a", now.getTime(), now);
 //        }catch (Exception e){
 //            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" );
 //        }
-
+//
 //    }
 
     @Async("transwarpExecutor")
