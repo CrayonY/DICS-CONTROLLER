@@ -118,12 +118,12 @@ public class ServiceThread {
             if(UserApi.login(client, username, password)){
                 try{
                     String servicesInfo = ServicesApi.getAllServices(client);
-                    logger.info(servicesInfo.toString());
+//                    logger.info(servicesInfo.toString());
 
                     // 格式化 第三方返回结果
                     result = gs.fromJson(servicesInfo, new TypeToken<List<TdhServicesInfoDTO>>() {
                     }.getType());
-                    logger.info(result.toString());
+//                    logger.info(result.toString());
                     UserApi.logout(client);
                     client.close1();
 
@@ -155,10 +155,10 @@ public class ServiceThread {
 
                 /** 如果结果为空,证明第一次执行定时任务，直接插入第一条实时数据 */
                 if(ObjectUtils.isEmpty(healthChecksIdNum)){
-
-                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowTypeListDTO,resultVO);
                     // 保存第一条实时服务数据
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowTypeListDTO,resultVO);
+
                     // 筛选result中不健康的数据
                     result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                 }
@@ -386,7 +386,7 @@ public class ServiceThread {
             //return url+"-"+centre+"-"+username+"-"+password;
             try {
                 String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
-                System.out.println(jobsInfo);
+//                System.out.println(jobsInfo);
                 result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
                 }.getType());
 //                    logger.info(result.toString());
@@ -432,7 +432,6 @@ public class ServiceThread {
                 String description = tdhServicesJobDTO.getDescription();
                 logger.info("insert.indexof:"+description.indexOf("insert"));
                 if (description == null || description.indexOf("insert") == -1){
-                    logger.info("remove");
                     tdhServicesJobIter.remove();
                 }else{
                     tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
@@ -544,18 +543,18 @@ public class ServiceThread {
 //        List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
 //        DateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        List<String> date = new ArrayList<String>();
-//        date.add("2019-05-06 12:25:37");
-//        date.add("2019-05-14 12:25:37");
+////        date.add("2019-05-06 12:25:37");
+////        date.add("2019-05-10 12:25:37");
 //        date.add("2019-04-26 12:25:37");
 //
 //        try {
-//            for (int i = 0; i < 3; i++) {
+//            for (int i = 0; i < 1; i++) {
 //                TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
 //                tdhServicesJobDTO.setTableName("testds" + i);
 //                tdhServicesJobDTO.setStatus("running");
 //                result.add(tdhServicesJobDTO);
 //            }
-//            for (int i = 0; i < 3; i++) {
+//            for (int i = 0; i < 1; i++) {
 //                TdhServicesJobVO tdhServicesJobVO = new TdhServicesJobVO();
 //                tdhServicesJobVO.setTableName("testds" + i);
 //                tdhServicesJobVO.setStatus("down");
@@ -669,18 +668,21 @@ public class ServiceThread {
                 tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
             }
 
-            logger.info(tdhServicesInfoDTO.toString());
+//            logger.info(tdhServicesInfoDTO.toString());
+            logger.info("中心："+centre+"，tdhServicesInfoDTO.getType():"+tdhServicesInfoDTO.getType());
         });
         // 服务返回个数不正确，抛异常
         Integer typeNum = result.size();
+        logger.info("typeNum.equals(typeNumA):"+String.valueOf(typeNum.equals(typeNumA)));
+//        logger.info("typeNum==(typeNumA):"+String.valueOf(typeNum== (Integer.valueOf(typeNumA).intValue())));
 
         // 服务A个数
-        if((centre.equals(centrea) && !typeNum.equals(typeNumA))){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+        if((centre.equals(centrea) && typeNum!= (Integer.valueOf(typeNumA).intValue()))){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"typeNum:"+typeNum+",typeNumA:"+typeNumA+","+result.toString());
         }
         // 服务B个数
-        if(centre.equals(centreb) && !typeNum.equals(typeNumB)){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+result.toString());
+        if(centre.equals(centreb) && typeNum!= (Integer.valueOf(typeNumB).intValue())){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"typeNum:"+typeNum+",typeNumB:"+typeNumB+","+result.toString());
         }
 
         resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);

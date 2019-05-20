@@ -24,6 +24,7 @@ import com.ucd.daocommon.VO.tdhdsVO.tdhdslistVO.TdhDsListVO;
 import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.exception.SoftwareException;
 import com.ucd.server.mapper.TdhTaskParameterMapper;
+import com.ucd.server.service.impl.FileDsThread;
 import com.ucd.server.service.impl.ServiceSync;
 import com.ucd.server.service.impl.ServiceThread;
 import com.ucd.server.service.tdhservicesservice.TdhServicesDsService;
@@ -72,6 +73,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     public DaoClient daoClient;
     @Autowired
     public ServiceSync serviceSync;
+
+    @Autowired
+    public FileDsThread fileDsThread;
 
     public DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -267,6 +271,9 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                                 }
                                 if (TdhDsVO.getAuditStatus() == 1 ){//1.审核中
                                     throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER_AUDITSTATEING.getCode(),ResultExceptEnum.ERROR_PARAMETER_AUDITSTATEING.getMessage());
+                                }
+                                if (TdhDsVO.getAuditStatus() == 3 ){//3.审核通过
+                                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getMessage());
                                 }
                             }
                         }
@@ -498,6 +505,8 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         }
         List<TdhDssyncDTO> tdhDssyncDTOList = new ArrayList<TdhDssyncDTO>();
         StringBuffer filetext = new StringBuffer();
+        TdhDsDTO tdhDsDTOCount = new TdhDsDTO();
+        tdhDsDTOCount.setState(1);
         for (TdhDsDTO tdhDsDTO : tdhDsDTOS){
             if(tdhDsDTO.getCentre() == null || "".equals(tdhDsDTO.getCentre())){
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
@@ -571,6 +580,21 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                 filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal()  + " \r\n");
             }
         }
+        tdhDsDTOCount.setCentreTableName(tdhDsDTOS.get(0).getCentreTableName());
+        ResultVO resultVOcount = daoClient.countTdhDsDataByAuditStatusAndState(tdhDsDTOCount);
+        logger.info("resultVOcount=" + resultVOcount);
+        if ("000000".equals(resultVOcount.getCode())) {
+            Object object = resultVOcount.getData();
+            if (object != null){
+                int count =Integer.valueOf(String.valueOf(object));
+                if (count != 0){
+                    throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getCode(),ResultExceptEnum.RROR_PARAMETER_SYNCSTATEING.getMessage());
+                }
+            }
+        } else {
+            logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+        }
         ResultVO resultVOTdhDsListVO = daoClient.getThdDsListDataS(tdhDsDTOS);
         if("000000".equals(resultVOTdhDsListVO.getCode())) {
             List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
@@ -608,34 +632,35 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             }
                         }
                     }
-                    //本地生成文件
-                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
-                    if (!creatFileFlag){
-                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
-                    }
-                    //删除原有文件上传文件
-                    Thread.sleep(2000);
-                    boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
-                    if (!tdhdeleteFileFlag){
-                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
-                    }
-                    boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
-                    if (!tdhcreateFileFlag){
-                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
-                    }
-                    //调取数据同步方法
-                    String testFlag = "";
-                    try {
-                        testFlag = serviceSync.SyncThdListDataThread();
-                    }catch (Exception e){
-                        logger.info("数据同步shell脚本失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
-                    }
+//                    //本地生成文件
+//                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
+//                    if (!creatFileFlag){
+//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
+//                    }
+//                    //删除原有文件上传文件
+//                    Thread.sleep(2000);
+//                    boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
+//                    if (!tdhdeleteFileFlag){
+//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+//                    }
+//                    boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
+//                    if (!tdhcreateFileFlag){
+//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+//                    }
+//                    //调取数据同步方法
+//                    String testFlag = "";
+//                    try {
+//                        testFlag = serviceSync.SyncThdListDataThread();
+//                    }catch (Exception e){
+//                        logger.info("数据同步shell脚本失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
+//                    }
                     //通知数据同步shell（异步）
-                    if("OK".equals(testFlag)) {
+//                    if("OK".equals(testFlag)) {
+                    fileDsThread.taskSaveDsData(filetext,tdhDsDTOS,userCode,urlotherside);
 
 // 向对端发送http同步请求  修改同步状态
                         ResultVO resultDsSyncVO = new ResultVO();
@@ -685,12 +710,12 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //                            logger.info("添加DSSYNC表！添加失败");
 //                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "添加DSSYNC表！添加失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
 //                        }
-                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),testFlag);
+                        resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(),ResultEnum.RESULT_SUCCESS.getMessage(),"OK");
                         return resultVO;
-                    }else {
-                        logger.info("通知数据同步shell失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
-                    }
+//                    }else {
+//                        logger.info("通知数据同步shell失败");
+//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "通知数据同步shell失败!异常：:" + testFlag);
+//                    }
                 }
             }else {
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());

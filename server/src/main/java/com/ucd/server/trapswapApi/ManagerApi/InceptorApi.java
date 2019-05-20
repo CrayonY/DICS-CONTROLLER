@@ -48,7 +48,7 @@ public class InceptorApi {
 				// 成功
 				responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
 
-				log.debug("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+				log.debug("[HTTP]响应数据: {}, {}", statusCode/*, responseContent*/);
 				
 				return responseContent;
 
@@ -56,7 +56,7 @@ public class InceptorApi {
 				// 失败
 				responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
 				
-				log.error("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+				log.error("[HTTP]响应数据: {}, {}", statusCode/*, responseContent*/);
 
 				throw new Exception("[HTTP]异常响应状态:" + statusCode);
 			}

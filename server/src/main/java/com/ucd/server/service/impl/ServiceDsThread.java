@@ -172,11 +172,15 @@ public class ServiceDsThread {
 //                                                     tdhDsDTO1.setStartdownTime(tdhServicesJobVO.getHealthtime());
 //                                                     tdhDsDTO1.setType(0);
 //                                                     tdhDsDTO1.setCheckStatus(0);//可见可操作
-                                                     tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
+//                                                     tdhDsDTO1.setPid(tdhDsDTOtotal1.getId());
                                                      tdhDsDTO1.setDataTimes(tdhDsVO.getDataTimes()+","+format2.format(tdhServicesJobVO.getHealthtime())+"-"+format2.format(startupTime));
                                                      tdhDsDTO1.setId(tdhDsVO.getId());
                                                      tdhDsDTOupdateList.add(tdhDsDTO1);
-                                                     tdhDsDTOtotal1.setState(2);
+                                                     if(tdhDsVO.getState() == 2) {
+                                                         tdhDsDTOtotal1.setState(2);
+                                                     }else {
+                                                         tdhDsDTOtotal1.setState(0);
+                                                     }
                                                      tdhDsDTOList.add(tdhDsDTOtotal1);
                                                  }
                                              }else {
