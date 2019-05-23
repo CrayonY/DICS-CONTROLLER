@@ -575,7 +575,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
 //            tdhDssyncDTO.setTableNameall(tdhDsDTO.getTableNameTotal());
 //            tdhDssyncDTOList.add(tdhDssyncDTO);
             if (tdhDsDTO.getSyncType() == 0) {
-                filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal() + "," + format2.format(tdhDsDTO.getStartdownTime()) + "," + format2.format(tdhDsDTO.getStartupTime()) + " \r\n");
+                filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal() + "," + tdhDsDTO.getStartdownTime().getTime() + "," + tdhDsDTO.getStartupTime().getTime() + " \r\n");
             }else {
                 filetext.append(tdhDsDTO.getId() + "," + tdhDsDTO.getSyncType() + "," + tdhDsDTO.getTableNameTotal()  + " \r\n");
             }
@@ -956,6 +956,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhDsDTO.getCentre());
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhDsDTO.getCentre());
         }
+        tdhDsDTO.setCheckStatus(0);
         ResultVO resultVO = daoClient.countTdhDsDataByAuditStatusAndState(tdhDsDTO);
         logger.info("resultVO=" + resultVO);
         if ("000000".equals(resultVO.getCode())) {
@@ -970,6 +971,13 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
     public ResultVO closeSync(String centre,String userName) throws Exception {
 
         //调用星环关闭进程脚本
+        String testFlag = "";
+
+        testFlag = serviceSync.SyncThdListDataThread();
+        if (!("OK".equals(testFlag))) {
+            logger.info("杀死同步进程shell脚本失败");
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "杀死同步进程shell脚本失败!异常：:" + testFlag);
+        }
 
         Gson gs = new Gson();
         TdhDsDTO tdhDsDTO = new TdhDsDTO();

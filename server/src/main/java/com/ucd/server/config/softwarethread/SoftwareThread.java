@@ -14,9 +14,9 @@ public class SoftwareThread {
 
     Logger logger = Logger.getLogger(SoftwareThread.class);
 
-        private int corePoolSize = 10;//核心池大小
+        private int corePoolSize = 20;//核心池大小
 
-        private int maxPoolSize = 30;//最大池大小
+        private int maxPoolSize = 50;//最大池大小
 
         private int queueCapacity = 8;
 

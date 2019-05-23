@@ -119,9 +119,19 @@ public class RemoteShellExecutor {
               }
 
              public static void main(String args[]) throws Exception {
+                 System.out.println("开始运行");
+//                 数据同步脚本
                  RemoteShellExecutor executor = new RemoteShellExecutor("10.28.3.48", "root", "bjcj@123456");
-                 executor.exec("/root/testShell.sh");
+                 int in = executor.exec("/root/datasync/sync.sh");
                  // 执行myTest.sh 参数为java Know dummy
-//                 System.out.println(executor.exec("/home/IFileGenTool /load_data.sh t_users myDataBase01"));
+//                 //关闭数据同步
+//                 RemoteShellExecutor executor = new RemoteShellExecutor("10.28.3.48", "root", "bjcj@123456");
+//                 int in = executor.exec("/root/datasync/yarnkiller.sh");
+                 System.out.println("继续运行"+ in);
+
+                 for(int i = 1;i < 20;){
+                     System.out.println("i:"+i);
+                     Thread.sleep(1000);
+                 }
             }
 }
