@@ -100,8 +100,8 @@ public class TaskTdhService {
 
     //向星环发起请求，获取集群服务信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
-//    @Scheduled(cron = "0/30 * * * * ?")
-     // @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
         Date now = new Date();
         logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
@@ -174,7 +174,7 @@ public class TaskTdhService {
     }
 
     //向星环发起请求，获取running的job信息，并判断是否需要数据同步
-    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
 //    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
         Date now = new Date();
@@ -215,7 +215,7 @@ public class TaskTdhService {
 
     //每个月初将上个月还没有进行完copytable的DS数据（还剩不超过1条数据） 按照表名月份归为1条数据，类别是snapshot
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0 28 17 * * ?")
+//    @Scheduled(cron = "0 5 0 1 * ?")
     public void taskUpdateThdDsData(){
         Date now = new Date();
         logger.info("taskUpdateThdDsData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));

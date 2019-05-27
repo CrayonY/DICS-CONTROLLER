@@ -21,8 +21,8 @@ eureka:
   client:
     service-url:
 #      defaultZone: http://localhost:8761/eureka/
-#      defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
-       defaultZone: http://10.66.1.165:8761/eureka-0.0.1-SNAPSHOT/eureka/
+      defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
+#      defaultZone: http://10.66.1.165:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
@@ -44,20 +44,25 @@ basicparameters:
     centrea: A
     usernamea: gongweimin
     passworda: gongweimin
-    jobsizea: 6
+    jobsizea: 10
     serviceinfourlb: http://10.28.3.51:8180/api
     joburlb: http://10.28.3.52:4044/api
     centreb: B
     usernameb: gongweimin
     passwordb: gongweimin
     jobsizeb: 3
-    kafkatime: 0.01
-    typenuma: 15
-    typenumb: 17
+    kafkatime: 1
+    namenuma: 17
+    namenumb: 19
     service-runtime: 180
-    service-type-a: TOS,LICENSE_SERVICE,ZOOKEEPER,HDFS,YARN,SEARCH,HYPERBASE,TXSQL,INCEPTOR,KAFKA,MILANO,SLIPSTREAM,GUARDIAN,SLIPSTREAM_STUDIO,DISCOVER
-    service-type-b: RUBIK,NOTIFICATION,WORKFLOW,TRANSPORTER,PILOT,HYPERBASE,SLIPSTREAM,INCEPTOR,TXSQL,YARN,HDFS,MILANO,SEARCH,KAFKA,ZOOKEEPER,LICENSE_SERVICE,TOS
+    service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2
+    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2
+    syncip: 10.28.3.48
+    syncusername: root
+    syncpassword: bjcj@123456
+    syncstartshell: /root/datasync/sync.sh
+    syncstopshell: /root/datasync/yarnkiller.sh
 
   configrunning: 0
-  centrelocal: B
-  urlotherside: http://10.66.1.192:28070
+  centrelocal: A
+  urlotherside: http://10.66.1.160:28070

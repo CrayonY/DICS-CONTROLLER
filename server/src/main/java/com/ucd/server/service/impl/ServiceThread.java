@@ -44,11 +44,11 @@ import java.util.stream.Collectors;
 public class ServiceThread {
 
 
-    @Value("${basicparameters.transwarp.typenuma}")
-    public String typeNumA;
+    @Value("${basicparameters.transwarp.namenuma}")
+    public String nameNumA;
 
-    @Value("${basicparameters.transwarp.typenumb}")
-    public String typeNumB;
+    @Value("${basicparameters.transwarp.namenumb}")
+    public String nameNumB;
 
     @Value("${basicparameters.transwarp.service-runtime}")
     public String serviceRuntime;
@@ -59,11 +59,11 @@ public class ServiceThread {
     @Value("${basicparameters.transwarp.centreb}")
     public String centreb;
 
-    @Value("${basicparameters.transwarp.service-type-a}")
-    public String serviceTypeA;
+    @Value("${basicparameters.transwarp.service-name-a}")
+    public String serviceNameA;
 
-    @Value("${basicparameters.transwarp.service-type-b}")
-    public String serviceTypeB;
+    @Value("${basicparameters.transwarp.service-name-b}")
+    public String serviceNameB;
 
     private final Integer NUM = 180;
 
@@ -139,6 +139,7 @@ public class ServiceThread {
                     logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
                 }
+                logger.info(centre + "中心:result.size"+ result.size());
                 ResultVO resultVO = null;
                 // 1.获取查询实时数据结果
                 TdhServicesAVO thdServicesInfoNow = daoClient.getThdServicesInfoNow(centre);
@@ -148,48 +149,49 @@ public class ServiceThread {
                 TdhServicesListDTO tdhServicesListDTO = new TdhServicesListDTO();
 
                 // 补全未知数据，调用monitor-dao微服务，进行相应逻辑判断
-                TdhServicesListDTO tdhServicesUnknowTypeListDTO = new TdhServicesListDTO();
+                TdhServicesListDTO tdhServicesUnknowNameListDTO = new TdhServicesListDTO();
 
                 // 筛选接口返回的服务类型
-                List<String> typeList = result.parallelStream().map(TdhServicesInfoDTO::getType).collect(Collectors.toList());
+//                List<String> typeList = result.parallelStream().map(TdhServicesInfoDTO::getType).collect(Collectors.toList());
+                List<String> nameList = result.parallelStream().map(TdhServicesInfoDTO::getName).collect(Collectors.toList());
 
                 /** 如果结果为空,证明第一次执行定时任务，直接插入第一条实时数据 */
                 if(ObjectUtils.isEmpty(healthChecksIdNum)){
                     // 保存第一条实时服务数据
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
-                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowTypeListDTO,resultVO);
+                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowNameListDTO,resultVO);
 
                     // 筛选result中不健康的数据
                     result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                 }
 
                 /** 如果服务实时表已有数据或者初始化数据成功后，执行以下程序 */
-                List<String> typeAorBList = new ArrayList<>();
+                List<String> nameAorBList = new ArrayList<>();
                 // 查看所有服务类型
                 if (centre.equals(centrea)){
-                    typeAorBList = StringTool.stringToStrList(serviceTypeA,",");
+                    nameAorBList = StringTool.stringToStrList(serviceNameA,",");
                 }
                 if (centre.equals(centreb)){
-                    typeAorBList = StringTool.stringToStrList(serviceTypeB,",");
+                    nameAorBList = StringTool.stringToStrList(serviceNameB,",");
                 }
                 // 筛选所有未知状态的服务
-                ArrayList<String> unknowTypeList = new ArrayList<>();
-                List<String> finalTypeAorBList = typeAorBList;
-
-                finalTypeAorBList.forEach(allType -> {
-                    if(typeList.parallelStream().noneMatch(unknowType -> unknowType.equals(allType))){
+                ArrayList<String> unknowNameList = new ArrayList<>();
+                List<String> finalNameAorBList = nameAorBList;
+                logger.info("tttttttttttttttttttttttt"+nameList);
+                finalNameAorBList.forEach(allName -> {
+                    if(nameList.parallelStream().noneMatch(unknowName -> unknowName.equals(allName))){
                         // 简化版 if(typeList.parallelStream().noneMatch(allType::equals)){
-                        unknowTypeList.add(allType);
+                        unknowNameList.add(allName);
                     }
                 });
-                logger.info(unknowTypeList.toString());
+                logger.info("11111111111"+unknowNameList.toString());
                 // 简化版写法
-                List<String> unknowTypeList1 = finalTypeAorBList.parallelStream().filter(allType ->
-                        typeList.parallelStream().noneMatch(allType::equals)).collect(Collectors.toList());
+                List<String> unknowNameList1 = finalNameAorBList.parallelStream().filter(allName ->
+                        nameList.parallelStream().noneMatch(allName::equals)).collect(Collectors.toList());
 
                 /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
-                    result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
+                    result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowNameList,tdhServicesUnknowNameListDTO,resultVO);
 
                     /** 判断如果不为180s时，只存储不健康数据 */
                     if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM){
@@ -197,18 +199,23 @@ public class ServiceThread {
                         result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                     }
                 }
-
+                logger.info("333333333333333333333"+result.size());
                 if(result != null && result.size()>0){
                     // 数据初始化
                     result.forEach(tdhServicesInfoDTO -> {
+                        logger.info("2222222222222222222222222222"+tdhServicesInfoDTO.getName());
                         // 与URL匹配，设置中心，初始化数据
                         tdhServicesInfoDTO.setCentre(centre);
                         String healthChecksId = KeyUtil.genUniqueKey();
                         tdhServicesInfoDTO.setCreattime(now);
                         tdhServicesInfoDTO.setTaskTime(nowDate);
                         tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
-                        tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
-                        logger.info(tdhServicesInfoDTO.toString());
+                        if ("A".equals(centre)) {
+                            tdhServicesInfoDTO.setTableName("tdha_services_TOS");
+                        }else {
+                            tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
+                        }
+//                        logger.info(tdhServicesInfoDTO.toString());
 
                         // 获取第三方json串中：healthChecks数据
                         List<TdhServicesHealthckDTO> tdhServicesHealthckDTOList = tdhServicesInfoDTO.getHealthChecks();
@@ -236,13 +243,13 @@ public class ServiceThread {
                         }
                         // 插入服务名称
                         setTableName(tdhServicesInfoDTO);
-                        if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
-                            // 查表“流目前登记的状态”查看流服务的状态state1
-                            // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
-                            // 则不做操作，如果不是healthy，则修改state1的状态为healthy，且取出当前时间作为stopTime，查表“tdh_services_slipstream”以当前时间为底线，向上
-                            // 获取第一个状态为healthy的时间作为startTime，如果stopTime-startTime>2.4天（可配置），则将stopTime，startTime并把hbase的对应所有表名（或“ALL”）
-                            // 存入到“应该数据同步”的表中，并作状态“未同步”
-                        }
+//                        if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
+//                            // 查表“流目前登记的状态”查看流服务的状态state1
+//                            // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
+//                            // 则不做操作，如果不是healthy，则修改state1的状态为healthy，且取出当前时间作为stopTime，查表“tdh_services_slipstream”以当前时间为底线，向上
+//                            // 获取第一个状态为healthy的时间作为startTime，如果stopTime-startTime>2.4天（可配置），则将stopTime，startTime并把hbase的对应所有表名（或“ALL”）
+//                            // 存入到“应该数据同步”的表中，并作状态“未同步”
+//                        }
 
                     });
 
@@ -250,8 +257,8 @@ public class ServiceThread {
 
                 /** 插入未知状态数据 */
                 List<TdhServicesInfoDTO> resultType = new ArrayList<>();
-                if(unknowTypeList != null && unknowTypeList.size()>0){
-                   this.unknowTypeList(resultType,centre,now,nowDate,unknowTypeList,tdhServicesUnknowTypeListDTO,resultVO);
+                if(unknowNameList != null && unknowNameList.size()>0){
+                   this.unknowTypeList(resultType,centre,now,nowDate,unknowNameList,tdhServicesUnknowNameListDTO,resultVO);
                 }
 
                 if(result != null && result.size()>0){
@@ -285,94 +292,114 @@ public class ServiceThread {
 
     public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
         String centre = tdhServicesInfoDTO.getCentre();
-        String type = tdhServicesInfoDTO.getType();
-        logger.info("++++++++++++++++++++++++++++++type=" + type);
+        String name = tdhServicesInfoDTO.getName();
+        logger.info("++++++++++++++++++++++++++++++name=" + name);
         if ("A".equals(centre)) {
-            if (type == null || "".equals(type)) {
+            if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_tos");
-            } else if ("TOS".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_tos");
-            } else if ("LICENSE_SERVICE".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_license");
-            } else if ("ZOOKEEPER".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_zookeeper");
-            } else if ("KAFKA".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_kafka");
-            } else if ("SEARCH".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_search");
-            } else if ("MILANO".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_milano");
-            } else if ("HDFS".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
-            } else if ("YARN".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_yarn");
-            } else if ("TXSQL".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_txsql");
-            } else if ("INCEPTOR".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_inceptor");
-            } else if ("SLIPSTREAM".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_slipstream");
-            } else if ("HYPERBASE".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_hyperbase");
-            } else if ("PILOT".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_pilot");
-            } else if ("TRANSPORTER".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_transporter");
-            } else if ("WORKFLOW".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_workflow");
-            } else if ("GUARDIAN".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_guardian");
-            } else if ("SLIPSTREAM_STUDIO".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_slipstream_studio");
-            }else if ("NOTIFICATION".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_notification");
-            }else if ("RUBIK".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_rubik");
+            } else{
+                tdhServicesInfoDTO.setTableName("tdha_services_"+name);
             }
         }else if("B".equals(centre)){
-            if (type == null || "".equals(type)) {
+            if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdhb_services_tos");
-            } else if ("TOS".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
-            } else if ("LICENSE_SERVICE".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_license");
-            } else if ("ZOOKEEPER".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_zookeeper");
-            } else if ("KAFKA".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_kafka");
-            } else if ("SEARCH".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_search");
-            } else if ("MILANO".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_milano");
-            } else if ("HDFS".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_hdfs");
-            } else if ("YARN".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_yarn");
-            } else if ("TXSQL".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_txsql");
-            } else if ("INCEPTOR".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_inceptor");
-            } else if ("SLIPSTREAM".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream");
-            } else if ("HYPERBASE".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_hyperbase");
-            } else if ("PILOT".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_pilot");
-            } else if ("TRANSPORTER".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_transporter");
-            } else if ("WORKFLOW".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_workflow");
-            } else if ("GUARDIAN".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_guardian");
-            }else if ("SLIPSTREAM_STUDIO".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream_studio");
-            }else if ("NOTIFICATION".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_notification");
-            }else if ("RUBIK".equals(type)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_rubik");
+            } else{
+                tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
             }
         }
+        logger.info("---------------------name=" + tdhServicesInfoDTO.getTableName());
     }
+
+//    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
+//        String centre = tdhServicesInfoDTO.getCentre();
+//        String type = tdhServicesInfoDTO.getType();
+//        logger.info("++++++++++++++++++++++++++++++type=" + type);
+//        if ("A".equals(centre)) {
+//            if (type == null || "".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_tos");
+//            } else if ("TOS".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_tos");
+//            } else if ("LICENSE_SERVICE".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_license");
+//            } else if ("ZOOKEEPER".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_zookeeper");
+//            } else if ("KAFKA".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_kafka");
+//            } else if ("SEARCH".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_search");
+//            } else if ("MILANO".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_milano");
+//            } else if ("HDFS".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
+//            } else if ("YARN".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_yarn");
+//            } else if ("TXSQL".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_txsql");
+//            } else if ("INCEPTOR".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_inceptor");
+//            } else if ("SLIPSTREAM".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_slipstream");
+//            } else if ("HYPERBASE".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_hyperbase");
+//            } else if ("PILOT".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_pilot");
+//            } else if ("TRANSPORTER".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_transporter");
+//            } else if ("WORKFLOW".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_workflow");
+//            } else if ("GUARDIAN".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_guardian");
+//            } else if ("SLIPSTREAM_STUDIO".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_slipstream_studio");
+//            }else if ("NOTIFICATION".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_notification");
+//            }else if ("RUBIK".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdha_services_rubik");
+//            }
+//        }else if("B".equals(centre)){
+//            if (type == null || "".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
+//            } else if ("TOS".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
+//            } else if ("LICENSE_SERVICE".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_license");
+//            } else if ("ZOOKEEPER".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_zookeeper");
+//            } else if ("KAFKA".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_kafka");
+//            } else if ("SEARCH".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_search");
+//            } else if ("MILANO".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_milano");
+//            } else if ("HDFS".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_hdfs");
+//            } else if ("YARN".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_yarn");
+//            } else if ("TXSQL".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_txsql");
+//            } else if ("INCEPTOR".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_inceptor");
+//            } else if ("SLIPSTREAM".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream");
+//            } else if ("HYPERBASE".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_hyperbase");
+//            } else if ("PILOT".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_pilot");
+//            } else if ("TRANSPORTER".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_transporter");
+//            } else if ("WORKFLOW".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_workflow");
+//            } else if ("GUARDIAN".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_guardian");
+//            }else if ("SLIPSTREAM_STUDIO".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_slipstream_studio");
+//            }else if ("NOTIFICATION".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_notification");
+//            }else if ("RUBIK".equals(type)) {
+//                tdhServicesInfoDTO.setTableName("tdhb_services_rubik");
+//            }
+//        }
+//    }
     @Async("transwarpExecutor")
     public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
 
@@ -649,7 +676,7 @@ public class ServiceThread {
 
 
     private List<TdhServicesInfoDTO> healthChecksIdNumIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
-                                                                 Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
+                                                                 Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,TdhServicesListDTO tdhServicesUnknowNameListDTO, ResultVO resultVO){
 
         result.forEach(tdhServicesInfoDTO -> {
             // 与URL匹配，设置中心，初始化数据
@@ -670,19 +697,20 @@ public class ServiceThread {
 
 //            logger.info(tdhServicesInfoDTO.toString());
             logger.info("中心："+centre+"，tdhServicesInfoDTO.getType():"+tdhServicesInfoDTO.getType());
+            logger.info("中心："+centre+"，tdhServicesInfoDTO.getName():"+tdhServicesInfoDTO.getName());
         });
         // 服务返回个数不正确，抛异常
-        Integer typeNum = result.size();
-        logger.info("typeNum.equals(typeNumA):"+String.valueOf(typeNum.equals(typeNumA)));
+        Integer nameNum = result.size();
+        logger.info("typeNum.equals(nameNumA):"+String.valueOf(nameNum.equals(nameNumA)));
 //        logger.info("typeNum==(typeNumA):"+String.valueOf(typeNum== (Integer.valueOf(typeNumA).intValue())));
 
         // 服务A个数
-        if((centre.equals(centrea) && typeNum!= (Integer.valueOf(typeNumA).intValue()))){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"typeNum:"+typeNum+",typeNumA:"+typeNumA+","+result.toString());
+        if((centre.equals(centrea) && nameNum!= (Integer.valueOf(nameNumA).intValue()))){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"nameNum:"+nameNum+",nameNumA:"+nameNumA+","+result.toString());
         }
         // 服务B个数
-        if(centre.equals(centreb) && typeNum!= (Integer.valueOf(typeNumB).intValue())){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"typeNum:"+typeNum+",typeNumB:"+typeNumB+","+result.toString());
+        if(centre.equals(centreb) && nameNum!= (Integer.valueOf(nameNumB).intValue())){
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"nameNum:"+nameNum+",nameNumB:"+nameNumB+","+result.toString());
         }
 
         resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);
