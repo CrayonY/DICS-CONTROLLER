@@ -101,7 +101,7 @@ public class ServiceThread {
      * @return void
      */
     @Async("transwarpExecutor")
-    public void saveThdServicesListDataThread(String url, String centre, String username, String password) {
+    public void saveThdServicesListDataThread(String url, String centre, String username, String password, String nowDate) {
 
         logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
         Connection client = new Connection(url,centre);
@@ -110,9 +110,9 @@ public class ServiceThread {
         Gson gs = new Gson();
 
         // 当前时间转字符串
-        LocalDateTime ldt = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String nowDate = ldt.format(dateTimeFormatter);
+//        LocalDateTime ldt = LocalDateTime.now();
+//        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        String nowDate = ldt.format(dateTimeFormatter);
         try{
 
             if(UserApi.login(client, username, password)){
@@ -296,13 +296,13 @@ public class ServiceThread {
         logger.info("++++++++++++++++++++++++++++++name=" + name);
         if ("A".equals(centre)) {
             if (name == null || "".equals(name)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_tos");
+                tdhServicesInfoDTO.setTableName("tdha_services_TOS");
             } else{
                 tdhServicesInfoDTO.setTableName("tdha_services_"+name);
             }
         }else if("B".equals(centre)){
             if (name == null || "".equals(name)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_tos");
+                tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
             } else{
                 tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
             }
@@ -725,7 +725,7 @@ public class ServiceThread {
     }
 
     private List<TdhServicesInfoDTO> healthChecksIdNumNotIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
-                      Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
+                      Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,ArrayList<String> unknowNameList,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
 
         // 更新所有未知状态类型信息
         result.forEach(tdhServicesInfoDTO -> {
@@ -754,11 +754,11 @@ public class ServiceThread {
         });
 
         List<TdhServicesInfoDTO> resultType = new ArrayList<>();
-        if(unknowTypeList != null && unknowTypeList.size()>0){
+        if(unknowNameList != null && unknowNameList.size()>0){
             TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
             // 循环list获取type值
-            unknowTypeList.forEach(type -> {
-                tdhServicesInfoDTO.setType(type);
+            unknowNameList.forEach(name -> {
+                tdhServicesInfoDTO.setName(name);
                 tdhServicesInfoDTO.setHealth(UNKNOW);
                 tdhServicesInfoDTO.setTaskTime(nowDate);
                 resultType.add(tdhServicesInfoDTO);

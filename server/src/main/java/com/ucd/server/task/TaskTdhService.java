@@ -55,11 +55,13 @@ public class TaskTdhService {
     @Autowired
     public DaoClient daoClient;
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private final static Logger logger = LoggerFactory.getLogger(TaskTdhService.class);
     // 每5秒启动（测试）
     @Scheduled(cron = "3/5 * * * * ?")
     public void timerToNow(){
-        System.out.println("now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        System.out.println("now time:" + sdf.format(new Date()));
     }
 
     //向星环发起请求，获取集群用户信息，并存库
@@ -69,7 +71,7 @@ public class TaskTdhService {
     public void taskSaveThdUsersListData(){
 
         Date now = new Date();
-        logger.info("taskSaveThdUsersListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskSaveThdUsersListData()now time:" + sdf.format(now));
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","taskUsersInfo");
@@ -77,6 +79,7 @@ public class TaskTdhService {
         logger.info("num:" + num);
         if (num == 1) {
             try {
+//                now = sdf.parse(sdf.format(now).substring(0,18)+"0");
                 logger.info("集群用户信息--成功进入");
                 //记录定时任务运行时间
                 TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
@@ -87,7 +90,7 @@ public class TaskTdhService {
                 Thread.sleep(5000);
                 map.put("taskState",0);
                 tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -100,11 +103,10 @@ public class TaskTdhService {
 
     //向星环发起请求，获取集群服务信息，并存库
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
-    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
-        Date now = new Date();
-        logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+
         Map<String,Object> map = new HashMap<String,Object>();
 
         // 初始化数据，进行开门操作
@@ -116,16 +118,19 @@ public class TaskTdhService {
         // 如果返回1，说明开门操作成功，可以进行业务操作
         if (num == 1) {
             try{
+                Date now = new Date();
+                logger.info("taskSaveThdServicesListData()now time:" + sdf.format(now));
                 logger.info("集群服务信息--成功进入");
                 // 记录定时任务运行时间
                 TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
                 tdhTaskParameter.setTaskName("taskServiceInfo");
                 tdhTaskParameter.setTaskTime(now);
                 tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
+                String nowDate = sdf.format(now).substring(0,18)+"0";
                 // 保存A中心数据
-                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda);
+                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda, nowDate);
                 // 保存B中心数据
-                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb);
+                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb, nowDate);
 
                 // 操作完成进行关门操作
                 Thread.sleep(5000);
@@ -143,7 +148,7 @@ public class TaskTdhService {
 
 
       /*  Date now = new Date();
-        logger.info("taskSaveThdServicesListData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskSaveThdServicesListData()now time:" + sdf.format(now));
             Map<String,Object> map = new HashMap<String,Object>();
             map.put("taskState",1);
             map.put("taskName","taskServiceInfo");
@@ -175,10 +180,9 @@ public class TaskTdhService {
 
     //向星环发起请求，获取running的job信息，并判断是否需要数据同步
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
-        Date now = new Date();
-        logger.info("taskSaveThdServicesJobErrorData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","taskServicejob");
@@ -186,6 +190,9 @@ public class TaskTdhService {
         logger.info("num:" + num);
         if (num == 1) {
             try {
+                Date now = new Date();
+                logger.info("taskSaveThdServicesJobErrorData()now time:" + sdf.format(now));
+                now = sdf.parse(sdf.format(now).substring(0,18)+"0");
                 logger.info("running的job信息成功进入");
                 //记录定时任务运行时间
                 TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
@@ -202,7 +209,7 @@ public class TaskTdhService {
                     map.put("taskState", 0);
                     tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
 
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -215,10 +222,10 @@ public class TaskTdhService {
 
     //每个月初将上个月还没有进行完copytable的DS数据（还剩不超过1条数据） 按照表名月份归为1条数据，类别是snapshot
 //    @Scheduled(cron = "0/30 * * * * ?")
-//    @Scheduled(cron = "0 5 0 1 * ?")
+    @Scheduled(cron = "0 5 0 1 * ?")
     public void taskUpdateThdDsData(){
         Date now = new Date();
-        logger.info("taskUpdateThdDsData()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskUpdateThdDsData()now time:" + sdf.format(now));
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","taskDsInfo");
@@ -255,10 +262,10 @@ public class TaskTdhService {
 
     //自动开门
 //    @Scheduled(cron = "5/30 * * * * ?")
-//    @Scheduled(cron = "5/10 * * * * ?")
+    @Scheduled(cron = "5/10 * * * * ?")
     public void taskOpentaskState(){
         Date now = new Date();
-        logger.info("taskOpentaskState()now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        logger.info("taskOpentaskState()now time:" + sdf.format(now));
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","tasktaskDoorkeeper");

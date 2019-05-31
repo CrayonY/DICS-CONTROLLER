@@ -1028,4 +1028,15 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
             throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"同步状态通知失败异常：:" + resultDsSyncVO.getMsg() + resultDsSyncVO.getData());
         }
     }
+
+    public static void main(String[] args) throws Exception {
+        SimpleDateFormat format2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        System.out.println(format2.format(now));
+        System.out.println(now);
+        System.out.println(format2.format(now).substring(0,18)+"0");
+        now = format2.parse(format2.format(now).substring(0,18)+"0");
+        System.out.println(now);
+
+    }
 }

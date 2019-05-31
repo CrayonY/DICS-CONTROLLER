@@ -127,9 +127,12 @@ public class TdhServicesServiceImpl implements TdhServicesService {
     public String saveThdServicesListData() throws Exception{
         //return urla+"-"+centrea+"-"+usernamea+"-"+passworda+"==="+urlb+"-"+centreb+"-"+usernameb+"-"+passwordb;
             int num = tdhTaskParameterMapper.updateTdhServiceTaskState(1);
+            Date now = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String nowDate = sdf.format(now).substring(0,18)+"0";
             if (num == 1) {
-                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda);
-                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb);
+                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda, nowDate);
+                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb, nowDate);
             }else{
                 return "30";
             }
@@ -140,9 +143,9 @@ public class TdhServicesServiceImpl implements TdhServicesService {
 
     @Override
     public PageView getThdServicesInfo(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
-        if (tdhServicesInfoDTO.getType() == null || "".equals(tdhServicesInfoDTO.getType())){
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",type类型不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"type类型不能为空");
+        if (tdhServicesInfoDTO.getName() == null || "".equals(tdhServicesInfoDTO.getName())){
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",name名称不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"name名称不能为空");
         }
         if(tdhServicesInfoDTO.getCentre() == null || "".equals(tdhServicesInfoDTO.getCentre())){
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
