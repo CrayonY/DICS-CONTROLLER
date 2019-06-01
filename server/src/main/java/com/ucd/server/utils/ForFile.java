@@ -22,8 +22,8 @@ import java.util.UUID;
 public class ForFile {
     private final static Logger logger = LoggerFactory.getLogger(ForFile.class);
     //生成文件路径
-//    private static String path = "D:\\new\\";
-    private static String path = "/root/sync/";
+    private static String path = "D:\\new\\";
+//    private static String path = "/root/sync/";
 
     //文件路径+名称
     private static String filenameTemp;

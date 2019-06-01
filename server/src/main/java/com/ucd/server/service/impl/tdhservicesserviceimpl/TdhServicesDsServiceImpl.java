@@ -632,34 +632,34 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
                             }
                         }
                     }
-//                    //本地生成文件
-//                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
-//                    if (!creatFileFlag){
-//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
-//                    }
-//                    //删除原有文件上传文件
-//                    Thread.sleep(2000);
-//                    boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
-//                    if (!tdhdeleteFileFlag){
-//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
-//                    }
-//                    boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
-//                    if (!tdhcreateFileFlag){
-//                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
-//                    }
-//                    //调取数据同步方法
-//                    String testFlag = "";
-//                    try {
-//                        testFlag = serviceSync.SyncThdListDataThread();
-//                    }catch (Exception e){
-//                        logger.info("数据同步shell脚本失败");
-//                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
-//                    }
-                    //通知数据同步shell（异步）
-//                    if("OK".equals(testFlag)) {
+////                    //本地生成文件
+////                    boolean creatFileFlag = ForFile.createFile("testFile",filetext.toString());
+////                    if (!creatFileFlag){
+////                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心生成文件异常：");
+////                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心参数异常");
+////                    }
+////                    //删除原有文件上传文件
+////                    Thread.sleep(2000);
+////                    boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
+////                    if (!tdhdeleteFileFlag){
+////                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
+////                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+////                    }
+////                    boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
+////                    if (!tdhcreateFileFlag){
+////                        logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER+tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
+////                        throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,tdhDsDTOS.get(0).getCentre()+"中心上传文件异常");
+////                    }
+////                    //调取数据同步方法
+////                    String testFlag = "";
+////                    try {
+////                        testFlag = serviceSync.SyncThdListDataThread();
+////                    }catch (Exception e){
+////                        logger.info("数据同步shell脚本失败");
+////                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "数据同步shell脚本失败!异常：:" + testFlag);
+////                    }
+//                    //通知数据同步shell（异步）
+////                    if("OK".equals(testFlag)) {
                     fileDsThread.taskSaveDsData(filetext,tdhDsDTOS,userCode,urlotherside);
 
 // 向对端发送http同步请求  修改同步状态
@@ -973,7 +973,7 @@ public class TdhServicesDsServiceImpl implements TdhServicesDsService {
         //调用星环关闭进程脚本
         String testFlag = "";
 
-        testFlag = serviceSync.SyncThdListDataThread();
+        testFlag = serviceSync.KillSyncDataThread();
         if (!("OK".equals(testFlag))) {
             logger.info("杀死同步进程shell脚本失败");
             throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "杀死同步进程shell脚本失败!异常：:" + testFlag);
