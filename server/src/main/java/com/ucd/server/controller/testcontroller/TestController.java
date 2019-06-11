@@ -14,6 +14,7 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -206,6 +207,17 @@ public class TestController {
             for (Date date1 : lDate){
                 System.out.println(format2.format(date1));
             }
+//            List<String> uuidlists = new ArrayList<String>();
+//            for (int i = 0;i < 1000; i++){
+//                uuidlists.add(UUID.randomUUID().toString());
+//            }
+//            while(true){
+//                uuidlists.remove((int)Math.random()*100+300);
+//                uuidlists.add(UUID.randomUUID().toString());
+//                uuidlists.remove((int)Math.random()*100+300);
+//                uuidlists.add(UUID.randomUUID().toString());
+//            }
+
 
 //            req.setCharacterEncoding("utf-8");
 //            //获取cookie
@@ -294,5 +306,21 @@ public class TestController {
 
     }
 
+    @GetMapping(value = "/test1")
+    @Async("transwarpExecutor")
+    public void test1(HttpServletRequest req){
+        List<String> uuidlists = new ArrayList<String>();
+        for (int i = 0;i < 1000; i++){
+            uuidlists.add(UUID.randomUUID().toString());
+        }
+        while(true){
+            uuidlists.remove((int)Math.random()*100+300);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*100+500);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*100+800);
+            uuidlists.add(UUID.randomUUID().toString());
+        }
+    }
 
 }

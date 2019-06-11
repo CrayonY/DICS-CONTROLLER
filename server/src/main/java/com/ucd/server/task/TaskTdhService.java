@@ -106,7 +106,7 @@ public class TaskTdhService {
 //    @Scheduled(cron = "0/30 * * * * ?")
     @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData(){
-
+        Date now = new Date();
         Map<String,Object> map = new HashMap<String,Object>();
 
         // 初始化数据，进行开门操作
@@ -118,7 +118,7 @@ public class TaskTdhService {
         // 如果返回1，说明开门操作成功，可以进行业务操作
         if (num == 1) {
             try{
-                Date now = new Date();
+
                 logger.info("taskSaveThdServicesListData()now time:" + sdf.format(now));
                 logger.info("集群服务信息--成功进入");
                 // 记录定时任务运行时间
@@ -182,7 +182,7 @@ public class TaskTdhService {
 //    @Scheduled(cron = "0/30 * * * * ?")
     @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData(){
-
+        Date now = new Date();
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("taskState",1);
         map.put("taskName","taskServicejob");
@@ -190,7 +190,7 @@ public class TaskTdhService {
         logger.info("num:" + num);
         if (num == 1) {
             try {
-                Date now = new Date();
+
                 logger.info("taskSaveThdServicesJobErrorData()now time:" + sdf.format(now));
                 now = sdf.parse(sdf.format(now).substring(0,18)+"0");
                 logger.info("running的job信息成功进入");

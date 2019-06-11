@@ -465,9 +465,13 @@ public class ServiceThread {
                     tdhServicesJobDTO.setCentreTableName(centreJobTableName);
                     tdhServicesJobDTO.setCreattime(now);
                     tdhServicesJobDTO.setHealthtime(now);
-                    int index2 = description.indexOf("_",description.indexOf("_")+1);
-                    String tablename = description.substring(index2-10,index2+1);
-                    tdhServicesJobDTO.setTableName(tablename);
+                    try {
+                        int index2 = description.indexOf("_", description.indexOf("_") + 1);
+                        String tablename = description.substring(index2 - 10, index2 + 1);
+                        tdhServicesJobDTO.setTableName(tablename);
+                    }catch (Exception e){
+                        tdhServicesJobDTO.setTableName("111");
+                    }
                     logger.info(tdhServicesJobDTO.toString());
                 }
             }
