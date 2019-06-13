@@ -40,4 +40,13 @@ public interface HardWareService {
     ResultVO<Map<String,Object>> getHardWareStatusByTime(String type, String nipsOrThreadNames,HardwareCpuDTO hardwareCpuDTO);
 
 
+    /***
+     * @author gongweimin
+     * @Description        获取所有硬件host
+     * @date 2019/6/12 10:18
+     * @params []
+     * @exception
+     * @return com.ucd.common.VO.ResultVO
+     */
+    ResultVO getHardWareHostList()throws Exception;
 }

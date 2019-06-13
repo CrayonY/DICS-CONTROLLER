@@ -215,4 +215,26 @@ public class HardwareController {
 		 return hardWareService.getHardWareStatusByTime(type,nipsOrThreadNames,hardwareCpuDTO);
 	}
 
+
+	/***
+	 * @author gongweimin
+	 * @Description 获取所有硬件host
+	 * @date 2019/6/12 10:16
+	 * @params [host]
+	 * @exception
+	 * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>
+	 */
+    @GetMapping(value = "/getHardWareHostList")
+    public ResultVO<Map<String, Object>> getHardWareHostList(){
+        ResultVO resultVO = new ResultVO();
+        try {
+            resultVO = hardWareService.getHardWareHostList();
+            return resultVO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultVO = ResultVOUtil.error(e);
+            logger.info("resultVO:"+resultVO);
+            return resultVO;
+        }
+    }
 }

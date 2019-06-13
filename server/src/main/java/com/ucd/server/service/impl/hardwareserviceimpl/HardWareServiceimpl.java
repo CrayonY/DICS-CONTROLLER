@@ -258,6 +258,18 @@ public class HardWareServiceimpl implements HardWareService {
         }
     }
 
+    @Override
+    public ResultVO getHardWareHostList() throws Exception {
+        ResultVO resultVO = daoClient.getHardWareHostList();
+        logger.info("resultVO=" + resultVO);
+        if ("000000".equals(resultVO.getCode())) {
+            return resultVO;
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT,  "异常:" + resultVO.getMsg()+resultVO.getData());
+        }
+    }
+
 
 //    @Override
 //    public PageView gethardwareInfo(PageView pageView, HardwareDTO hardwareDTO) throws Exception {
