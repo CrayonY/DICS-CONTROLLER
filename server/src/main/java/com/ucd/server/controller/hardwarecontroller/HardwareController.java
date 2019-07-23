@@ -195,7 +195,7 @@ public class HardwareController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultVO = ResultVOUtil.error(e);
-			logger.info("resultVO:"+resultVO);
+			logger.error("resultVO:"+resultVO);
 			return resultVO;
 		}
 	}

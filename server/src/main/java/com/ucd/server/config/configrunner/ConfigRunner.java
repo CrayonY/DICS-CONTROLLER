@@ -43,7 +43,7 @@ public class ConfigRunner implements CommandLineRunner{
 	 */
 	public void run(String... args) throws Exception {
 		Date now = new Date();
-		logger.info("configrunning:"+configrunning+"ConfigRunner 11111111111111111111111111111111111 now time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+		logger.info("configrunning:【{}】,ConfigRunner now time:【{}】",configrunning,new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
         if("0".equals(configrunning)){
 			logger.info("不需要与对端同步数据！");
 		}else{
@@ -65,7 +65,7 @@ public class ConfigRunner implements CommandLineRunner{
                 }
             }catch (Exception e){
                 e.printStackTrace();
-                logger.info("需要与对端同步数据发生异常！目前不可进行定时任务 e:"+e);
+				logger.error("需要与对端同步数据发生异常！目前不可进行定时任务 e:"+e);
                 tdhTaskParameter.setTaskStatus(1);
                 tdhTaskParameterMapper.updateByTaskName(tdhTaskParameter);
             }
