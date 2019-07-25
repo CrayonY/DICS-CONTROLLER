@@ -1,6 +1,9 @@
 package com.ucd.server.config.softwarethread;
 
-import org.jboss.logging.Logger;
+
+import com.ucd.server.config.scheduleconfig.ScheduleConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -12,7 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 public class SoftwareThread {
 
-    Logger logger = Logger.getLogger(SoftwareThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(SoftwareThread.class);
 
         private int corePoolSize = 20;//核心池大小
 
@@ -24,7 +27,8 @@ public class SoftwareThread {
 
         @Bean
         public Executor transwarpExecutor() {
-            logger.info("+++++++++++++++++++++++++++++++++++++++++++++++corePoolSize"+corePoolSize+"maxPoolSize"+maxPoolSize+"queueCapacity"+queueCapacity+"keepAlive"+keepAlive);
+
+            logger.info("+++++++++++++++++++++++++++++++++++++++++++++++corePoolSize:【{}】,maxPoolSize:【{}】,queueCapacity:【{}】,keepAlive:【{}】",corePoolSize,maxPoolSize,queueCapacity,keepAlive);
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
             executor.setCorePoolSize(corePoolSize);
             executor.setMaxPoolSize(maxPoolSize);
