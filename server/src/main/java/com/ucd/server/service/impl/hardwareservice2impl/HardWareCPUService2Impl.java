@@ -1,4 +1,4 @@
-package com.ucd.server.service.impl.hardwareserviceimpl;
+package com.ucd.server.service.impl.hardwareservice2impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -8,11 +8,9 @@ import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareCpuDTO;
-import com.ucd.daocommon.DTO.hardwareDTO.HardwareNicDTO;
 import com.ucd.server.enums.SoftwareExceptEnum;
 import com.ucd.server.exception.SoftwareException;
-import com.ucd.server.service.hardwareservice.HardWareCPUService;
-import com.ucd.server.service.hardwareservice.HardWareNICService;
+import com.ucd.server.service.hardwareservice2.HardWareCPUService2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,33 +21,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by crayon on 2019/4/1.
+ * Created by gwm on 2019/4/1.
  */
 @Service
-public class HardWareNICServiceImpl implements HardWareNICService {
+public class HardWareCPUService2Impl implements HardWareCPUService2 {
 
     @Autowired
     public DaoClient daoClient;
 
-    private final static Logger logger = LoggerFactory.getLogger(HardWareNICService.class);
+    private final static Logger logger = LoggerFactory.getLogger(HardWareCPUService2.class);
 
 
     @Override
-    public PageView getHardWareNIC(PageView pageView, HardwareNicDTO hardwareNicDTO) throws Exception {
+    public PageView getHardWareCPU(PageView pageView, HardwareCpuDTO hardwareCpuDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
-        logger.info("hardwareNicDTO:" + hardwareNicDTO);
-        if (hardwareNicDTO.getTablename() == null || "".equals(hardwareNicDTO.getTablename())){
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
-        }
-        if("nowtrue".equals(hardwareNicDTO.getTablename())){
-            hardwareNicDTO.setTablename("hard_ware_nic_now");
-        }else {
-            hardwareNicDTO.setTablename("hard_ware_nic");
-        }
+        logger.info("hardwareCpuDTO:" + hardwareCpuDTO);
         models.put("pageView", pageView);
-        models.put("hardwareNicDTO", hardwareNicDTO);
-        ResultVO resultVO = daoClient.getHardWareNic(models);
+        models.put("hardwareCpuDTO", hardwareCpuDTO);
+        ResultVO resultVO = daoClient.getHardWareCpu(models);
         logger.info("resultVO=" + resultVO);
 
         if (!ObjectUtils.isEmpty(resultVO.getCode()) && SoftwareExceptEnum.SUCCESS.getCode().equals(resultVO.getCode())) {

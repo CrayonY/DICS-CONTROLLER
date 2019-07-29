@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,10 +21,11 @@ import java.util.UUID;
  * @version 2016年7月8日 上午10:38:49
  */
 public class ForFile {
+
     private final static Logger logger = LoggerFactory.getLogger(ForFile.class);
     //生成文件路径
-    private static String path = "D:\\new\\";
-//    private static String path = "/root/sync/";
+//    private static String path = "D:\\new\\";
+    private static String path = "/root/sync/";
 
     //文件路径+名称
     private static String filenameTemp;
@@ -150,10 +152,10 @@ public class ForFile {
  * @exception
  * @return boolean
  */
-    public static boolean TDHcreate(String fileName){
+    public static boolean TDHcreate(String fileName,String guardianAccessToken){
         Boolean bool = false;
         filenameTemp = path+fileName+".txt";
-        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=CREATE&data=TRUE&user.name=hdfs";
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=CREATE&data=TRUE&user.name=hdfs&guardian_access_token="+guardianAccessToken;
 //        String url = "hdfs://10.28.3.45:8020/tmp/ccc?op=CREATE&data=TRUE&guardian_access_token=CMjaaNFrKDATxzowF1mY-880TDCA.TDH";
         HttpClient client = new HttpClient();
         int status = -1;
@@ -180,10 +182,10 @@ public class ForFile {
     }
 
 
-    public static boolean TDHdelete(String fileName){
+    public static boolean TDHdelete(String fileName,String guardianAccessToken){
         Boolean bool = false;
         filenameTemp = path+fileName+".txt";
-        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=DELETE&user.name=hdfs";
+        String url = "http://10.28.3.48:14000/webhdfs/v1/tmp/"+fileName+"?op=DELETE&user.name=hdfs&guardian_access_token="+guardianAccessToken;
         HttpClient client = new HttpClient();
         int status = -1;
         DeleteMethod method = new DeleteMethod(url);
@@ -200,8 +202,10 @@ public class ForFile {
         return bool;
     }
     public static void main(String[] args) {
-        //UUID uuid = UUID.randomUUID();
-        createFile("myfile", "我的梦说别停留等待,就让光芒折射泪湿的瞳孔\r\n"+"映出心中最想拥有的彩虹,带我奔向那片有你的天空,因为你是我的梦 我的梦");
+        //UUID uuid = UUID.randomUUID();头条
+//        createFile("myfile", "我的梦说别停留等待,就让光芒折射泪湿的瞳孔\r\n"+"映出心中最想拥有的彩虹,带我奔向那片有你的天空,因为你是我的梦 我的梦");
+//        TDHdelete("testFile");
+        TDHcreate("testFile","rrZs53w3ImiEjhLzpOqv-TDH");
     }
 
 

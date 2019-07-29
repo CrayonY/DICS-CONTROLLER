@@ -115,7 +115,8 @@ public class ServiceThread {
 //        String nowDate = ldt.format(dateTimeFormatter);
         try{
 
-            if(UserApi.login(client, username, password)){
+//            if(UserApi.login(client, username, password)){
+            if(UserApi.login(client, "monitorservice", "monitorservice")){
                 try{
                     String servicesInfo = ServicesApi.getAllServices(client);
 //                    logger.info(servicesInfo.toString());
@@ -186,8 +187,8 @@ public class ServiceThread {
                 });
                 logger.info("11111111111"+unknowNameList.toString());
                 // 简化版写法
-                List<String> unknowNameList1 = finalNameAorBList.parallelStream().filter(allName ->
-                        nameList.parallelStream().noneMatch(allName::equals)).collect(Collectors.toList());
+//                List<String> unknowNameList1 = finalNameAorBList.parallelStream().filter(allName ->
+//                        nameList.parallelStream().noneMatch(allName::equals)).collect(Collectors.toList());
 
                 /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
@@ -199,7 +200,7 @@ public class ServiceThread {
                         result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                     }
                 }
-                logger.info("333333333333333333333"+result.size());
+                logger.info("333333333333333333333："+result.size());
                 if(result != null && result.size()>0){
                     // 数据初始化
                     result.forEach(tdhServicesInfoDTO -> {
@@ -229,7 +230,7 @@ public class ServiceThread {
                                 tdhServicesHealthckDTO.setCreattime(now);
                                 tdhServicesInfoDTO.setTaskTime(nowDate);
                                 tdhServicesHealthckDTO.setHealthChecksId(healthChecksId);
-                                logger.info(centre + "中心:" + tdhServicesHealthckDTO.getType() + ": time:" + tdhServicesHealthckDTO.getLastCheck());
+//                                logger.info(centre + "中心:" + tdhServicesHealthckDTO.getType() + ": time:" + tdhServicesHealthckDTO.getLastCheck());
 
                                 if ("".equals(lastCheck)) {
                                     lastCheck = tdhServicesHealthckDTO.getLastCheck();
@@ -238,11 +239,11 @@ public class ServiceThread {
                                     lastCheck = tdhServicesHealthckDTO.getLastCheck();
                                 }
                                 tdhServicesInfoDTO.setLastCheck(lastCheck);
-                                logger.info(tdhServicesHealthckDTO.toString());
+//                                logger.info(tdhServicesHealthckDTO.toString());
                             }
                         }
                         // 插入服务名称
-                        setTableName(tdhServicesInfoDTO);
+                        setTableName(tdhServicesInfoDTO,finalNameAorBList);
 //                        if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
 //                            // 查表“流目前登记的状态”查看流服务的状态state1
 //                            // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
@@ -264,7 +265,7 @@ public class ServiceThread {
                 if(result != null && result.size()>0){
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
                     resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
-                    logger.info("resultVO=" + resultVO);
+//                    logger.info("resultVO=" + resultVO);
                 }
                 // 返回值
                 if ( !"000000".equals(resultVO.getCode())) {
@@ -290,6 +291,29 @@ public class ServiceThread {
         }
     }
 
+    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO,  List<String> finalNameAorBList){
+        String centre = tdhServicesInfoDTO.getCentre();
+        String name = tdhServicesInfoDTO.getName();
+        logger.info("++++++++++++++++++++++++++++++name=" + name);
+        if ("A".equals(centre)) {
+            if (name == null || "".equals(name)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_TOS");
+            }
+            if(finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
+                    tdhServicesInfoDTO.setTableName("tdha_services_" + name);
+            }
+        }
+        if("B".equals(centre)){
+            if (name == null || "".equals(name)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
+            }
+            if(finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
+            }
+        }
+        logger.info("---------------------name=" + tdhServicesInfoDTO.getTableName());
+    }
+
     public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
         String centre = tdhServicesInfoDTO.getCentre();
         String name = tdhServicesInfoDTO.getName();
@@ -298,12 +322,13 @@ public class ServiceThread {
             if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_TOS");
             } else{
-                tdhServicesInfoDTO.setTableName("tdha_services_"+name);
+                tdhServicesInfoDTO.setTableName("tdha_services_" + name);
             }
-        }else if("B".equals(centre)){
+        }
+        if("B".equals(centre)){
             if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
-            } else{
+            } else {
                 tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
             }
         }
@@ -472,7 +497,7 @@ public class ServiceThread {
                     }catch (Exception e){
                         tdhServicesJobDTO.setTableName("111");
                     }
-                    logger.info(tdhServicesJobDTO.toString());
+//                    logger.info(tdhServicesJobDTO.toString());
                 }
             }
 
@@ -482,10 +507,11 @@ public class ServiceThread {
             if("000000".equals(resultVOTdhServicesJobVO.getCode())){
                 Object object = resultVOTdhServicesJobVO.getData();
                 String tdhServicesJobVOString = Tools.toJson(object);
-                logger.info("tdhServicesJobVOString:" + tdhServicesJobVOString);
+//                logger.info("tdhServicesJobVOString:" + tdhServicesJobVOString);
                 tdhServicesJobVOList = gs.fromJson(tdhServicesJobVOString, new TypeToken<List<TdhServicesJobVO>>() {
                 }.getType());
-                logger.info("tdhServicesJobVOList:" + tdhServicesJobVOList+"  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
+//                logger.info("tdhServicesJobVOList:" + tdhServicesJobVOList+"  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
+                logger.info("  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
                 if (null == tdhServicesJobVOList || tdhServicesJobVOList.size() == 0) {
                     //job表为空
                     logger.info("job表为空");
@@ -617,13 +643,14 @@ public class ServiceThread {
         Gson gs = new Gson();
         try {
             //return url+"-"+centre+"-"+username+"-"+password;
-            if (UserApi.login(client, username, password)) {
+//            if (UserApi.login(client, username, password)) {
+            if (UserApi.login(client, "monitoruser", "monitoruser")) {
                 try {
                     String usersInfo = UserApi.getAllUsers1(client);
-                    System.out.println(usersInfo);
+//                    System.out.println(usersInfo);
                     result = gs.fromJson(usersInfo, new TypeToken<List<UserDTO>>() {
                     }.getType());
-                    logger.info(result.toString());
+//                    logger.info(result.toString());
                     UserApi.logout(client);
                     client.close1();
                 }catch (Exception e){
@@ -705,7 +732,7 @@ public class ServiceThread {
         });
         // 服务返回个数不正确，抛异常
         Integer nameNum = result.size();
-        logger.info("typeNum.equals(nameNumA):"+String.valueOf(nameNum.equals(nameNumA)));
+//        logger.info("typeNum.equals(nameNumA):"+String.valueOf(nameNum.equals(nameNumA)));
 //        logger.info("typeNum==(typeNumA):"+String.valueOf(typeNum== (Integer.valueOf(typeNumA).intValue())));
 
         // 服务A个数
@@ -754,7 +781,7 @@ public class ServiceThread {
             if (centre.equals(centreb)){
                 tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
             }
-            logger.info(tdhServicesInfoDTO.toString());
+//            logger.info(tdhServicesInfoDTO.toString());
         });
 
         List<TdhServicesInfoDTO> resultType = new ArrayList<>();
@@ -765,6 +792,24 @@ public class ServiceThread {
                 tdhServicesInfoDTO.setName(name);
                 tdhServicesInfoDTO.setHealth(UNKNOW);
                 tdhServicesInfoDTO.setTaskTime(nowDate);
+                tdhServicesInfoDTO.setCentre(centre);
+                tdhServicesInfoDTO.setCreattime(now);
+                // 判断是否达到180s,如果达到180，计数器重新修改为1
+                if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM){
+                    // 计数器
+                    tdhServicesInfoDTO.setHealthChecksId("1");
+                }else {
+                    // 计数器
+                    tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
+                }
+                // 确定表名
+                if (centre.equals(centrea)){
+                    tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
+                }
+
+                if (centre.equals(centreb)){
+                    tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
+                }
                 resultType.add(tdhServicesInfoDTO);
             });
 
@@ -806,18 +851,18 @@ public class ServiceThread {
                                 Date now,String nowDate,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO,ResultVO resultVO){
         TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
         // 循环list获取type值
-        unknowTypeList.forEach(type -> {
+        unknowTypeList.forEach(name -> {
             tdhServicesInfoDTO.setCentre(centre);
             String healthChecksId = KeyUtil.genUniqueKey();
             tdhServicesInfoDTO.setCreattime(now);
             tdhServicesInfoDTO.setTaskTime(nowDate);
             tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
             tdhServicesInfoDTO.setTableName("tdha_services_hdfs");
-            tdhServicesInfoDTO.setType(type);
+            tdhServicesInfoDTO.setName(name);
             tdhServicesInfoDTO.setHealth(UNKNOW);
-            logger.info(tdhServicesInfoDTO.toString());
+//            logger.info(tdhServicesInfoDTO.toString());
             // 插入服务名称
-            setTableName(tdhServicesInfoDTO);
+            setTableName(tdhServicesInfoDTO, unknowTypeList);
             resultType.add(tdhServicesInfoDTO);
         });
 
@@ -835,28 +880,53 @@ public class ServiceThread {
 
 
     public static void main(String[] args) {
-        String a = "insert into station_c2222456sdfg_201812 \n" +
-                "SELECT \n" +
-                "get_json_object(context_list,'$.Id')||regexp_replace(substr(get_json_object(context_list,'$.Time'),9,15),'(T|\\\\:|\\\\.|\\\\-)',''),\n" +
-                "get_json_object(context_list,'$.StringValue'),\n" +
-                "get_json_object(context_list,'$.IntValue'),\n" +
-                "get_json_object(context_list,'$.DoubleValue'),\n" +
-                "case when get_json_object(context_list,'$.BoolValue')='false' THEN 0 when get_json_object(context_list,'$.BoolValue')='true' THEN 1 else null end \n" +
-                "from \n" +
-                "(select \n" +
-                "regexp_replace(regexp_replace(get_json_object(a.stats,'$.PointValues'),'\\,\\\\{\\\"Id\\\"','|\\\\{\\\"Id\\\"'),'(\\\\[|\\\\])','') as context \n" +
-                "from station_stream_c a) t lateral view explode(split(t.context,'\\\\|')) context_view as context_list\n" +
-                "where get_json_object(context_list,'$.Id') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),9,15),'(T|\\\\:|\\\\.|\\\\-)','') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),6,2),'(T|\\\\:|\\\\.|\\\\-)','') = substr(201812,5)";
-        int index1 = a.indexOf("into ");
-        System.out.println("index1:"+index1);//index1:7
-        int index2 = a.indexOf("_",a.indexOf("_")+1);
-        System.out.println("index2:"+index2);//index2:32
-        String b = a.substring(12,index2);
-        System.out.println("b:"+b);//b:station_c2222456sdfg
-        Date now = new Date();
-        long t1 = now.getTime();
-        System.out.println("t1:"+t1);//
-        System.out.println(a.indexOf("insert"));//0
+//        String a = "insert into station_c2222456sdfg_201812 \n" +
+//                "SELECT \n" +
+//                "get_json_object(context_list,'$.Id')||regexp_replace(substr(get_json_object(context_list,'$.Time'),9,15),'(T|\\\\:|\\\\.|\\\\-)',''),\n" +
+//                "get_json_object(context_list,'$.StringValue'),\n" +
+//                "get_json_object(context_list,'$.IntValue'),\n" +
+//                "get_json_object(context_list,'$.DoubleValue'),\n" +
+//                "case when get_json_object(context_list,'$.BoolValue')='false' THEN 0 when get_json_object(context_list,'$.BoolValue')='true' THEN 1 else null end \n" +
+//                "from \n" +
+//                "(select \n" +
+//                "regexp_replace(regexp_replace(get_json_object(a.stats,'$.PointValues'),'\\,\\\\{\\\"Id\\\"','|\\\\{\\\"Id\\\"'),'(\\\\[|\\\\])','') as context \n" +
+//                "from station_stream_c a) t lateral view explode(split(t.context,'\\\\|')) context_view as context_list\n" +
+//                "where get_json_object(context_list,'$.Id') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),9,15),'(T|\\\\:|\\\\.|\\\\-)','') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),6,2),'(T|\\\\:|\\\\.|\\\\-)','') = substr(201812,5)";
+//        int index1 = a.indexOf("into ");
+//        System.out.println("index1:"+index1);//index1:7
+//        int index2 = a.indexOf("_",a.indexOf("_")+1);
+//        System.out.println("index2:"+index2);//index2:32
+//        String b = a.substring(12,index2);
+//        System.out.println("b:"+b);//b:station_c2222456sdfg
+//        Date now = new Date();
+//        long t1 = now.getTime();
+//        System.out.println("t1:"+t1);//
+//        System.out.println(a.indexOf("insert"));//0
+//        List<String> a = new ArrayList<String>();
+//        for(int i = 0;i<122;i++){
+//            int num = (int) (Math.random() * (1024 - 500)) + 500;
+//            a.add(String.valueOf(num));
+//        }
+//        System.out.println("a:"+a);
+
+//        List<String> a = new ArrayList<String>();
+//        for(int i = 0;i<122;i++){
+//            double num = ((double) (Math.random() * (82 - 60)) + 60);
+//            a.add(String.format("%.2f", num));
+//        }
+//        System.out.println("a:"+a);
+
+        List<String> a = new ArrayList<String>();
+        double d = 50;
+        for(int i = 0;i<122;i++){
+            a.add(String.format("%.2f", d));
+            double num = ((double) (Math.random() * (0.03 - 0)) + 0);
+            if (i != 50) {
+                d = d + num;
+            }
+
+        }
+        System.out.println("a:"+a);
     }
 
 

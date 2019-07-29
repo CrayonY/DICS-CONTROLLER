@@ -138,7 +138,7 @@ public class ServiceDsThread {
                                          tdhDsDTO1.setTableName(tdhServicesJobDTO.getTableName());
                                          tdhDsDTO1.setCentreTableName(centreDsTableName);
                                          ResultVO resultVO = daoClient.getThdDsListData(tdhDsDTO1);
-                                         logger.info("resultVO=" + resultVO);
+//                                         logger.info("resultVO=" + resultVO);
                                          if ("000000".equals(resultVO.getCode())) {
                                              List<TdhDsVO> tdhDsVOS = new ArrayList<TdhDsVO>();
                                              Object object = resultVO.getData();

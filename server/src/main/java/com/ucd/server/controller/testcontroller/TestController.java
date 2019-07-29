@@ -310,15 +310,29 @@ public class TestController {
     @Async("transwarpExecutor")
     public void test1(HttpServletRequest req){
         List<String> uuidlists = new ArrayList<String>();
-        for (int i = 0;i < 1000; i++){
+        for (int i = 0;i < 50000; i++){
             uuidlists.add(UUID.randomUUID().toString());
         }
         while(true){
-            uuidlists.remove((int)Math.random()*100+300);
+            uuidlists.remove((int)Math.random()*1000+3000);
             uuidlists.add(UUID.randomUUID().toString());
-            uuidlists.remove((int)Math.random()*100+500);
+            uuidlists.remove((int)Math.random()*1000+10000);
             uuidlists.add(UUID.randomUUID().toString());
-            uuidlists.remove((int)Math.random()*100+800);
+            uuidlists.remove((int)Math.random()*100+15000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*1000+5000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*1000+20000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*100+25000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*1000+6000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*1000+30000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*100+35000);
+            uuidlists.add(UUID.randomUUID().toString());
+            uuidlists.remove((int)Math.random()*1000+7000);
             uuidlists.add(UUID.randomUUID().toString());
         }
     }

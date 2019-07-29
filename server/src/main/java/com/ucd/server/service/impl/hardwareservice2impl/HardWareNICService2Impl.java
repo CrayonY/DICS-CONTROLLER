@@ -1,4 +1,4 @@
-package com.ucd.server.service.impl.hardwareserviceimpl;
+package com.ucd.server.service.impl.hardwareservice2impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -7,12 +7,10 @@ import com.ucd.common.VO.ResultVO;
 import com.ucd.common.enums.ResultExceptEnum;
 import com.ucd.common.utils.Tools;
 import com.ucd.common.utils.pager.PageView;
-import com.ucd.daocommon.DTO.hardwareDTO.HardwareCpuDTO;
 import com.ucd.daocommon.DTO.hardwareDTO.HardwareNicDTO;
 import com.ucd.server.enums.SoftwareExceptEnum;
 import com.ucd.server.exception.SoftwareException;
-import com.ucd.server.service.hardwareservice.HardWareCPUService;
-import com.ucd.server.service.hardwareservice.HardWareNICService;
+import com.ucd.server.service.hardwareservice2.HardWareNICService2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +21,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by crayon on 2019/4/1.
+ * Created by gwm on 2019/4/1.
  */
 @Service
-public class HardWareNICServiceImpl implements HardWareNICService {
+public class HardWareNICService2Impl implements HardWareNICService2 {
 
     @Autowired
     public DaoClient daoClient;
 
-    private final static Logger logger = LoggerFactory.getLogger(HardWareNICService.class);
+    private final static Logger logger = LoggerFactory.getLogger(HardWareNICService2.class);
 
 
     @Override

@@ -38,7 +38,8 @@ import java.util.*;
 **/
 @Component
 public class FileDsThread {
-
+    @Value("${basicparameters.transwarp.guardian-access-token}")
+    public String guardianAccessToken;
 
     @Autowired
     public DaoClient daoClient;
@@ -60,12 +61,12 @@ public class FileDsThread {
             }
             //删除原有文件上传文件
             Thread.sleep(2000);
-            boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile");
-            if (!tdhdeleteFileFlag) {
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, tdhDsDTOS.get(0).getCentre() + "中心上传文件异常");
-            }
-            boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile");
+//            boolean tdhdeleteFileFlag = ForFile.TDHdelete("testFile",guardianAccessToken);
+//            if (!tdhdeleteFileFlag) {
+//                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
+//                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, tdhDsDTOS.get(0).getCentre() + "中心上传文件异常");
+//            }
+            boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile",guardianAccessToken);
             if (!tdhcreateFileFlag) {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, tdhDsDTOS.get(0).getCentre() + "中心上传文件异常");
