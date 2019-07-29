@@ -6,9 +6,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: rootroot
+    password: root
 #    url: jdbc:mysql://10.66.1.192:3306/clouddemo?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
-    url: jdbc:mysql://10.66.1.160:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
+    url: jdbc:mysql://10.28.3.203:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 #  jpa:
 #    show-sql: true
 #  cloud:
@@ -21,11 +21,12 @@ eureka:
   client:
     service-url:
 #      defaultZone: http://localhost:8761/eureka/
-       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
+       defaultZone: http://192.168.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://192.168.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
 #      defaultZone: http://10.66.1.160:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
+    ip-address: 192.168.1.202
     prefer-ip-address: true
-    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    instance-id: 192.168.1.202:${server.port}
 #SOFTWARE:
 ribbon:
   NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
@@ -39,12 +40,12 @@ mybatis:
 
 basicparameters:
   transwarp:
-    serviceinfourla: http://10.28.3.50:8180/api
+    serviceinfourla: http://10.28.3.160:8180/api
     joburla: http://10.28.3.50:4044/api
     centrea: A
     usernamea: gongweimin
     passworda: gongweimin
-    jobsizea: 10
+    jobsizea: 13
     serviceinfourlb: http://10.28.3.51:8180/api
     joburlb: http://10.28.3.52:4044/api
     centreb: B
@@ -52,11 +53,13 @@ basicparameters:
     passwordb: gongweimin
     jobsizeb: 3
     kafkatime: 1
-    namenuma: 17
-    namenumb: 19
+    namenuma: 18
+    namenumb: 20
     service-runtime: 180
-    service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2
-    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2
+    service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2,Manager
+    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager
+    #注意：与星环确认token和限制IP
+    guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
     syncip: 10.28.3.48
     syncusername: root
     syncpassword: bjcj@123456
@@ -65,4 +68,4 @@ basicparameters:
 
   configrunning: 0
   centrelocal: A
-  urlotherside: http://10.66.1.192:28070
+  urlotherside: http://10.66.1.166:8180
