@@ -442,7 +442,6 @@ public class ServiceThread {
             //return url+"-"+centre+"-"+username+"-"+password;
             try {
                 String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
-//                System.out.println(jobsInfo);
                 result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
                 }.getType());
 //                    logger.info(result.toString());
@@ -486,8 +485,9 @@ public class ServiceThread {
             while(tdhServicesJobIter.hasNext()){
                 TdhServicesJobDTO tdhServicesJobDTO = tdhServicesJobIter.next();
                 String description = tdhServicesJobDTO.getDescription();
-                logger.info("insert.indexof:"+description.indexOf("insert"));
-                if (description == null || description.indexOf("insert") == -1){
+//                logger.info("insert.indexof:"+description.indexOf("insert"));
+                logger.info("udf_insertData.indexof:"+description.indexOf("udf_insertData"));
+                if (description == null || description.indexOf("udf_insertData") == -1){
                     tdhServicesJobIter.remove();
                 }else{
                     tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
@@ -495,8 +495,10 @@ public class ServiceThread {
                     tdhServicesJobDTO.setCreattime(now);
                     tdhServicesJobDTO.setHealthtime(now);
                     try {
-                        int index2 = description.indexOf("_", description.indexOf("_") + 1);
-                        String tablename = description.substring(index2 - 10, index2 + 1);
+//                        int index2 = description.indexOf("_", description.indexOf("_") + 1);
+//                        String tablename = description.substring(index2 - 10, index2 + 1);
+                        int index2 = description.indexOf("udf_insertData");
+                        String tablename = description.substring(index2 + 20, index2 + 31);
                         tdhServicesJobDTO.setTableName(tablename);
                     }catch (Exception e){
                         tdhServicesJobDTO.setTableName("111");
