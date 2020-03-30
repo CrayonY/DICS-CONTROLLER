@@ -8,6 +8,7 @@ import com.ucd.server.enums.TdhServicesReturnEnum;
 import com.ucd.server.service.operationloginfoservice.OperationLogInfoService;
 import com.ucd.server.utils.ForFile;
 import com.ucd.server.utils.HttpClientUtils;
+import com.ucd.zabbixtestcommon.ZabbixProblemDTO;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -25,7 +26,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+import java.util.stream.Collectors;
 
 
 @CrossOrigin
@@ -335,6 +336,36 @@ public class TestController {
             uuidlists.remove((int)Math.random()*1000+7000);
             uuidlists.add(UUID.randomUUID().toString());
         }
+    }
+
+
+    @GetMapping(value = "/zabbixtestget")
+    public String zabbixtest(String a){
+        System.out.println("a:"+a);
+        return "a:"+a;
+    }
+
+    @PostMapping(value = "/zabbixtestpost")
+    public String zabbixtestpost(@RequestParam("a") String a){
+        System.out.println("a:"+a);
+//        a = "Problem#2019.09.18 18:43:20#SQLServer:Access Methods Page Splits / Sec#SQL - 10.166.50.102#Average#130532# ";
+        List<String> list= Arrays.asList(a .split("#")).stream().map(s -> (s.trim())).collect(Collectors.toList());
+        ZabbixProblemDTO zabbixProblemDTO = new ZabbixProblemDTO();
+        zabbixProblemDTO.setStartTime(list.get(1));
+        zabbixProblemDTO.setName(list.get(2));
+        zabbixProblemDTO.setHost(list.get(3));
+        zabbixProblemDTO.setSeverity(list.get(4));
+        zabbixProblemDTO.setOriginalproblemid(list.get(5));
+        zabbixProblemDTO.setUrl(list.get(6));
+        System.out.println(String.join(",", list));
+        System.out.println(zabbixProblemDTO);
+        return "a:"+a;
+    }
+
+    @PostMapping(value = "/zabbixtestpost1")
+    public String zabbixtestpost1(@RequestBody ZabbixProblemDTO zabbixProblemDTO){
+        System.out.println("zabbixProblemDTO:"+zabbixProblemDTO);
+        return "zabbixProblemDTO:"+zabbixProblemDTO;
     }
 
 }

@@ -256,6 +256,9 @@ public class ServiceThread {
 
                 }
 
+                logger.info("unknowNameList"+unknowNameList.toString());
+
+
                 /** 插入未知状态数据 */
                 List<TdhServicesInfoDTO> resultType = new ArrayList<>();
                 if(unknowNameList != null && unknowNameList.size()>0){
@@ -264,6 +267,7 @@ public class ServiceThread {
 
                 if(result != null && result.size()>0){
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
+                    logger.info("tdhServicesListDTO"+tdhServicesListDTO.toString());
                     resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
 //                    logger.info("resultVO=" + resultVO);
                 }
@@ -786,9 +790,9 @@ public class ServiceThread {
 
         List<TdhServicesInfoDTO> resultType = new ArrayList<>();
         if(unknowNameList != null && unknowNameList.size()>0){
-            TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
             // 循环list获取type值
             unknowNameList.forEach(name -> {
+                TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
                 tdhServicesInfoDTO.setName(name);
                 tdhServicesInfoDTO.setHealth(UNKNOW);
                 tdhServicesInfoDTO.setTaskTime(nowDate);
@@ -815,6 +819,7 @@ public class ServiceThread {
 
             // 更新未知状态数据
             tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+            logger.info("tdhServicesUnknowTypeListDTO=" + tdhServicesUnknowTypeListDTO);
             resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
             logger.info("resultVO=" + resultVO);
 
@@ -849,9 +854,9 @@ public class ServiceThread {
      */
     private void unknowTypeList(List<TdhServicesInfoDTO> resultType,String centre,
                                 Date now,String nowDate,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO,ResultVO resultVO){
-        TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
         // 循环list获取type值
         unknowTypeList.forEach(name -> {
+            TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
             tdhServicesInfoDTO.setCentre(centre);
             String healthChecksId = KeyUtil.genUniqueKey();
             tdhServicesInfoDTO.setCreattime(now);
