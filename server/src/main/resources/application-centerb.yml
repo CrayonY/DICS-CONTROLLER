@@ -21,7 +21,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka-0.0.1-SNAPSHOT/eureka/
+      defaultZone: http://10.0.1.181:8761/eureka-0.0.1-SNAPSHOT/eureka/
   #       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
   #      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
@@ -63,9 +63,9 @@ basicparameters:
     syncip: 10.28.3.52
     syncusername: root
     syncpassword: bjcj@123456
-    syncstartshell: /root/datasync/sync.sh
+    syncstartshell: /root/da tasync/sync.sh
     syncstopshell: /root/datasync/yarnkiller.sh
 
   configrunning: 0
   centrelocal: B
-  urlotherside: http://10.0.1.102:28070
+  urlotherside: http://10.0.1.181:28070

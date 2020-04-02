@@ -19,7 +19,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka-0.0.1-SNAPSHOT/eureka/
+      defaultZone: http://10.0.1.181:8761/eureka-0.0.1-SNAPSHOT/eureka/
   #       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
   #      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
@@ -69,4 +69,5 @@ basicparameters:
   configrunning: 0
   centrelocal: A
   #urlotherside: http://10.28.3.201:8180
-  urlotherside: http://10.166.50.156:28070
+  #urlotherside: http://10.166.50.156:28070
+  urlotherside: http://10.28.3.203:28070
