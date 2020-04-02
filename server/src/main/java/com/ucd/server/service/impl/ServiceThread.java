@@ -194,6 +194,10 @@ public class ServiceThread {
                 if(!ObjectUtils.isEmpty(healthChecksIdNum)){
                     result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowNameList,tdhServicesUnknowNameListDTO,resultVO);
 
+//                    logger.info("getHealthChecksId---------------："+thdServicesInfoNow.getHealthChecksId());
+//                    logger.info("NUM---------------："+NUM);
+//                    logger.info("Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM："+(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM));
+
                     /** 判断如果不为180s时，只存储不健康数据 */
                     if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM){
                         // 筛选result中不健康的数据
@@ -267,7 +271,7 @@ public class ServiceThread {
 
                 if(result != null && result.size()>0){
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
-                    logger.info("tdhServicesListDTO"+tdhServicesListDTO.toString());
+//                    logger.info("tdhServicesListDTO"+tdhServicesListDTO.toString());
                     resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
 //                    logger.info("resultVO=" + resultVO);
                 }
@@ -790,7 +794,7 @@ public class ServiceThread {
 //            logger.info(tdhServicesInfoDTO.toString());
         });
 
-        List<TdhServicesInfoDTO> resultType = new ArrayList<>();
+//        List<TdhServicesInfoDTO> resultType = new ArrayList<>();
         if(unknowNameList != null && unknowNameList.size()>0){
             // 循环list获取type值
             unknowNameList.forEach(name -> {
@@ -816,20 +820,21 @@ public class ServiceThread {
                 if (centre.equals(centreb)){
                     tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
                 }
-                resultType.add(tdhServicesInfoDTO);
+//                resultType.add(tdhServicesInfoDTO);
+                result.add(tdhServicesInfoDTO);
             });
 
-            // 更新未知状态数据
-            tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
-            logger.info("tdhServicesUnknowTypeListDTO=" + tdhServicesUnknowTypeListDTO);
-            resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
-            logger.info("resultVO=" + resultVO);
-
-            // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-            if(!"000000".equals(resultVO.getCode())){
-                logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
-            }
+//            // 更新未知状态数据
+//            tdhServicesUnknowTypeListDTO.setTdhServicesInfoDTOList(resultType);
+//            logger.info("tdhServicesUnknowTypeListDTO=" + tdhServicesUnknowTypeListDTO);
+//            resultVO = daoClient.updateThdServicesInfoNow(tdhServicesUnknowTypeListDTO, healthChecksIdNum);
+//            logger.info("resultVO=" + resultVO);
+//
+//            // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
+//            if(!"000000".equals(resultVO.getCode())){
+//                logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
+//                throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+//            }
         }
         // 更新实时数据
         tdhServicesListDTO.setTdhServicesInfoDTOList(result);

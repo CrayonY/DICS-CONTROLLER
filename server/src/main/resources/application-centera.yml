@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: 123456
-    url: jdbc:mysql://10.0.1.102:3306/bjcj_perception?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
+    url: jdbc:mysql://10.28.3.203:3306/monitordb_a?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 #  jpa:
 #    show-sql: true
 #  cloud:
@@ -57,7 +57,7 @@ basicparameters:
     service-runtime: 180
     # 服务数量 需要与大数据同步
     service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2,Manager
-    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager
+    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager,Discover1
     #注意：与星环确认token和限制IP
     guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
     syncip: 10.28.3.48
