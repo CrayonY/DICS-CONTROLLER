@@ -43,8 +43,8 @@ basicparameters:
     serviceinfourla: http://10.28.3.50:8180/api
     joburla: http://10.28.3.50:4044/api
     centrea: A
-    usernamea: monitorservice
-    passworda: monitorservice
+    usernamea: monitorserviceb
+    passworda: monitorserviceb
     jobsizea: 3
     serviceinfourlb: http://10.28.3.51:8180/api
     joburlb: http://10.28.3.52:4044/api
