@@ -40,17 +40,17 @@ mybatis:
 
 basicparameters:
   transwarp:
-    serviceinfourla: http://10.28.3.43:8180/api
+    serviceinfourla: http://10.28.3.50:8180/api
     joburla: http://10.28.3.50:4044/api
     centrea: A
-    usernamea: gongweimin
-    passworda: gongweimin
+    usernamea: monitorservice
+    passworda: monitorservice
     jobsizea: 3
     serviceinfourlb: http://10.28.3.51:8180/api
     joburlb: http://10.28.3.52:4044/api
     centreb: B
-    usernameb: gongweimin
-    passwordb: gongweimin
+    usernameb: monitorserviceb
+    passwordb: monitorserviceb
     jobsizeb: 4
     kafkatime: 0.05
     namenuma: 18

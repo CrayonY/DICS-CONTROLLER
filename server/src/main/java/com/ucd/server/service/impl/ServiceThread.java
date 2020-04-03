@@ -115,8 +115,8 @@ public class ServiceThread {
 //        String nowDate = ldt.format(dateTimeFormatter);
         try{
 
-//            if(UserApi.login(client, username, password)){
-            if(UserApi.login(client, "monitorservice", "monitorservice")){
+            if(UserApi.login(client, username, password)){
+//            if(UserApi.login(client, "monitorserviceb", "monitorserviceb")){
                 try{
                     String servicesInfo = ServicesApi.getAllServices(client);
 //                    logger.info(servicesInfo.toString());
@@ -653,8 +653,8 @@ public class ServiceThread {
         Gson gs = new Gson();
         try {
             //return url+"-"+centre+"-"+username+"-"+password;
-//            if (UserApi.login(client, username, password)) {
-            if (UserApi.login(client, "monitoruser", "monitoruser")) {
+            if (UserApi.login(client, username, password)) {
+//            if (UserApi.login(client, "monitoruser", "monitoruser")) {
                 try {
                     String usersInfo = UserApi.getAllUsers1(client);
 //                    System.out.println(usersInfo);
