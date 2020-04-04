@@ -63,7 +63,7 @@ basicparameters:
     syncip: 10.28.3.52
     syncusername: root
     syncpassword: bjcj@123456
-    syncstartshell: /root/da tasync/sync.sh
+    syncstartshell: /root/datasync/sync.sh
     syncstopshell: /root/datasync/yarnkiller.sh
 
   configrunning: 0
