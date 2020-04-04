@@ -42,6 +42,7 @@ public class ServiceSync {
         logger.info("开始调取同步脚本");
         RemoteShellExecutor executor = new RemoteShellExecutor(syncip, syncusername, syncpassword);
         int in = executor.exec(syncstartshell);
+        logger.info("数据同步脚本返回in："+in);
         if (in == 0){
             return "OK";
         }else {
