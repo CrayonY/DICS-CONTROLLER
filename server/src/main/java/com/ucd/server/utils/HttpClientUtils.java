@@ -18,245 +18,242 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpClientUtils {
-	
-	private static final Logger log = LoggerFactory.getLogger(HttpClientUtils.class);
 
-	private static RequestConfig defaultRequestConfig = RequestConfig.custom()
-			.setConnectTimeout(10000).setConnectionRequestTimeout(10000)
-			.setSocketTimeout(30000).build();
-	
-	/**
-	 * 
-	 * 方法功能说明：POST数据
-	 * 创建：2017年3月9日 by admin 
-	 * 修改：日期 by 修改者
-	 * 修改内容：
-	 * @参数： @param url
-	 * @参数： @param content
-	 * @参数： @param contentType
-	 * @参数： @return
-	 * @参数： @throws Exception    
-	 * @return String
-	 *
-	 */
-	public static String postString(String url, String content, String contentType, Map<String,String> headers) throws Exception {
+    private static final Logger log = LoggerFactory.getLogger(HttpClientUtils.class);
 
-		if (StringUtils.isEmpty(url)) {
-			throw new NullPointerException("URL为空");
-		}
+    private static RequestConfig defaultRequestConfig = RequestConfig.custom()
+            .setConnectTimeout(10000).setConnectionRequestTimeout(10000)
+            .setSocketTimeout(30000).build();
 
-		log.debug("[HTTP]发送数据: url={}, content={}", url, content);
+    /**
+     * 方法功能说明：POST数据
+     * 创建：2017年3月9日 by admin
+     * 修改：日期 by 修改者
+     * 修改内容：
+     *
+     * @return String
+     * @参数： @param url
+     * @参数： @param content
+     * @参数： @param contentType
+     * @参数： @return
+     * @参数： @throws Exception
+     */
+    public static String postString(String url, String content, String contentType, Map<String, String> headers) throws Exception {
 
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		
-		HttpPost method = new HttpPost(url);
-		
-		if (MapUtils.isNotEmpty(headers)) {
-			for (String key : headers.keySet()) {
-				method.addHeader(key, headers.get(key));
-			}
-		}
+        if (StringUtils.isEmpty(url)) {
+            throw new NullPointerException("URL为空");
+        }
 
-		method.setConfig(defaultRequestConfig);
+        log.debug("[HTTP]发送数据: url={}, content={}", url, content);
 
-		method.addHeader("Content-Type", contentType);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
 
-		method.setEntity(new StringEntity(content, "utf-8"));
-		
-		String responseContent = null;
+        HttpPost method = new HttpPost(url);
 
-		try {
-			// 执行请求
-			HttpResponse response = httpclient.execute(method);
+        if (MapUtils.isNotEmpty(headers)) {
+            for (String key : headers.keySet()) {
+                method.addHeader(key, headers.get(key));
+            }
+        }
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == HttpStatus.SC_OK) {
-				// 成功
-				responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
+        method.setConfig(defaultRequestConfig);
 
-				log.debug("[HTTP]接收数据: {}, {}", statusCode, responseContent);
-				
-				return responseContent;
+        method.addHeader("Content-Type", contentType);
 
-			} else {
-				// 失败
-				responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
-				
-				log.error("[HTTP]接收数据: {}, {}", statusCode, responseContent);
+        method.setEntity(new StringEntity(content, "utf-8"));
 
-				throw new Exception("[HTTP]异常响应状态:" + statusCode);
-			}
-		} catch (Exception ex) {
-			
-			log.error("***发送消息时出现异常: " + url, ex);
+        String responseContent = null;
 
-			throw ex;
-			
-		} finally {
-			if (method != null) {
-				// 释放连接
-				method.releaseConnection();
-			}
-			if (httpclient != null) {
-				// 关闭实例
-				httpclient.close();
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * 方法功能说明：PUT数据
-	 * 创建：2017年3月9日 by admin 
-	 * 修改：日期 by 修改者
-	 * 修改内容：
-	 * @参数： @param url
-	 * @参数： @param content
-	 * @参数： @param contentType
-	 * @参数： @return
-	 * @参数： @throws Exception    
-	 * @return String
-	 *
-	 */
-	public static String putString(String url, String content, String contentType, Map<String,String> headers) throws Exception {
+        try {
+            // 执行请求
+            HttpResponse response = httpclient.execute(method);
 
-		if (StringUtils.isEmpty(url)) {
-			throw new NullPointerException("URL为空");
-		}
+            int statusCode = response.getStatusLine().getStatusCode();
 
-		log.debug("[HTTP]发送数据: url={}, content={}", url, content);
+            if (statusCode == HttpStatus.SC_OK) {
+                // 成功
+                responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
 
-		CloseableHttpClient httpclient = HttpClients.createDefault();
+                log.debug("[HTTP]接收数据: {}, {}", statusCode, responseContent);
 
-		HttpPut method = new HttpPut(url);
+                return responseContent;
 
-		for (String key : headers.keySet()) {
-			method.addHeader(key, headers.get(key));
-		}
+            } else {
+                // 失败
+                responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
 
-		method.setConfig(defaultRequestConfig);
+                log.error("[HTTP]接收数据: {}, {}", statusCode, responseContent);
 
-		method.addHeader("Content-Type", contentType);
+                throw new Exception("[HTTP]异常响应状态:" + statusCode);
+            }
+        } catch (Exception ex) {
 
-		method.setEntity(new StringEntity(content, "utf-8"));
-		
-		String responseContent = null;
+            log.error("***发送消息时出现异常: " + url, ex);
 
-		try {
-			// 执行请求
-			HttpResponse response = httpclient.execute(method);
+            throw ex;
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == HttpStatus.SC_OK) {
-				// 成功
-				responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
+        } finally {
+            if (method != null) {
+                // 释放连接
+                method.releaseConnection();
+            }
+            if (httpclient != null) {
+                // 关闭实例
+                httpclient.close();
+            }
+        }
+    }
 
-				log.debug("[HTTP]接收数据: {}, {}", statusCode, responseContent);
-				
-				return responseContent;
+    /**
+     * 方法功能说明：PUT数据
+     * 创建：2017年3月9日 by admin
+     * 修改：日期 by 修改者
+     * 修改内容：
+     *
+     * @return String
+     * @参数： @param url
+     * @参数： @param content
+     * @参数： @param contentType
+     * @参数： @return
+     * @参数： @throws Exception
+     */
+    public static String putString(String url, String content, String contentType, Map<String, String> headers) throws Exception {
 
-			} else {
-				// 失败
-				responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
-				
-				log.error("[HTTP]接收数据: {}, {}", statusCode, responseContent);
+        if (StringUtils.isEmpty(url)) {
+            throw new NullPointerException("URL为空");
+        }
 
-				throw new Exception("[HTTP]异常响应状态:" + statusCode);
-			}
-		} catch (Exception ex) {
-			
-			log.error("***发送消息时出现异常: " + url, ex);
+        log.debug("[HTTP]发送数据: url={}, content={}", url, content);
 
-			throw ex;
-			
-		} finally {
-			if (method != null) {
-				// 释放连接
-				method.releaseConnection();
-			}
-			if (httpclient != null) {
-				// 关闭实例
-				httpclient.close();
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * 方法功能说明：以GET的方式获取数据
-	 * 创建：2017年3月15日 by Liu.Wen 
-	 * 修改：日期 by 修改者
-	 * 修改内容：
-	 * @参数： @param url
-	 * @参数： @param content
-	 * @参数： @param contentType
-	 * @参数： @param headers
-	 * @参数： @return    
-	 * @return String
-	 *
-	 */
-	public static final String getString(String url, String contentType, Map<String,String> headers) throws Exception {
-		
-		if (StringUtils.isEmpty(url)) {
-			throw new NullPointerException("URL为空");
-		}
+        CloseableHttpClient httpclient = HttpClients.createDefault();
 
-		log.debug("[HTTP]发送数据: url={}", url);
+        HttpPut method = new HttpPut(url);
 
-		CloseableHttpClient httpclient = HttpClients.createDefault();
+        for (String key : headers.keySet()) {
+            method.addHeader(key, headers.get(key));
+        }
 
-		HttpGet method = new HttpGet(url);
+        method.setConfig(defaultRequestConfig);
 
-		for (String key : headers.keySet()) {
-			method.addHeader(key, headers.get(key));
-		}
+        method.addHeader("Content-Type", contentType);
 
-		method.setConfig(defaultRequestConfig);
+        method.setEntity(new StringEntity(content, "utf-8"));
 
-		method.addHeader("Content-Type", contentType);
+        String responseContent = null;
 
-		String responseContent = null;
+        try {
+            // 执行请求
+            HttpResponse response = httpclient.execute(method);
 
-		try {
-			// 执行请求
-			HttpResponse response = httpclient.execute(method);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == HttpStatus.SC_OK) {
-				// 成功
-				responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
+            if (statusCode == HttpStatus.SC_OK) {
+                // 成功
+                responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
 
-				log.debug("[HTTP]响应数据: {}, {}", statusCode, responseContent);
-				
-				return responseContent;
+                log.debug("[HTTP]接收数据: {}, {}", statusCode, responseContent);
 
-			} else {
-				// 失败
-				responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
-				
-				log.error("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+                return responseContent;
 
-				throw new Exception("[HTTP]异常响应状态:" + statusCode);
-			}
-		} catch (Exception ex) {
-			
-			log.error("***HTTP请求调用出现异常: " + url, ex);
+            } else {
+                // 失败
+                responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
 
-			throw ex;
-			
-		} finally {
-			if (method != null) {
-				// 释放连接
-				method.releaseConnection();
-			}
-			if (httpclient != null) {
-				// 关闭实例
-				httpclient.close();
-			}
-		}
-	}
-	
+                log.error("[HTTP]接收数据: {}, {}", statusCode, responseContent);
+
+                throw new Exception("[HTTP]异常响应状态:" + statusCode);
+            }
+        } catch (Exception ex) {
+
+            log.error("***发送消息时出现异常: " + url, ex);
+
+            throw ex;
+
+        } finally {
+            if (method != null) {
+                // 释放连接
+                method.releaseConnection();
+            }
+            if (httpclient != null) {
+                // 关闭实例
+                httpclient.close();
+            }
+        }
+    }
+
+    /**
+     * 方法功能说明：以GET的方式获取数据
+     * 创建：2017年3月15日 by Liu.Wen
+     * 修改：日期 by 修改者
+     * 修改内容：
+     *
+     * @return String
+     * @参数： @param url
+     * @参数： @param content
+     * @参数： @param contentType
+     * @参数： @param headers
+     * @参数： @return
+     */
+    public static final String getString(String url, String contentType, Map<String, String> headers) throws Exception {
+
+        if (StringUtils.isEmpty(url)) {
+            throw new NullPointerException("URL为空");
+        }
+
+        log.debug("[HTTP]发送数据: url={}", url);
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+
+        HttpGet method = new HttpGet(url);
+
+        for (String key : headers.keySet()) {
+            method.addHeader(key, headers.get(key));
+        }
+
+        method.setConfig(defaultRequestConfig);
+
+        method.addHeader("Content-Type", contentType);
+
+        String responseContent = null;
+
+        try {
+            // 执行请求
+            HttpResponse response = httpclient.execute(method);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (statusCode == HttpStatus.SC_OK) {
+                // 成功
+                responseContent = EntityUtils.toString(response.getEntity(), "utf-8");
+
+                log.debug("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+
+                return responseContent;
+
+            } else {
+                // 失败
+                responseContent = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+                log.error("[HTTP]响应数据: {}, {}", statusCode, responseContent);
+
+                throw new Exception("[HTTP]异常响应状态:" + statusCode);
+            }
+        } catch (Exception ex) {
+
+            log.error("***HTTP请求调用出现异常: " + url, ex);
+
+            throw ex;
+
+        } finally {
+            if (method != null) {
+                // 释放连接
+                method.releaseConnection();
+            }
+            if (httpclient != null) {
+                // 关闭实例
+                httpclient.close();
+            }
+        }
+    }
+
 }

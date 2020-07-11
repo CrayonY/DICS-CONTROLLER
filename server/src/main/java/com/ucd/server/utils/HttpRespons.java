@@ -3,6 +3,7 @@ package com.ucd.server.utils;
 import lombok.Data;
 
 import java.util.Vector;
+
 @Data
 public class HttpRespons {
     Vector<String> contentCollection;

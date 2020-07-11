@@ -31,30 +31,30 @@ public class HardWareMEMController {
     private final static Logger logger = LoggerFactory.getLogger(HardWareMEMController.class);
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author Crayon
      * @Description 获取硬件MEM信息
      * @date 2019/4/1 3:41 PM
      * @params [pageView, hardwareMemDTO]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/getHardWareMEM")
     public ResultVO getHardWareMEM(PageView pageView, HardwareMemDTO hardwareMemDTO) {
         ResultVO resultVO = null;
 
-        try{
-            if(pageView == null){
+        try {
+            if (pageView == null) {
                 pageView = new PageView();
             }
             // 获取数据
-            pageView = hardWareMEMService.getHardWareMEM(pageView,hardwareMemDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = hardWareMEMService.getHardWareMEM(pageView, hardwareMemDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
 

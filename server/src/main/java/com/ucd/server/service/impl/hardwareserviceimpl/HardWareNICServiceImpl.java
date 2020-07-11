@@ -38,13 +38,13 @@ public class HardWareNICServiceImpl implements HardWareNICService {
     public PageView getHardWareNIC(PageView pageView, HardwareNicDTO hardwareNicDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
         logger.info("hardwareNicDTO:" + hardwareNicDTO);
-        if (hardwareNicDTO.getTablename() == null || "".equals(hardwareNicDTO.getTablename())){
+        if (hardwareNicDTO.getTablename() == null || "".equals(hardwareNicDTO.getTablename())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "表名不能为空");
         }
-        if("nowtrue".equals(hardwareNicDTO.getTablename())){
+        if ("nowtrue".equals(hardwareNicDTO.getTablename())) {
             hardwareNicDTO.setTablename("hard_ware_nic_now");
-        }else {
+        } else {
             hardwareNicDTO.setTablename("hard_ware_nic");
         }
         models.put("pageView", pageView);

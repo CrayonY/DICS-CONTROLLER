@@ -11,34 +11,35 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
+
 @Configuration
 @EnableAsync
 public class SoftwareThread {
 
     private static final Logger logger = LoggerFactory.getLogger(SoftwareThread.class);
 
-        private int corePoolSize = 20;//核心池大小
+    private int corePoolSize = 20;//核心池大小
 
-        private int maxPoolSize = 50;//最大池大小
+    private int maxPoolSize = 50;//最大池大小
 
-        private int queueCapacity = 8;
+    private int queueCapacity = 8;
 
-        private int keepAlive = 60;
+    private int keepAlive = 60;
 
-        @Bean
-        public Executor transwarpExecutor() {
+    @Bean
+    public Executor transwarpExecutor() {
 
-            logger.info("+++++++++++++++++++++++++++++++++++++++++++++++corePoolSize:【{}】,maxPoolSize:【{}】,queueCapacity:【{}】,keepAlive:【{}】",corePoolSize,maxPoolSize,queueCapacity,keepAlive);
-            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-            executor.setCorePoolSize(corePoolSize);
-            executor.setMaxPoolSize(maxPoolSize);
-            executor.setQueueCapacity(queueCapacity);
-            executor.setThreadNamePrefix("transwarpExecutor-");
-            executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-            executor.setKeepAliveSeconds(keepAlive);
-            executor.initialize();
-            return executor;
-        }
+        logger.info("+++++++++++++++++++++++++++++++++++++++++++++++corePoolSize:【{}】,maxPoolSize:【{}】,queueCapacity:【{}】,keepAlive:【{}】", corePoolSize, maxPoolSize, queueCapacity, keepAlive);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("transwarpExecutor-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setKeepAliveSeconds(keepAlive);
+        executor.initialize();
+        return executor;
+    }
 
 
 }

@@ -20,8 +20,8 @@ public class IndiviConnection {
     private String baseUrl;
     private CloseableHttpClient client;
     private static RequestConfig defaultRequestConfig = RequestConfig.custom()
-			.setConnectTimeout(10000).setConnectionRequestTimeout(10000)
-			.setSocketTimeout(30000).build();
+            .setConnectTimeout(10000).setConnectionRequestTimeout(10000)
+            .setSocketTimeout(30000).build();
 
 
     public IndiviConnection(String baseUrl) {
@@ -36,7 +36,7 @@ public class IndiviConnection {
      * @return HttpResponse
      * @throws Exception
      */
-    
+
     public static CloseableHttpResponse get(String path, IndiviConnection connection) throws Exception {
         String fullUrl = connection.baseUrl + path;
         HttpGet getRequest = new HttpGet(fullUrl);
@@ -53,7 +53,7 @@ public class IndiviConnection {
         CloseableHttpResponse response = connection.client.execute(getRequest);
         return response;
     }
-    
+
     /**
      * HTTP POST
      *
@@ -75,7 +75,7 @@ public class IndiviConnection {
     /**
      * HTTP POST(without content)
      *
-     * @param path    relative path
+     * @param path relative path
      * @return HttpResponse
      * @throws Exception
      */
@@ -89,7 +89,6 @@ public class IndiviConnection {
         postRequest.abort();
         return response;
     }
-
 
 
     /**
@@ -110,6 +109,7 @@ public class IndiviConnection {
         deleteRequest.abort();
         return response;
     }
+
     public static CloseableHttpResponse delete(String path, IndiviConnection connection) throws Exception {
         String fullUrl = connection.baseUrl + path;
         MyHttpDelete deleteRequest = new MyHttpDelete(fullUrl);
@@ -142,7 +142,6 @@ public class IndiviConnection {
         return response;
     }
 
- 
 
     public void close() {
         if (client != null) {
@@ -154,7 +153,7 @@ public class IndiviConnection {
         }
     }
 
-    public static void printLineAndTitle( String funcName) throws Exception{
+    public static void printLineAndTitle(String funcName) throws Exception {
         System.out.println("\n\n ----------------------------------------------------");
         System.out.println("\n The return of " + funcName + ": \n");
     }

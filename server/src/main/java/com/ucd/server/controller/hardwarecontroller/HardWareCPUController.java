@@ -32,33 +32,32 @@ public class HardWareCPUController {
     private final static Logger logger = LoggerFactory.getLogger(HardwareController.class);
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author Crayon
      * @Description 查看硬件CPU信息
      * @date 2019/3/29 3:03 PM
      * @params [pageView, hardwareCpuDTO]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/getHardWareCpu")
     public ResultVO getHardWareCpu(PageView pageView, HardwareCpuDTO hardwareCpuDTO) {
 
         ResultVO resultVO;
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView = hardWareCPUService.getHardWareCPU(pageView,hardwareCpuDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = hardWareCPUService.getHardWareCPU(pageView, hardwareCpuDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
-
 
 
 }

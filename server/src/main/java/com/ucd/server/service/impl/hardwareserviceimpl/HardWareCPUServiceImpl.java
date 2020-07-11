@@ -24,7 +24,7 @@ import java.util.Map;
  * Created by crayon on 2019/4/1.
  */
 @Service
-public class HardWareCPUServiceImpl implements HardWareCPUService{
+public class HardWareCPUServiceImpl implements HardWareCPUService {
 
     @Autowired
     public DaoClient daoClient;

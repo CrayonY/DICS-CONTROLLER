@@ -9,12 +9,12 @@ import com.ucd.daocommon.DTO.hardwareDTO.HardwareMemDTO;
 public interface HardWareMEMService2 {
 
     /**
+     * @return com.ucd.common.utils.pager.PageView
+     * @throws
      * @author gwm
      * @Description 获取硬件的MEM信息
      * @date 2019/4/1 3:07 PM
      * @params [pageView, hardwareMemDTO]
-     * @exception  
-     * @return com.ucd.common.utils.pager.PageView  
      */
     PageView getHardWareMEM(PageView pageView, HardwareMemDTO hardwareMemDTO) throws Exception;
 

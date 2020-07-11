@@ -30,46 +30,47 @@ public class ServiceSync {
 
     private final static Logger logger = LoggerFactory.getLogger(ServiceSync.class);
 
-/**
- * @author gongweimin
- * @Description
- * @date 2019/5/22 15:46 
- * @params []
- * @exception  
- * @return java.lang.String  
- */
-    public String SyncThdListDataThread() throws Exception{
+    /**
+     * @return java.lang.String
+     * @throws
+     * @author gongweimin
+     * @Description
+     * @date 2019/5/22 15:46
+     * @params []
+     */
+    public String SyncThdListDataThread() throws Exception {
         logger.info("开始调取同步脚本");
         RemoteShellExecutor executor = new RemoteShellExecutor(syncip, syncusername, syncpassword);
         int in = executor.exec(syncstartshell);
-        logger.info("数据同步脚本返回in："+in);
-        if (in == 0){
+        logger.info("数据同步脚本返回in：" + in);
+        if (in == 0) {
             return "OK";
-        }else {
+        } else {
             return "ERROR";
         }
 
     }
+
     /**
+     * @return java.lang.String
+     * @throws
      * @author gongweimin
      * @Description
      * @date 2019/5/22 15:48
      * @params []
-     * @exception
-     * @return java.lang.String
      */
-    public String KillSyncDataThread() throws Exception{
+    public String KillSyncDataThread() throws Exception {
         logger.info("开始调取杀死同步进程脚本");
         RemoteShellExecutor executor = new RemoteShellExecutor(syncip, syncusername, syncpassword);
         int in = executor.exec(syncstopshell);
-        if (in == 0){
+        if (in == 0) {
             return "OK";
-        }else {
+        } else {
             return "ERROR";
         }
     }
 
 
-
-    public static void main(String[] args) {}
+    public static void main(String[] args) {
+    }
 }

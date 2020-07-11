@@ -25,20 +25,21 @@ public class Connection {
     private static CloseableHttpClient client;
     private CloseableHttpClient client1;
     private static RequestConfig defaultRequestConfig = RequestConfig.custom()
-			.setConnectTimeout(10000).setConnectionRequestTimeout(10000)
-			.setSocketTimeout(30000).build();
+            .setConnectTimeout(10000).setConnectionRequestTimeout(10000)
+            .setSocketTimeout(30000).build();
 
     public Connection(String baseUrl) {
         this.baseUrl = baseUrl;
         this.client = HttpClients.createDefault();
     }
-    public Connection(String baseUrl1,CloseableHttpClient client1) {
+
+    public Connection(String baseUrl1, CloseableHttpClient client1) {
         this.baseUrl1 = baseUrl1;
         //this.client = HttpClients.createDefault();
         this.client1 = client1;
     }
 
-    public Connection(String baseUrl1,String type) {
+    public Connection(String baseUrl1, String type) {
         this.baseUrl1 = baseUrl1;
         this.client1 = HttpClients.createDefault();
     }
@@ -68,7 +69,7 @@ public class Connection {
         return response;
     }
 
-    public static CloseableHttpResponse get1(String path,Connection connection) throws Exception {
+    public static CloseableHttpResponse get1(String path, Connection connection) throws Exception {
         String fullUrl = connection.baseUrl1 + path;
         HttpGet getRequest = new HttpGet(fullUrl);
         getRequest.setConfig(defaultRequestConfig);
@@ -77,7 +78,7 @@ public class Connection {
         return response;
     }
 
-    public static CloseableHttpResponse getNOAbort1(String path,Connection connection) throws Exception {
+    public static CloseableHttpResponse getNOAbort1(String path, Connection connection) throws Exception {
         String fullUrl = connection.baseUrl1 + path;
         HttpGet getRequest = new HttpGet(fullUrl);
         getRequest.setConfig(defaultRequestConfig);
@@ -106,7 +107,7 @@ public class Connection {
     /**
      * HTTP POST(without content)
      *
-     * @param path    relative path
+     * @param path relative path
      * @return HttpResponse
      * @throws Exception
      */
@@ -142,11 +143,11 @@ public class Connection {
     /**
      * HTTP POST(without content)
      *
-     * @param path    relative path
+     * @param path relative path
      * @return HttpResponse
      * @throws Exception
      */
-    public static CloseableHttpResponse post1(String path,Connection connection) throws Exception {
+    public static CloseableHttpResponse post1(String path, Connection connection) throws Exception {
         // JSONObject postContent = new JSONObject();
         String fullUrl = connection.baseUrl1 + path;
         HttpPost postRequest = new HttpPost(fullUrl);
@@ -195,8 +196,6 @@ public class Connection {
     }
 
 
-
-
     /**
      * HTTP DELETE
      *
@@ -215,6 +214,7 @@ public class Connection {
         deleteRequest.abort();
         return response;
     }
+
     public static CloseableHttpResponse delete(String path) throws Exception {
         String fullUrl = baseUrl + path;
         MyHttpDelete deleteRequest = new MyHttpDelete(fullUrl);
@@ -267,7 +267,7 @@ public class Connection {
         }
     }
 
-    public static void printLineAndTitle( String funcName) throws Exception{
+    public static void printLineAndTitle(String funcName) throws Exception {
         System.out.println("\n\n ----------------------------------------------------");
         System.out.println("\n The return of " + funcName + ": \n");
     }

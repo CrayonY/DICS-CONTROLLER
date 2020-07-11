@@ -1,5 +1,5 @@
 package com.ucd.server.service.impl.tdhmetricserviceimpl;
- 
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -9,27 +9,24 @@ import com.ucd.server.service.tdhmetricservice.RestApiResultService;
 import org.springframework.stereotype.Service;
 
 
-
-
- 
 @Service
 public class RestApiResultServiceImpl implements RestApiResultService {
-	
-	@Override
-	public TdhMetricDTO changeFormatByresult(String result) {
-//		String getJson = StringUtils.trim(result).substring(1, result.length()-1);
-		TdhMetricDTO tdhMetricDTO  = new TdhMetricDTO();
-		JSONArray jsonArray = JSONArray.parseArray(result);
-		for (Object obj : jsonArray) {
 
-	        JSONObject jsonObject = (JSONObject) obj;
-			tdhMetricDTO.setName(jsonObject.getString("name"));
-			tdhMetricDTO.setValue(jsonObject.getString("value"));
-			tdhMetricDTO.setType(jsonObject.getString("type"));
-			tdhMetricDTO.setUnit(jsonObject.getString("unit"));
-			tdhMetricDTO.setEnname(jsonObject.getString("name"));
-			tdhMetricDTO.setTimestamp(jsonObject.getString("timestamp"));
-	    }
-		return tdhMetricDTO;
-	}
+    @Override
+    public TdhMetricDTO changeFormatByresult(String result) {
+//		String getJson = StringUtils.trim(result).substring(1, result.length()-1);
+        TdhMetricDTO tdhMetricDTO = new TdhMetricDTO();
+        JSONArray jsonArray = JSONArray.parseArray(result);
+        for (Object obj : jsonArray) {
+
+            JSONObject jsonObject = (JSONObject) obj;
+            tdhMetricDTO.setName(jsonObject.getString("name"));
+            tdhMetricDTO.setValue(jsonObject.getString("value"));
+            tdhMetricDTO.setType(jsonObject.getString("type"));
+            tdhMetricDTO.setUnit(jsonObject.getString("unit"));
+            tdhMetricDTO.setEnname(jsonObject.getString("name"));
+            tdhMetricDTO.setTimestamp(jsonObject.getString("timestamp"));
+        }
+        return tdhMetricDTO;
+    }
 }

@@ -32,30 +32,30 @@ public class HardWareDiskController {
     private final static Logger logger = LoggerFactory.getLogger(HardWareDiskController.class);
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author Crayon
      * @Description 获取硬件磁盘信息
      * @date 2019/4/1 4:05 PM
      * @params [pageView, hardwareDiskDTO]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/getHardWareDisk")
     public ResultVO getHardWareDisk(PageView pageView, HardwareDiskDTO hardwareDiskDTO) {
         ResultVO resultVO = null;
 
-        try{
-            if(pageView == null){
+        try {
+            if (pageView == null) {
                 pageView = new PageView();
             }
             // 获取数据
-            pageView = hardWareDiskService.getHardwareDisk(pageView,hardwareDiskDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = hardWareDiskService.getHardwareDisk(pageView, hardwareDiskDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
 

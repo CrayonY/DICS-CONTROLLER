@@ -21,38 +21,37 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 
-
-
 @Component
-@Order(value=1)//boot启动后自启动
-public class ConfigRunner implements CommandLineRunner{
+@Order(value = 1)//boot启动后自启动
+public class ConfigRunner implements CommandLineRunner {
 
-	@Value("${basicparameters.configrunning}")
-	public String configrunning;
-	@Autowired
-	public DaoClient daoClient;
+    @Value("${basicparameters.configrunning}")
+    public String configrunning;
+    @Autowired
+    public DaoClient daoClient;
 
-	@Autowired
-	public TdhTaskParameterMapper tdhTaskParameterMapper;
+    @Autowired
+    public TdhTaskParameterMapper tdhTaskParameterMapper;
 
     @Autowired
     private TdhServicesjobService tdhServicesjobService;
-	private final static Logger logger = LoggerFactory.getLogger(ConfigRunner.class);
-	/**
-	 *
-	 */
-	public void run(String... args) throws Exception {
-		Date now = new Date();
-		logger.info("configrunning:【{}】,ConfigRunner now time:【{}】",configrunning,new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
-        if("0".equals(configrunning)){
-			logger.info("不需要与对端同步数据！");
-		}else{
-			logger.info("需要与对端同步数据！");
-			//关闭“数据同步”定时任务
-			TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
-			tdhTaskParameter.setTaskName("taskServicejob");
-			tdhTaskParameter.setTaskStatus(1);
-			tdhTaskParameterMapper.updateByTaskName(tdhTaskParameter);
+    private final static Logger logger = LoggerFactory.getLogger(ConfigRunner.class);
+
+    /**
+     *
+     */
+    public void run(String... args) throws Exception {
+        Date now = new Date();
+        logger.info("configrunning:【{}】,ConfigRunner now time:【{}】", configrunning, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now));
+        if ("0".equals(configrunning)) {
+            logger.info("不需要与对端同步数据！");
+        } else {
+            logger.info("需要与对端同步数据！");
+            //关闭“数据同步”定时任务
+            TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
+            tdhTaskParameter.setTaskName("taskServicejob");
+            tdhTaskParameter.setTaskStatus(1);
+            tdhTaskParameterMapper.updateByTaskName(tdhTaskParameter);
             try {
                 boolean flag = tdhServicesjobService.endToEndSynchronizationData();
                 if (flag) {
@@ -60,15 +59,15 @@ public class ConfigRunner implements CommandLineRunner{
                     //打开“数据同步”定时任务
                     tdhTaskParameter.setTaskStatus(0);
                     tdhTaskParameterMapper.updateByTaskName(tdhTaskParameter);
-                }else{
+                } else {
                     logger.info("与对端同步数据失败，请查明原因");
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-				logger.error("需要与对端同步数据发生异常！目前不可进行定时任务 e:"+e);
+                logger.error("需要与对端同步数据发生异常！目前不可进行定时任务 e:" + e);
                 tdhTaskParameter.setTaskStatus(1);
                 tdhTaskParameterMapper.updateByTaskName(tdhTaskParameter);
             }
-		}
+        }
     }
 }

@@ -18,33 +18,33 @@ public interface HardWareService2 {
     PageView gethardwareInfo(PageView pageView, HardwareNowDTO hardwareNowDTO) throws Exception;
 
     /**
+     * @return com.ucd.common.VO.ResultVO<java.util.Map < java.lang.String, java.lang.Object>>
+     * @throws
      * @author gwm
      * @Description 查看所有硬件实时状态数据
      * @date 2019/4/28 1:54 PM
      * @params [host]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>
      */
     ResultVO<Map<String, Object>> getHardWareListNow(String host);
 
-   /**
-    * @author gwm
-    * @Description 根据时间区间查看硬件状态
-    * @date 2019/5/5 2:14 PM
-    * @params [type, hardwareCpuDTO]
-    * @exception
-    * @return com.ucd.common.VO.ResultVO<java.util.Map<java.lang.String,java.lang.Object>>
-    */
-    ResultVO<Map<String,Object>> getHardWareStatusByTime(String type, String nipsOrThreadNames, HardwareCpuDTO hardwareCpuDTO);
+    /**
+     * @return com.ucd.common.VO.ResultVO<java.util.Map < java.lang.String, java.lang.Object>>
+     * @throws
+     * @author gwm
+     * @Description 根据时间区间查看硬件状态
+     * @date 2019/5/5 2:14 PM
+     * @params [type, hardwareCpuDTO]
+     */
+    ResultVO<Map<String, Object>> getHardWareStatusByTime(String type, String nipsOrThreadNames, HardwareCpuDTO hardwareCpuDTO);
 
 
     /***
      * @author gwm
-     * @Description        获取所有硬件host
+     * @Description 获取所有硬件host
      * @date 2019/6/12 10:18
      * @params []
      * @exception
      * @return com.ucd.common.VO.ResultVO
      */
-    ResultVO getHardWareHostList()throws Exception;
+    ResultVO getHardWareHostList() throws Exception;
 }

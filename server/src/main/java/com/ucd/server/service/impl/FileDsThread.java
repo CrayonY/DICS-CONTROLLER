@@ -29,13 +29,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
-    *@ClassName: ServiceDsThread
-    *@Description: TODO
-    *@Author: gongweimin
-    *@CreateDate: 2019/5/5 12:36
-    *@Version 1.0
-    *@Copyright:  Copyright2018- BJCJ Inc. All rights reserved. 
-**/
+ * @ClassName: ServiceDsThread
+ * @Description: TODO
+ * @Author: gongweimin
+ * @CreateDate: 2019/5/5 12:36
+ * @Version 1.0
+ * @Copyright: Copyright2018- BJCJ Inc. All rights reserved.
+ **/
 @Component
 public class FileDsThread {
     @Value("${basicparameters.transwarp.guardian-access-token}")
@@ -66,7 +66,7 @@ public class FileDsThread {
 //                logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + tdhDsDTOS.get(0).getCentre() + "中心删除文件异常：");
 //                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, tdhDsDTOS.get(0).getCentre() + "中心上传文件异常");
 //            }
-            boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile",guardianAccessToken);
+            boolean tdhcreateFileFlag = ForFile.TDHcreate("testFile", guardianAccessToken);
             if (!tdhcreateFileFlag) {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + tdhDsDTOS.get(0).getCentre() + "中心上传文件异常：");
                 throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, tdhDsDTOS.get(0).getCentre() + "中心上传文件异常");
@@ -130,14 +130,14 @@ public class FileDsThread {
                 "from station_stream_c a) t lateral view explode(split(t.context,'\\\\|')) context_view as context_list\n" +
                 "where get_json_object(context_list,'$.Id') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),9,15),'(T|\\\\:|\\\\.|\\\\-)','') is not null and regexp_replace(substr(get_json_object(context_list,'$.Time'),6,2),'(T|\\\\:|\\\\.|\\\\-)','') = substr(201812,5)";
         int index1 = a.indexOf("into ");
-        System.out.println("index1:"+index1);//index1:7
-        int index2 = a.indexOf("_",a.indexOf("_")+1);
-        System.out.println("index2:"+index2);//index2:32
-        String b = a.substring(12,index2);
-        System.out.println("b:"+b);//b:station_c2222456sdfg
+        System.out.println("index1:" + index1);//index1:7
+        int index2 = a.indexOf("_", a.indexOf("_") + 1);
+        System.out.println("index2:" + index2);//index2:32
+        String b = a.substring(12, index2);
+        System.out.println("b:" + b);//b:station_c2222456sdfg
         Date now = new Date();
         long t1 = now.getTime();
-        System.out.println("t1:"+t1);//
+        System.out.println("t1:" + t1);//
         System.out.println(a.indexOf("insert"));//0
     }
 }

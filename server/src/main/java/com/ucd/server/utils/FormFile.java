@@ -24,6 +24,7 @@ public class FormFile {
 
     /**
      * 此函数用来传输小文件
+     *
      * @param filname
      * @param data
      * @param parameterName
@@ -33,10 +34,12 @@ public class FormFile {
         this.data = data;
         this.filname = filname;
         this.parameterName = parameterName;
-        if(contentType!=null) this.contentType = contentType;
+        if (contentType != null) this.contentType = contentType;
     }
+
     /**
      * 此函数用来传输大文件
+     *
      * @param filname
      * @param file
      * @param parameterName
@@ -51,7 +54,7 @@ public class FormFile {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        if(contentType!=null) this.contentType = contentType;
+        if (contentType != null) this.contentType = contentType;
     }
 
     public File getFile() {

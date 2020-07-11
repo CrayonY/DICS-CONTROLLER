@@ -35,7 +35,7 @@ public class OperationLogInfoServiceimpl implements OperationLogInfoService {
     @Transactional
     @Async("transwarpExecutor")
     public String saveOperationLogInfo(OperationLogInfoDTO operationLogInfoDTO) throws Exception {
-        if(operationLogInfoDTO == null){
+        if (operationLogInfoDTO == null) {
             throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER);
         }
         operationLogInfoDTO.setCreattime(new Date());
@@ -44,19 +44,19 @@ public class OperationLogInfoServiceimpl implements OperationLogInfoService {
         if ("000000".equals(resultVO.getCode())) {
             return resultVO.getData().toString();
         } else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT,  "异常:" + resultVO.getMsg()+resultVO.getData());
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "异常:" + resultVO.getMsg() + resultVO.getData());
         }
     }
 
     @Override
     public PageView getOperationLogInfo(PageView pageView, OperationLogInfoDTO operationLogInfoDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
-        models.put("pageView",pageView);
-        models.put("operationLogInfoDTO",operationLogInfoDTO);
+        models.put("pageView", pageView);
+        models.put("operationLogInfoDTO", operationLogInfoDTO);
         ResultVO resultVO = daoClient.getOperationLogInfo(models);
         logger.info("resultVO=" + resultVO);
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -65,11 +65,11 @@ public class OperationLogInfoServiceimpl implements OperationLogInfoService {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
 
 }

@@ -32,33 +32,32 @@ public class HardWareNICController2 {
     private final static Logger logger = LoggerFactory.getLogger(HardWareNICController2.class);
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gwm
      * @Description 查看硬件NIC信息
      * @date 2019/3/29 3:03 PM
      * @params [pageView, hardwareNicDTO]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/getHardWareNic")
     public ResultVO getHardWareNic(PageView pageView, HardwareNicDTO hardwareNicDTO) {
 
         ResultVO resultVO;
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView = hardWareNICService2.getHardWareNIC(pageView,hardwareNicDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = hardWareNICService2.getHardWareNIC(pageView, hardwareNicDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
-
 
 
 }

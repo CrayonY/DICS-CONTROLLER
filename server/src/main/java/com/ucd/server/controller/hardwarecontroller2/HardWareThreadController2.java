@@ -32,33 +32,32 @@ public class HardWareThreadController2 {
     private final static Logger logger = LoggerFactory.getLogger(HardWareThreadController2.class);
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gwm
      * @Description 查看硬件Thread信息
      * @date 2019/3/29 3:03 PM
      * @params [pageView, hardwareThreadDTO]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/getHardWareThread")
     public ResultVO getHardWareThread(PageView pageView, HardwareThreadDTO hardwareThreadDTO) {
 
         ResultVO resultVO;
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView = hardWareThreadService2.getHardWareThread(pageView,hardwareThreadDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = hardWareThreadService2.getHardWareThread(pageView, hardwareThreadDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
-
 
 
 }

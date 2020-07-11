@@ -67,10 +67,14 @@ public class ServiceThread {
 
     private final Integer NUM = 180;
 
-    /** 状态：健康 */
+    /**
+     * 状态：健康
+     */
     private final String HEALTHY = "HEALTHY";
 
-    /** 状态：未知 */
+    /**
+     * 状态：未知
+     */
     private final String UNKNOW = "UNKNOW";
 
 
@@ -93,18 +97,18 @@ public class ServiceThread {
     private final static Logger logger = LoggerFactory.getLogger(ServiceThread.class);
 
     /**
+     * @return void
+     * @throws
      * @author Crayon
      * @Description
      * @date 2019/4/12 4:57 PM
      * @params [url, centre, username, password]
-     * @exception
-     * @return void
      */
     @Async("transwarpExecutor")
     public void saveThdServicesListDataThread(String url, String centre, String username, String password, String nowDate) {
 
         logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
-        Connection client = new Connection(url,centre);
+        Connection client = new Connection(url, centre);
         List<TdhServicesInfoDTO> result = new ArrayList<>();
         Date now = new Date();
         Gson gs = new Gson();
@@ -113,11 +117,11 @@ public class ServiceThread {
 //        LocalDateTime ldt = LocalDateTime.now();
 //        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 //        String nowDate = ldt.format(dateTimeFormatter);
-        try{
+        try {
 
-            if(UserApi.login(client, username, password)){
+            if (UserApi.login(client, username, password)) {
 //            if(UserApi.login(client, "monitorserviceb", "monitorserviceb")){
-                try{
+                try {
                     String servicesInfo = ServicesApi.getAllServices(client);
 //                    logger.info(servicesInfo.toString());
 
@@ -128,19 +132,19 @@ public class ServiceThread {
                     UserApi.logout(client);
                     client.close1();
 
-                }catch (Exception e){
+                } catch (Exception e) {
                     UserApi.logout(client);
                     client.close1();
-                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode() + "," + centre + "中心异常：e=" + e);
                     throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
                 }
 
-                logger.info(centre + "中心连接关闭" );
+                logger.info(centre + "中心连接关闭");
                 if (result == null) {
                     logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
                 }
-                logger.info(centre + "中心:result.size"+ result.size());
+                logger.info(centre + "中心:result.size" + result.size());
                 ResultVO resultVO = null;
                 // 1.获取查询实时数据结果
                 TdhServicesAVO thdServicesInfoNow = daoClient.getThdServicesInfoNow(centre);
@@ -157,10 +161,10 @@ public class ServiceThread {
                 List<String> nameList = result.parallelStream().map(TdhServicesInfoDTO::getName).collect(Collectors.toList());
 
                 /** 如果结果为空,证明第一次执行定时任务，直接插入第一条实时数据 */
-                if(ObjectUtils.isEmpty(healthChecksIdNum)){
+                if (ObjectUtils.isEmpty(healthChecksIdNum)) {
                     // 保存第一条实时服务数据
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
-                    result = this.healthChecksIdNumIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,tdhServicesUnknowNameListDTO,resultVO);
+                    result = this.healthChecksIdNumIsEmpty(result, tdhServicesListDTO, centre, now, nowDate, thdServicesInfoNow, healthChecksIdNum, tdhServicesUnknowNameListDTO, resultVO);
 
                     // 筛选result中不健康的数据
                     result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
@@ -169,46 +173,46 @@ public class ServiceThread {
                 /** 如果服务实时表已有数据或者初始化数据成功后，执行以下程序 */
                 List<String> nameAorBList = new ArrayList<>();
                 // 查看所有服务类型
-                if (centre.equals(centrea)){
-                    nameAorBList = StringTool.stringToStrList(serviceNameA,",");
+                if (centre.equals(centrea)) {
+                    nameAorBList = StringTool.stringToStrList(serviceNameA, ",");
                 }
-                if (centre.equals(centreb)){
-                    nameAorBList = StringTool.stringToStrList(serviceNameB,",");
+                if (centre.equals(centreb)) {
+                    nameAorBList = StringTool.stringToStrList(serviceNameB, ",");
                 }
                 // 筛选所有未知状态的服务
                 ArrayList<String> unknowNameList = new ArrayList<>();
                 List<String> finalNameAorBList = nameAorBList;
-                logger.info("tttttttttttttttttttttttt"+nameList);
+                logger.info("tttttttttttttttttttttttt" + nameList);
                 finalNameAorBList.forEach(allName -> {
-                    if(nameList.parallelStream().noneMatch(unknowName -> unknowName.equals(allName))){
+                    if (nameList.parallelStream().noneMatch(unknowName -> unknowName.equals(allName))) {
                         // 简化版 if(typeList.parallelStream().noneMatch(allType::equals)){
                         unknowNameList.add(allName);
                     }
                 });
-                logger.info("11111111111"+unknowNameList.toString());
+                logger.info("11111111111" + unknowNameList.toString());
                 // 简化版写法
 //                List<String> unknowNameList1 = finalNameAorBList.parallelStream().filter(allName ->
 //                        nameList.parallelStream().noneMatch(allName::equals)).collect(Collectors.toList());
 
                 /** 如果结果不为空，更新实时数据,并补全缺少未知状态数据  */
-                if(!ObjectUtils.isEmpty(healthChecksIdNum)){
-                    result = this.healthChecksIdNumNotIsEmpty(result,tdhServicesListDTO,centre, now,nowDate,thdServicesInfoNow,healthChecksIdNum,unknowNameList,tdhServicesUnknowNameListDTO,resultVO);
+                if (!ObjectUtils.isEmpty(healthChecksIdNum)) {
+                    result = this.healthChecksIdNumNotIsEmpty(result, tdhServicesListDTO, centre, now, nowDate, thdServicesInfoNow, healthChecksIdNum, unknowNameList, tdhServicesUnknowNameListDTO, resultVO);
 
 //                    logger.info("getHealthChecksId---------------："+thdServicesInfoNow.getHealthChecksId());
 //                    logger.info("NUM---------------："+NUM);
 //                    logger.info("Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM："+(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM));
 
                     /** 判断如果不为180s时，只存储不健康数据 */
-                    if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM){
+                    if (Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) != NUM) {
                         // 筛选result中不健康的数据
                         result = result.stream().filter(a -> !a.getHealth().equals(HEALTHY)).collect(Collectors.toList());
                     }
                 }
-                logger.info("333333333333333333333："+result.size());
-                if(result != null && result.size()>0){
+                logger.info("333333333333333333333：" + result.size());
+                if (result != null && result.size() > 0) {
                     // 数据初始化
                     result.forEach(tdhServicesInfoDTO -> {
-                        logger.info("2222222222222222222222222222"+tdhServicesInfoDTO.getName());
+                        logger.info("2222222222222222222222222222" + tdhServicesInfoDTO.getName());
                         // 与URL匹配，设置中心，初始化数据
                         tdhServicesInfoDTO.setCentre(centre);
                         String healthChecksId = KeyUtil.genUniqueKey();
@@ -217,7 +221,7 @@ public class ServiceThread {
                         tdhServicesInfoDTO.setHealthChecksId(healthChecksId);
                         if ("A".equals(centre)) {
                             tdhServicesInfoDTO.setTableName("tdha_services_TOS");
-                        }else {
+                        } else {
                             tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
                         }
 //                        logger.info(tdhServicesInfoDTO.toString());
@@ -228,7 +232,7 @@ public class ServiceThread {
                         String lastCheck = "";
                         if (null == tdhServicesHealthckDTOList || tdhServicesHealthckDTOList.size() == 0) {
                             logger.info(centre + "中心：tdhServicesHealthckDTOList为空");
-                        }else {
+                        } else {
                             // 获取healthChecks中所需信息，并初始化信息
                             for (TdhServicesHealthckDTO tdhServicesHealthckDTO : tdhServicesHealthckDTOList) {
                                 tdhServicesHealthckDTO.setCreattime(now);
@@ -247,7 +251,7 @@ public class ServiceThread {
                             }
                         }
                         // 插入服务名称
-                        setTableName(tdhServicesInfoDTO,finalNameAorBList);
+                        setTableName(tdhServicesInfoDTO, finalNameAorBList);
 //                        if("SLIPSTREAM".equals(tdhServicesInfoDTO.getType())){
 //                            // 查表“流目前登记的状态”查看流服务的状态state1
 //                            // 判断状态是否是healthy，如果不是，则修改state1的状态为当前状态（若state1的状态与之相同，不修改）；如果是，则判断state1的状态，如果是healthy
@@ -260,46 +264,46 @@ public class ServiceThread {
 
                 }
 
-                logger.info("unknowNameList"+unknowNameList.toString());
+                logger.info("unknowNameList" + unknowNameList.toString());
 
 
                 /** 插入未知状态数据 */
                 List<TdhServicesInfoDTO> resultType = new ArrayList<>();
-                if(unknowNameList != null && unknowNameList.size()>0){
-                   this.unknowTypeList(resultType,centre,now,nowDate,unknowNameList,tdhServicesUnknowNameListDTO,resultVO);
+                if (unknowNameList != null && unknowNameList.size() > 0) {
+                    this.unknowTypeList(resultType, centre, now, nowDate, unknowNameList, tdhServicesUnknowNameListDTO, resultVO);
                 }
 
-                if(result != null && result.size()>0){
+                if (result != null && result.size() > 0) {
                     tdhServicesListDTO.setTdhServicesInfoDTOList(result);
 //                    logger.info("tdhServicesListDTO"+tdhServicesListDTO.toString());
                     resultVO = daoClient.saveThdServicesListData(tdhServicesListDTO);
 //                    logger.info("resultVO=" + resultVO);
                 }
                 // 返回值
-                if ( !"000000".equals(resultVO.getCode())) {
-                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                if (!"000000".equals(resultVO.getCode())) {
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
                 }
 
-            }else {
+            } else {
                 logger.info(centre + "中心异常：e=" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR);
                 throw new SoftwareException(TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getCode(), centre + "中心异常:" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getMessage());
             }
-        }catch (Exception e){
-            logger.info(centre + "中心异常：e="+e.toString());
+        } catch (Exception e) {
+            logger.info(centre + "中心异常：e=" + e.toString());
             try {
                 UserApi.logout(client);
                 client.close1();
-            }catch (Exception e1){
-                logger.info(centre + "中心退出异常：e="+e1.toString());
+            } catch (Exception e1) {
+                logger.info(centre + "中心退出异常：e=" + e1.toString());
             }
             return;
-        }finally {
+        } finally {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
 
-    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO,  List<String> finalNameAorBList){
+    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO, List<String> finalNameAorBList) {
         String centre = tdhServicesInfoDTO.getCentre();
         String name = tdhServicesInfoDTO.getName();
         logger.info("++++++++++++++++++++++++++++++name=" + name);
@@ -307,43 +311,43 @@ public class ServiceThread {
             if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdha_services_TOS");
             }
-            if(finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
-                    tdhServicesInfoDTO.setTableName("tdha_services_" + name);
-            }
-        }
-        if("B".equals(centre)){
-            if (name == null || "".equals(name)) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
-            }
-            if(finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
-                tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
-            }
-        }
-        logger.info("---------------------name=" + tdhServicesInfoDTO.getTableName());
-    }
-
-    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
-        String centre = tdhServicesInfoDTO.getCentre();
-        String name = tdhServicesInfoDTO.getName();
-        logger.info("++++++++++++++++++++++++++++++name=" + name);
-        if ("A".equals(centre)) {
-            if (name == null || "".equals(name)) {
-                tdhServicesInfoDTO.setTableName("tdha_services_TOS");
-            } else{
+            if (finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
                 tdhServicesInfoDTO.setTableName("tdha_services_" + name);
             }
         }
-        if("B".equals(centre)){
+        if ("B".equals(centre)) {
             if (name == null || "".equals(name)) {
                 tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
-            } else {
-                tdhServicesInfoDTO.setTableName("tdhb_services_"+name);
+            }
+            if (finalNameAorBList.parallelStream().anyMatch(allname -> name.equals(allname))) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_" + name);
             }
         }
         logger.info("---------------------name=" + tdhServicesInfoDTO.getTableName());
     }
 
-//    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
+    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO) {
+        String centre = tdhServicesInfoDTO.getCentre();
+        String name = tdhServicesInfoDTO.getName();
+        logger.info("++++++++++++++++++++++++++++++name=" + name);
+        if ("A".equals(centre)) {
+            if (name == null || "".equals(name)) {
+                tdhServicesInfoDTO.setTableName("tdha_services_TOS");
+            } else {
+                tdhServicesInfoDTO.setTableName("tdha_services_" + name);
+            }
+        }
+        if ("B".equals(centre)) {
+            if (name == null || "".equals(name)) {
+                tdhServicesInfoDTO.setTableName("tdhb_services_TOS");
+            } else {
+                tdhServicesInfoDTO.setTableName("tdhb_services_" + name);
+            }
+        }
+        logger.info("---------------------name=" + tdhServicesInfoDTO.getTableName());
+    }
+
+    //    public void setTableName(TdhServicesInfoDTO tdhServicesInfoDTO){
 //        String centre = tdhServicesInfoDTO.getCentre();
 //        String type = tdhServicesInfoDTO.getType();
 //        logger.info("++++++++++++++++++++++++++++++type=" + type);
@@ -437,7 +441,7 @@ public class ServiceThread {
     public void taskSaveThdServicesJobErrorData(String joburla, String centre, String jobsize, Date now) {
 
         logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
-        Connection client = new Connection(joburla,centre);
+        Connection client = new Connection(joburla, centre);
         List<TdhServicesJobDTO> result = new ArrayList<TdhServicesJobDTO>();
         List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
 
@@ -445,55 +449,55 @@ public class ServiceThread {
         try {
             //return url+"-"+centre+"-"+username+"-"+password;
             try {
-                String jobsInfo = InceptorApi.getjobs(client,0,null,"running",null);
+                String jobsInfo = InceptorApi.getjobs(client, 0, null, "running", null);
                 result = gs.fromJson(jobsInfo, new TypeToken<List<TdhServicesJobDTO>>() {
                 }.getType());
 //                    logger.info(result.toString());
                 client.close1();
-            }catch (Exception e){
+            } catch (Exception e) {
                 client.close1();
-                logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode() + "," + centre + "中心异常：e=" + e);
                 throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
             }
-            logger.info(centre + "中心连接关闭" );
-            logger.info("result.size():"+result.size());
+            logger.info(centre + "中心连接关闭");
+            logger.info("result.size():" + result.size());
             long t1 = now.getTime();
             String centreJobTableName = "";
             String centreDsTableName = "";
-            if ("B".equals(centre)){
+            if ("B".equals(centre)) {
                 centreJobTableName = "tdhb_servicesjob_info";
                 centreDsTableName = "tdhb_ds_info";
-            }else{
+            } else {
                 centreJobTableName = "tdha_servicesjob_info";
                 centreDsTableName = "tdha_ds_info";
             }
             TdhServicesJobDTO tdhServicesJobDTO1 = new TdhServicesJobDTO();
             tdhServicesJobDTO1.setCentreTableName(centreJobTableName);
             if (result.size() == 0) {
-                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND+":result.size():"+result.size());
+                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND + ":result.size():" + result.size());
 //                throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
                 tdhServicesJobDTO1.setCreattime(now);
                 tdhServicesJobDTO1.setStatus("down");
                 result.add(tdhServicesJobDTO1);
                 ResultVO resultVO = daoClient.updateThdServicesjobListData(result);
                 if ("000000".equals(resultVO.getCode())) {
-                    logger.info(centre + "中心,修改完成:"+resultVO.getData().toString());
+                    logger.info(centre + "中心,修改完成:" + resultVO.getData().toString());
                     return;
                 } else {
-                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
                 }
             }
 
             Iterator<TdhServicesJobDTO> tdhServicesJobIter = result.iterator();
-            while(tdhServicesJobIter.hasNext()){
+            while (tdhServicesJobIter.hasNext()) {
                 TdhServicesJobDTO tdhServicesJobDTO = tdhServicesJobIter.next();
                 String description = tdhServicesJobDTO.getDescription();
 //                logger.info("insert.indexof:"+description.indexOf("insert"));
-                logger.info("udf_insertData.indexof:"+description.indexOf("udf_insertData"));
-                if (description == null || description.indexOf("udf_insertData") == -1){
+                logger.info("udf_insertData.indexof:" + description.indexOf("udf_insertData"));
+                if (description == null || description.indexOf("udf_insertData") == -1) {
                     tdhServicesJobIter.remove();
-                }else{
+                } else {
                     tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
                     tdhServicesJobDTO.setCentreTableName(centreJobTableName);
                     tdhServicesJobDTO.setCreattime(now);
@@ -504,7 +508,7 @@ public class ServiceThread {
                         int index2 = description.indexOf("udf_insertData");
                         String tablename = description.substring(index2 + 20, index2 + 31);
                         tdhServicesJobDTO.setTableName(tablename);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         tdhServicesJobDTO.setTableName("111");
                     }
 //                    logger.info(tdhServicesJobDTO.toString());
@@ -514,32 +518,32 @@ public class ServiceThread {
             //1.查询job表所有job信息，若为空,则判断result的list.size,若size等于规定的数，将所有的result插入数据库，如小于则不做操作。
             ResultVO resultVOTdhServicesJobVO = daoClient.getThdServicesjobListData(tdhServicesJobDTO1);
             logger.info("resultVOTdhServicesJobVO=" + resultVOTdhServicesJobVO);
-            if("000000".equals(resultVOTdhServicesJobVO.getCode())){
+            if ("000000".equals(resultVOTdhServicesJobVO.getCode())) {
                 Object object = resultVOTdhServicesJobVO.getData();
                 String tdhServicesJobVOString = Tools.toJson(object);
 //                logger.info("tdhServicesJobVOString:" + tdhServicesJobVOString);
                 tdhServicesJobVOList = gs.fromJson(tdhServicesJobVOString, new TypeToken<List<TdhServicesJobVO>>() {
                 }.getType());
 //                logger.info("tdhServicesJobVOList:" + tdhServicesJobVOList+"  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
-                logger.info("  tdhServicesJobVOList.size():"+tdhServicesJobVOList.size());
+                logger.info("  tdhServicesJobVOList.size():" + tdhServicesJobVOList.size());
                 if (null == tdhServicesJobVOList || tdhServicesJobVOList.size() == 0) {
                     //job表为空
                     logger.info("job表为空");
-                    logger.info("jobsize:"+jobsize);
-                    if(result.size() == Integer.valueOf(jobsize)){
+                    logger.info("jobsize:" + jobsize);
+                    if (result.size() == Integer.valueOf(jobsize)) {
                         ResultVO resultVO = daoClient.saveThdServicesjobListData(result);
                         if ("000000".equals(resultVO.getCode())) {
                             logger.info(centre + "中心,添加完成");
                             return;
                         } else {
-                            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+                            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
                         }
-                    }else{
+                    } else {
                         logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + ",result.size()异常:" + result.size());
                         throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:result.size()异常:" + result.size());
                     }
-                }else {//job表不为空
+                } else {//job表不为空
                     logger.info("job表不为空");
                     //2.遍历resultjob，根据表名修改对应的job在表中的记录，并且比较resultjob与job的时间差time，如果time大于规定的时间，则将此条记录存入“数据同步”表中
                     serviceDsThread.taskSaveDsData(tdhServicesJobVOList, result, centreDsTableName, centre, t1, now);
@@ -549,18 +553,18 @@ public class ServiceThread {
                     for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList) {
                         flag = true;
                         for (TdhServicesJobDTO tdhServicesJobDTO : result) {
-                            if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName())){
+                            if (tdhServicesJobDTO.getTableName().equals(tdhServicesJobVO.getTableName())) {
                                 tdhServicesJobDTO.setId(tdhServicesJobVO.getId());
                                 flag = false;
                             }
                         }
-                        if (flag){
+                        if (flag) {
                             idlist.add(tdhServicesJobVO.getId());
                         }
                     }
-                    for (String id : idlist){
+                    for (String id : idlist) {
                         for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList) {
-                            if (id.equals(tdhServicesJobVO.getId())){
+                            if (id.equals(tdhServicesJobVO.getId())) {
                                 TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
                                 tdhServicesJobDTO.setId(id);
                                 tdhServicesJobDTO.setCentre(centre);//与URL匹配，设置中心
@@ -576,26 +580,26 @@ public class ServiceThread {
                     idlist = null;
                     ResultVO resultVO = daoClient.updateThdServicesjobListData(result);
                     if ("000000".equals(resultVO.getCode())) {
-                        logger.info(centre + "中心,修改完成:"+resultVO.getData().toString());
+                        logger.info(centre + "中心,修改完成:" + resultVO.getData().toString());
                         return;
                     } else {
-                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                        logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+                        throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
                     }
                 }
-            }else {
-                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" + resultVOTdhServicesJobVO.getMsg()+resultVOTdhServicesJobVO.getData());
+            } else {
+                logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobVO.getMsg() + resultVOTdhServicesJobVO.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, centre + "中心异常:" + resultVOTdhServicesJobVO.getMsg() + resultVOTdhServicesJobVO.getData());
             }
-        }catch (Exception e){
-            logger.info(centre + "中心异常：e="+e.toString());
+        } catch (Exception e) {
+            logger.info(centre + "中心异常：e=" + e.toString());
             try {
                 client.close1();
-            }catch (Exception e1){
-                logger.info(centre + "中心退出异常：e="+e1.toString());
+            } catch (Exception e1) {
+                logger.info(centre + "中心退出异常：e=" + e1.toString());
             }
             return;
-        }finally {
+        } finally {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
@@ -647,7 +651,7 @@ public class ServiceThread {
     public void taskSaveThdUsersListDataThread(String url, String centre, String username, String password) {
 
         logger.info(centre + "---------------------进入线程" + Thread.currentThread().getName() + " 执行异步任务：");
-        Connection client = new Connection(url,centre);
+        Connection client = new Connection(url, centre);
         List<UserDTO> result = new ArrayList<UserDTO>();
         Date now = new Date();
         Gson gs = new Gson();
@@ -663,13 +667,13 @@ public class ServiceThread {
 //                    logger.info(result.toString());
                     UserApi.logout(client);
                     client.close1();
-                }catch (Exception e){
+                } catch (Exception e) {
                     UserApi.logout(client);
                     client.close1();
-                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode()+","+centre + "中心异常：e=" + e);
+                    logger.info(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode() + "," + centre + "中心异常：e=" + e);
                     throw new SoftwareException(TdhServicesReturnEnum.TDH_CONNECTION_ERROR.getCode(), centre + "中心异常:" + e.toString());
                 }
-                logger.info(centre + "中心连接关闭" );
+                logger.info(centre + "中心连接关闭");
                 if (result == null) {
                     logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_NOFOUND);
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND.getCode(), centre + "中心异常:" + ResultExceptEnum.ERROR_NOFOUND.getMessage());
@@ -680,8 +684,8 @@ public class ServiceThread {
                 if ("000000".equals(resultVO.getCode())) {
                     // return resultVO.getData().toString();
                 } else {
-                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+                    logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
                 }
 
 
@@ -689,16 +693,16 @@ public class ServiceThread {
                 logger.info(centre + "中心异常：e=" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR);
                 throw new SoftwareException(TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getCode(), centre + "中心异常:" + TdhServicesReturnEnum.TDH_CODEORPASSWORD_ERROR.getMessage());
             }
-        }catch (Exception e){
-            logger.info(centre + "中心异常：e="+e.toString());
+        } catch (Exception e) {
+            logger.info(centre + "中心异常：e=" + e.toString());
             try {
                 UserApi.logout(client);
                 client.close1();
-            }catch (Exception e1){
-                logger.info(centre + "中心退出异常：e="+e1.toString());
+            } catch (Exception e1) {
+                logger.info(centre + "中心退出异常：e=" + e1.toString());
             }
             return;
-        }finally {
+        } finally {
             //tdhTaskParameterMapper.updateTdhServiceTaskState(0);
         }
     }
@@ -710,14 +714,14 @@ public class ServiceThread {
         if ("000000".equals(resultVO.getCode())) {
             // return resultVO.getData().toString();
         } else {
-            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_UPDATE + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, centre + "中心异常:" + resultVO.getMsg()+resultVO.getData());
+            logger.info(centre + "中心异常：e=" + ResultExceptEnum.ERROR_UPDATE + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, centre + "中心异常:" + resultVO.getMsg() + resultVO.getData());
         }
     }
 
 
-    private List<TdhServicesInfoDTO> healthChecksIdNumIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
-                                                                 Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,TdhServicesListDTO tdhServicesUnknowNameListDTO, ResultVO resultVO){
+    private List<TdhServicesInfoDTO> healthChecksIdNumIsEmpty(List<TdhServicesInfoDTO> result, TdhServicesListDTO tdhServicesListDTO, String centre,
+                                                              Date now, String nowDate, TdhServicesAVO thdServicesInfoNow, String healthChecksIdNum, TdhServicesListDTO tdhServicesUnknowNameListDTO, ResultVO resultVO) {
 
         result.forEach(tdhServicesInfoDTO -> {
             // 与URL匹配，设置中心，初始化数据
@@ -729,16 +733,16 @@ public class ServiceThread {
             // 计数器
             tdhServicesInfoDTO.setHealthChecksId("1");
             // 确定表名
-            if (centre.equals(centrea)){
+            if (centre.equals(centrea)) {
                 tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
             }
-            if (centre.equals(centreb)){
+            if (centre.equals(centreb)) {
                 tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
             }
 
 //            logger.info(tdhServicesInfoDTO.toString());
-            logger.info("中心："+centre+"，tdhServicesInfoDTO.getType():"+tdhServicesInfoDTO.getType());
-            logger.info("中心："+centre+"，tdhServicesInfoDTO.getName():"+tdhServicesInfoDTO.getName());
+            logger.info("中心：" + centre + "，tdhServicesInfoDTO.getType():" + tdhServicesInfoDTO.getType());
+            logger.info("中心：" + centre + "，tdhServicesInfoDTO.getName():" + tdhServicesInfoDTO.getName());
         });
         // 服务返回个数不正确，抛异常
         Integer nameNum = result.size();
@@ -746,27 +750,27 @@ public class ServiceThread {
 //        logger.info("typeNum==(typeNumA):"+String.valueOf(typeNum== (Integer.valueOf(typeNumA).intValue())));
 
         // 服务A个数
-        if((centre.equals(centrea) && nameNum!= (Integer.valueOf(nameNumA).intValue()))){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"nameNum:"+nameNum+",nameNumA:"+nameNumA+","+result.toString());
+        if ((centre.equals(centrea) && nameNum != (Integer.valueOf(nameNumA).intValue()))) {
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为：" + "nameNum:" + nameNum + ",nameNumA:" + nameNumA + "," + result.toString());
         }
         // 服务B个数
-        if(centre.equals(centreb) && nameNum!= (Integer.valueOf(nameNumB).intValue())){
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为："+"nameNum:"+nameNum+",nameNumB:"+nameNumB+","+result.toString());
+        if (centre.equals(centreb) && nameNum != (Integer.valueOf(nameNumB).intValue())) {
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,返回个数不正确：内容为：" + "nameNum:" + nameNum + ",nameNumB:" + nameNumB + "," + result.toString());
         }
 
         resultVO = daoClient.saveThdServicesInfoNowListData(tdhServicesListDTO);
         logger.info("初始化服务 实时数据保存结果 resultVO=" + resultVO);
 
         // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-        if(!"000000".equals(resultVO.getCode())){
-            logger.info(centre + "中心异常,添加初始化信息失败：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,添加初始化信息失败：" + resultVO.getMsg()+resultVO.getData());
+        if (!"000000".equals(resultVO.getCode())) {
+            logger.info(centre + "中心异常,添加初始化信息失败：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,添加初始化信息失败：" + resultVO.getMsg() + resultVO.getData());
         }
         return result;
     }
 
-    private List<TdhServicesInfoDTO> healthChecksIdNumNotIsEmpty(List<TdhServicesInfoDTO> result,TdhServicesListDTO tdhServicesListDTO,String centre,
-                      Date now,String nowDate,TdhServicesAVO thdServicesInfoNow,String healthChecksIdNum,ArrayList<String> unknowNameList,TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO){
+    private List<TdhServicesInfoDTO> healthChecksIdNumNotIsEmpty(List<TdhServicesInfoDTO> result, TdhServicesListDTO tdhServicesListDTO, String centre,
+                                                                 Date now, String nowDate, TdhServicesAVO thdServicesInfoNow, String healthChecksIdNum, ArrayList<String> unknowNameList, TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO) {
 
         // 更新所有未知状态类型信息
         result.forEach(tdhServicesInfoDTO -> {
@@ -776,26 +780,26 @@ public class ServiceThread {
             tdhServicesInfoDTO.setTaskTime(nowDate);
 
             // 判断是否达到180s,如果达到180，计数器重新修改为1
-            if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM){
+            if (Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM) {
                 // 计数器
                 tdhServicesInfoDTO.setHealthChecksId("1");
-            }else {
+            } else {
                 // 计数器
-                tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
+                tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum) + 1));
             }
             // 确定表名
-            if (centre.equals(centrea)){
+            if (centre.equals(centrea)) {
                 tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
             }
 
-            if (centre.equals(centreb)){
+            if (centre.equals(centreb)) {
                 tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
             }
 //            logger.info(tdhServicesInfoDTO.toString());
         });
 
 //        List<TdhServicesInfoDTO> resultType = new ArrayList<>();
-        if(unknowNameList != null && unknowNameList.size()>0){
+        if (unknowNameList != null && unknowNameList.size() > 0) {
             // 循环list获取type值
             unknowNameList.forEach(name -> {
                 TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
@@ -805,19 +809,19 @@ public class ServiceThread {
                 tdhServicesInfoDTO.setCentre(centre);
                 tdhServicesInfoDTO.setCreattime(now);
                 // 判断是否达到180s,如果达到180，计数器重新修改为1
-                if(Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM){
+                if (Integer.parseInt(thdServicesInfoNow.getHealthChecksId()) == NUM) {
                     // 计数器
                     tdhServicesInfoDTO.setHealthChecksId("1");
-                }else {
+                } else {
                     // 计数器
-                    tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum)+1));
+                    tdhServicesInfoDTO.setHealthChecksId(String.valueOf(Integer.valueOf(healthChecksIdNum) + 1));
                 }
                 // 确定表名
-                if (centre.equals(centrea)){
+                if (centre.equals(centrea)) {
                     tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
                 }
 
-                if (centre.equals(centreb)){
+                if (centre.equals(centreb)) {
                     tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
                 }
 //                resultType.add(tdhServicesInfoDTO);
@@ -842,9 +846,9 @@ public class ServiceThread {
         logger.info("resultVO=" + resultVO);
 
         // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-        if(!"000000".equals(resultVO.getCode())){
-            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+        if (!"000000".equals(resultVO.getCode())) {
+            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg() + resultVO.getData());
         }
 
         return result;
@@ -852,15 +856,15 @@ public class ServiceThread {
     }
 
     /**
+     * @return void
+     * @throws
      * @author Crayon
      * @Description 插入未知状态数据
      * @date 2019/4/24 4:59 PM
      * @params [resultType, centre, now, nowDate, unknowTypeList, tdhServicesUnknowTypeListDTO]
-     * @exception
-     * @return void
      */
-    private void unknowTypeList(List<TdhServicesInfoDTO> resultType,String centre,
-                                Date now,String nowDate,ArrayList<String> unknowTypeList,TdhServicesListDTO tdhServicesUnknowTypeListDTO,ResultVO resultVO){
+    private void unknowTypeList(List<TdhServicesInfoDTO> resultType, String centre,
+                                Date now, String nowDate, ArrayList<String> unknowTypeList, TdhServicesListDTO tdhServicesUnknowTypeListDTO, ResultVO resultVO) {
         // 循环list获取type值
         unknowTypeList.forEach(name -> {
             TdhServicesInfoDTO tdhServicesInfoDTO = new TdhServicesInfoDTO();
@@ -884,9 +888,9 @@ public class ServiceThread {
         logger.info("resultVO=" + resultVO);
 
         // 判断返回值，如果不成功直接抛异常，不进行所有数据保存操作
-        if(!"000000".equals(resultVO.getCode())){
-            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg()+resultVO.getData());
+        if (!"000000".equals(resultVO.getCode())) {
+            logger.info(centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, centre + "中心异常,任务计数器数值前后不同，不进行所有数据保存操作:" + resultVO.getMsg() + resultVO.getData());
         }
     }
 
@@ -930,7 +934,7 @@ public class ServiceThread {
 
         List<String> a = new ArrayList<String>();
         double d = 50;
-        for(int i = 0;i<122;i++){
+        for (int i = 0; i < 122; i++) {
             a.add(String.format("%.2f", d));
             double num = ((double) (Math.random() * (0.03 - 0)) + 0);
             if (i != 50) {
@@ -938,9 +942,8 @@ public class ServiceThread {
             }
 
         }
-        System.out.println("a:"+a);
+        System.out.println("a:" + a);
     }
-
 
 
 }

@@ -36,13 +36,13 @@ public class HardWareThreadServiceImpl implements HardWareThreadService {
     public PageView getHardWareThread(PageView pageView, HardwareThreadDTO hardwareThreadDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
         logger.info("hardwareThreadDTO:" + hardwareThreadDTO);
-        if (hardwareThreadDTO.getTablename() == null || "".equals(hardwareThreadDTO.getTablename())){
+        if (hardwareThreadDTO.getTablename() == null || "".equals(hardwareThreadDTO.getTablename())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",表名不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"表名不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "表名不能为空");
         }
-        if("nowtrue".equals(hardwareThreadDTO.getTablename())){
+        if ("nowtrue".equals(hardwareThreadDTO.getTablename())) {
             hardwareThreadDTO.setTablename("hard_ware_thread_now");
-        }else {
+        } else {
             hardwareThreadDTO.setTablename("hard_ware_thread");
         }
         models.put("pageView", pageView);

@@ -9,12 +9,12 @@ import com.ucd.daocommon.DTO.hardwareDTO.HardwareNicDTO;
 public interface HardWareNICService2 {
 
     /**
+     * @return com.ucd.common.utils.pager.PageView
+     * @throws
      * @author gwm
      * @Description 获取硬件NIC信息
      * @date 2019/3/29 3:08 PM
      * @params [pageView, hardwareNicDTO]
-     * @exception
-     * @return com.ucd.common.utils.pager.PageView
      */
     PageView getHardWareNIC(PageView pageView, HardwareNicDTO hardwareNicDTO) throws Exception;
 }

@@ -37,22 +37,22 @@ public class HardWareMEMService2Impl implements HardWareMEMService2 {
     public PageView getHardWareMEM(PageView pageView, HardwareMemDTO hardwareMemDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
         logger.info("hardwareMemDTO:" + hardwareMemDTO);
-        models.put("pageView",pageView);
-        models.put("hardwareMemDTO",hardwareMemDTO);
+        models.put("pageView", pageView);
+        models.put("hardwareMemDTO", hardwareMemDTO);
         ResultVO resultVO = daoClient.getHardWareMEM(models);
         logger.info("resultVO=" + resultVO);
 
-        if(!ObjectUtils.isEmpty(resultVO.getCode()) && SoftwareExceptEnum.SUCCESS.getCode().equals(resultVO.getCode())){
+        if (!ObjectUtils.isEmpty(resultVO.getCode()) && SoftwareExceptEnum.SUCCESS.getCode().equals(resultVO.getCode())) {
             Object object = resultVO.getData();
-            if (!ObjectUtils.isEmpty(object)){
+            if (!ObjectUtils.isEmpty(object)) {
                 String pageViewString = Tools.toJson(object);
                 Gson gs = new Gson();
                 pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
-            }else {
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+            } else {
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
             }
         }
         return pageView;

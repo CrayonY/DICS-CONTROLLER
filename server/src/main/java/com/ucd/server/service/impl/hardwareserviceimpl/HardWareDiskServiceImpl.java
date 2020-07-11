@@ -24,7 +24,7 @@ import java.util.Map;
  * Created by crayon on 2019/4/1.
  */
 @Service
-public class HardWareDiskServiceImpl implements HardWareDiskService{
+public class HardWareDiskServiceImpl implements HardWareDiskService {
 
     @Autowired
     public DaoClient daoClient;
@@ -35,22 +35,22 @@ public class HardWareDiskServiceImpl implements HardWareDiskService{
     public PageView getHardwareDisk(PageView pageView, HardwareDiskDTO hardwareDiskDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
         logger.info("hardwareDiskDTO:" + hardwareDiskDTO);
-        models.put("pageView",pageView);
-        models.put("hardwareDiskDTO",hardwareDiskDTO);
+        models.put("pageView", pageView);
+        models.put("hardwareDiskDTO", hardwareDiskDTO);
         ResultVO resultVO = daoClient.getHardWareDisk(models);
         logger.info("resultVO=" + resultVO);
 
-        if(!ObjectUtils.isEmpty(resultVO.getCode()) && SoftwareExceptEnum.SUCCESS.getCode().equals(resultVO.getCode())){
+        if (!ObjectUtils.isEmpty(resultVO.getCode()) && SoftwareExceptEnum.SUCCESS.getCode().equals(resultVO.getCode())) {
             Object object = resultVO.getData();
-            if (!ObjectUtils.isEmpty(object)){
+            if (!ObjectUtils.isEmpty(object)) {
                 String pageViewString = Tools.toJson(object);
                 Gson gs = new Gson();
                 pageView = gs.fromJson(pageViewString, new TypeToken<PageView>() {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
-            }else {
-                logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+            } else {
+                logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
             }
         }
         return pageView;
