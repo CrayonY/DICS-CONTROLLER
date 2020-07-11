@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
 import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/softwareDs")
@@ -46,55 +47,53 @@ public class TdhServicesDsController {
     UserService userService;
 
 
-
-
-/**
- * @author gongweimin
- * @Description 获取数据同步列表（分页）       
- * @date 2019/5/6 17:19 
- * @params [pageView, tdhSDsDTO]
- * @exception  
- * @return com.ucd.common.VO.ResultVO  
- */
+    /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
+     * @author gongweimin
+     * @Description 获取数据同步列表（分页）
+     * @date 2019/5/6 17:19
+     * @params [pageView, tdhSDsDTO]
+     */
     @PostMapping(value = "/getThdServicesDsInfo")
-    public ResultVO getThdServicesDsInfo(PageView pageView, TdhDsDTO tdhSDsDTO){
+    public ResultVO getThdServicesDsInfo(PageView pageView, TdhDsDTO tdhSDsDTO) {
         ResultVO resultVO = new ResultVO();
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            logger.info("接受参数tdhSDsDTO："+tdhSDsDTO);
-            pageView =tdhServicesDsService.getThdServicesDsInfo(pageView,tdhSDsDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            logger.info("接受参数tdhSDsDTO：" + tdhSDsDTO);
+            pageView = tdhServicesDsService.getThdServicesDsInfo(pageView, tdhSDsDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 获取数据同步列表       
-     * @date 2019/5/6 17:19 
+     * @Description 获取数据同步列表
+     * @date 2019/5/6 17:19
      * @params [tdhDsDTOS]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/getThdDsListData")
-    public ResultVO getThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS){
+    public ResultVO getThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS) {
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsService.getThdDsListData(tdhDsDTOS);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
@@ -126,15 +125,15 @@ public class TdhServicesDsController {
 //    }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 向对端发送要进行数据同步的审核       
-     * @date 2019/5/6 17:18 
+     * @Description 向对端发送要进行数据同步的审核
+     * @date 2019/5/6 17:18
      * @params [tdhDsDTOS, req]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/auditThdDsListData")
-    public ResultVO auditThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
+    public ResultVO auditThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req) {
         ResultVO resultVO = new ResultVO();
         String userName = "";
         String accessToken = "";
@@ -194,15 +193,15 @@ public class TdhServicesDsController {
 //            }
             //获取header
             Enumeration headerNames = req.getHeaderNames();
-            if(headerNames==null){
+            if (headerNames == null) {
                 logger.info("没有hearder");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
-            }else{
-                while (headerNames.hasMoreElements()){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(), ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
+            } else {
+                while (headerNames.hasMoreElements()) {
 
                     //获取cookie的键
                     String key = (String) headerNames.nextElement();
-                    System.out.println("key:"+key);
+                    System.out.println("key:" + key);
                     if ("username".equals(key)) {
 
                         //获取cookie的值
@@ -219,67 +218,67 @@ public class TdhServicesDsController {
                     }
 
                 }
-                if("".equals(accessToken)){
+                if ("".equals(accessToken)) {
                     logger.info("token为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(), ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
                 }
-                if("".equals(userName)){
+                if ("".equals(userName)) {
                     logger.info("userName为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
                 }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
             operationLogInfoDTO.setUserCode(userName);
-            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.auditThdDsListData.getMessage());
+            operationLogInfoDTO.setValue(userName + OperationLogInfoEnum.auditThdDsListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
             String power = userService.checkUserPower(userName);
-            if ("NO".equals(power)){
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            if ("NO".equals(power)) {
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsDTOS,userName);
-            logger.info("resultVO:"+resultVO);
+            resultVO = tdhServicesDsService.auditThdDsListData(tdhDsDTOS, userName);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVOe:"+resultVO);
+            logger.info("resultVOe:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 向对端发送要进行数据同步的审核结果       
-     * @date 2019/5/6 17:18 
+     * @Description 向对端发送要进行数据同步的审核结果
+     * @date 2019/5/6 17:18
      * @params [tdhDsDTOS]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/updateThdDsListData")
-    public ResultVO updateThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS){
+    public ResultVO updateThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS) {
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsService.updateThdDsListData(tdhDsDTOS);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
-/**
- * @author gongweimin
- * @Description 数据同步       
- * @date 2019/5/6 17:18 
- * @params [tdhDsDTOS, req]
- * @exception  
- * @return com.ucd.common.VO.ResultVO  
- */
+    /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
+     * @author gongweimin
+     * @Description 数据同步
+     * @date 2019/5/6 17:18
+     * @params [tdhDsDTOS, req]
+     */
     @PostMapping(value = "/syncThdDsListData")
-    public ResultVO syncThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req){
+    public ResultVO syncThdDsListData(@RequestBody List<TdhDsDTO> tdhDsDTOS, HttpServletRequest req) {
         ResultVO resultVO = new ResultVO();
         String userName = "";
         String accessToken = "";
@@ -339,15 +338,15 @@ public class TdhServicesDsController {
 //            }
             //获取header
             Enumeration headerNames = req.getHeaderNames();
-            if(headerNames==null){
+            if (headerNames == null) {
                 logger.info("没有hearder");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
-            }else{
-                while (headerNames.hasMoreElements()){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(), ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
+            } else {
+                while (headerNames.hasMoreElements()) {
 
                     //获取cookie的键
                     String key = (String) headerNames.nextElement();
-                    System.out.println("key:"+key);
+                    System.out.println("key:" + key);
                     if ("username".equals(key)) {
 
                         //获取cookie的值
@@ -364,70 +363,70 @@ public class TdhServicesDsController {
                     }
 
                 }
-                if("".equals(accessToken)){
+                if ("".equals(accessToken)) {
                     logger.info("token为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(), ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
                 }
-                if("".equals(userName)){
+                if ("".equals(userName)) {
                     logger.info("userName为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
                 }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
             operationLogInfoDTO.setUserCode(userName);
-            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.syncThdDsListData.getMessage());
+            operationLogInfoDTO.setValue(userName + OperationLogInfoEnum.syncThdDsListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
             String power = userService.checkUserPower(userName);
-            if ("NO".equals(power)){
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            if ("NO".equals(power)) {
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsDTOS,userName);
-            logger.info("resultVO:"+resultVO);
+            resultVO = tdhServicesDsService.syncThdDsListData(tdhDsDTOS, userName);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 数据同步回复结果       
-     * @date 2019/5/6 17:18 
+     * @Description 数据同步回复结果
+     * @date 2019/5/6 17:18
      * @params [result, id]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @GetMapping(value = "/syncResult")
-    public ResultVO syncResult(@Param("result") String result,@Param("id") String id){
+    public ResultVO syncResult(@Param("result") String result, @Param("id") String id) {
         ResultVO resultVO = new ResultVO();
-        logger.info("result:"+result+"...id:"+id);
+        logger.info("result:" + result + "...id:" + id);
         try {
-            resultVO = tdhServicesDsService.syncResult(result,id);
-            logger.info("resultVO:"+resultVO);
+            resultVO = tdhServicesDsService.syncResult(result, id);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
-/**
- * @author gongweimin
- * @Description 关闭同步进程       
- * @date 2019/5/7 18:13 
- * @params [result, centre, req]
- * @exception  
- * @return com.ucd.common.VO.ResultVO  
- */
+    /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
+     * @author gongweimin
+     * @Description 关闭同步进程
+     * @date 2019/5/7 18:13
+     * @params [result, centre, req]
+     */
     @PostMapping(value = "/closeSync")
-    public ResultVO closeSync(@Param("result") String result,@Param("centre") String centre,HttpServletRequest req){
+    public ResultVO closeSync(@Param("result") String result, @Param("centre") String centre, HttpServletRequest req) {
         ResultVO resultVO = new ResultVO();
-        logger.info("result:"+result+"...centre:"+centre);
+        logger.info("result:" + result + "...centre:" + centre);
         String userName = "";
         String accessToken = "";
         try {
@@ -435,15 +434,15 @@ public class TdhServicesDsController {
             req.setCharacterEncoding("utf-8");
 //获取header
             Enumeration headerNames = req.getHeaderNames();
-            if(headerNames==null){
+            if (headerNames == null) {
                 logger.info("没有hearder");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
-            }else{
-                while (headerNames.hasMoreElements()){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(), ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
+            } else {
+                while (headerNames.hasMoreElements()) {
 
                     //获取cookie的键
                     String key = (String) headerNames.nextElement();
-                    logger.info("key:"+key);
+                    logger.info("key:" + key);
                     if ("username".equals(key)) {
 
                         //获取cookie的值
@@ -460,55 +459,55 @@ public class TdhServicesDsController {
                     }
 
                 }
-                if("".equals(accessToken)){
+                if ("".equals(accessToken)) {
                     logger.info("token为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(), ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
                 }
-                if("".equals(userName)){
+                if ("".equals(userName)) {
                     logger.info("userName为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
                 }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
             operationLogInfoDTO.setUserCode(userName);
-            operationLogInfoDTO.setValue(userName+OperationLogInfoEnum.closeSync.getMessage()+"，原因："+result);
+            operationLogInfoDTO.setValue(userName + OperationLogInfoEnum.closeSync.getMessage() + "，原因：" + result);
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
             String power = userService.checkUserPower(userName);
-            if ("NO".equals(power)){
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            if ("NO".equals(power)) {
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsService.closeSync(centre,userName);
-            logger.info("resultVO:"+resultVO);
+            resultVO = tdhServicesDsService.closeSync(centre, userName);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 根据审核状态得到对应数量       
-     * @date 2019/5/6 17:20 
+     * @Description 根据审核状态得到对应数量
+     * @date 2019/5/6 17:20
      * @params [tdhDsDTO]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")
-    public  ResultVO countTdhDsauditDataoByAuditStatus(TdhDsDTO tdhDsDTO) {
+    public ResultVO countTdhDsauditDataoByAuditStatus(TdhDsDTO tdhDsDTO) {
         logger.info("进入countTdhDsauditDataoByAuditStatuscontroller啦——————————————");
-        logger.info("接受参数tdhSDsDTO："+tdhDsDTO);
+        logger.info("接受参数tdhSDsDTO：" + tdhDsDTO);
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsService.countTdhDsauditDataoByAuditStatus(tdhDsDTO);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }

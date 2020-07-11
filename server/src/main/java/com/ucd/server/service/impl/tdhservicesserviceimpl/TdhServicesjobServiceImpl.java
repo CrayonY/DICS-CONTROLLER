@@ -75,16 +75,16 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
             tdhServicesJobDTO.setCentreTableName("tdha_servicesjob_info");
         } else if ("B".equals(tdhServicesJobDTO.getCentre())) {
             tdhServicesJobDTO.setCentreTableName("tdhb_servicesjob_info");
-        }else{
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常："+tdhServicesJobDTO.getCentre());
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre参数异常："+tdhServicesJobDTO.getCentre());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre参数异常：" + tdhServicesJobDTO.getCentre());
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "centre参数异常：" + tdhServicesJobDTO.getCentre());
         }
         Map<String, Object> models = new HashMap<String, Object>();
-        models.put("pageView",pageView);
-        models.put("tdhServicesJobDTO",tdhServicesJobDTO);
+        models.put("pageView", pageView);
+        models.put("tdhServicesJobDTO", tdhServicesJobDTO);
         ResultVO resultVO = daoClient.getThdServicesjobData(models);
         logger.info("resultVO=" + resultVO);
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -93,28 +93,28 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
 
     @Override
     public ResultVO getThdServicesjobListData(List<TdhServicesJobDTO> tdhServicesJobDTOList) throws Exception {
         Gson gs = new Gson();
         List<TdhServicesJobVO> tdhServicesJobVOList = new ArrayList<TdhServicesJobVO>();
-        if(tdhServicesJobDTOList == null || tdhServicesJobDTOList.size() == 0){
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        if (tdhServicesJobDTOList == null || tdhServicesJobDTOList.size() == 0) {
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
         }
         ResultVO resultVOTdhServicesJobListVO = daoClient.getThdServicesjobListDataS(tdhServicesJobDTOList);
-            if("000000".equals(resultVOTdhServicesJobListVO.getCode())) {
-                logger.info("resultVOTdhServicesJobListVO=" + resultVOTdhServicesJobListVO);
-                return resultVOTdhServicesJobListVO;
-            }else {
-                logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobListVO.getMsg()+resultVOTdhServicesJobListVO.getData());
-                throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhServicesJobListVO.getMsg()+resultVOTdhServicesJobListVO.getData());
-            }
+        if ("000000".equals(resultVOTdhServicesJobListVO.getCode())) {
+            logger.info("resultVOTdhServicesJobListVO=" + resultVOTdhServicesJobListVO);
+            return resultVOTdhServicesJobListVO;
+        } else {
+            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhServicesJobListVO.getMsg() + resultVOTdhServicesJobListVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhServicesJobListVO.getMsg() + resultVOTdhServicesJobListVO.getData());
+        }
     }
 
     @Override
@@ -134,10 +134,11 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
         //调对端接口，获得“job”表数据，存入本地“job”表数据
         Gson gs = new Gson();
         ResultVO resultJobVO = new ResultVO();
-        String result = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwarejob/getThdServicesjobListData",Tools.toJson(tdhServicesJobDTOS), "application/json",null);
-        resultJobVO = gs.fromJson(result, new TypeToken<ResultVO>() {}.getType());
-        logger.info("resultJobVO:"+resultJobVO);
-        if("000000".equals(resultJobVO.getCode())){
+        String result = HttpClientUtils.postString(urlotherside + "/server-0.0.1-SNAPSHOT/softwarejob/getThdServicesjobListData", Tools.toJson(tdhServicesJobDTOS), "application/json", null);
+        resultJobVO = gs.fromJson(result, new TypeToken<ResultVO>() {
+        }.getType());
+        logger.info("resultJobVO:" + resultJobVO);
+        if ("000000".equals(resultJobVO.getCode())) {
             List<TdhServicesJobListVO> tdhServicesJobListVOS = new ArrayList<TdhServicesJobListVO>();
             Object object = resultJobVO.getData();
             if (object != null) {
@@ -146,15 +147,15 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
                 tdhServicesJobListVOS = gs.fromJson(tdhServicesJobListVOString, new TypeToken<List<TdhServicesJobListVO>>() {
                 }.getType());
                 logger.info("tdhServicesJobListVOS:" + tdhServicesJobListVOS);
-                if (tdhServicesJobListVOS == null || tdhServicesJobListVOS.size() == 0){
+                if (tdhServicesJobListVOS == null || tdhServicesJobListVOS.size() == 0) {
                     logger.info("tdhServicesJobListVOS为空，不需要同步数据！");
-                }else {
-                    for (TdhServicesJobListVO tdhServicesJobListVO:tdhServicesJobListVOS) {
+                } else {
+                    for (TdhServicesJobListVO tdhServicesJobListVO : tdhServicesJobListVOS) {
                         List<TdhServicesJobVO> tdhServicesJobVOList = tdhServicesJobListVO.getTdhServicesJobVOList();
                         List<TdhServicesJobDTO> tdhServicesJobDTOList = new ArrayList<TdhServicesJobDTO>();
-                        if (tdhServicesJobVOList == null || tdhServicesJobVOList.size() == 0){
+                        if (tdhServicesJobVOList == null || tdhServicesJobVOList.size() == 0) {
                             logger.info("tdhServicesJobVOList为空，不需要同步数据！");
-                        }else {
+                        } else {
                             for (TdhServicesJobVO tdhServicesJobVO : tdhServicesJobVOList) {
                                 TdhServicesJobDTO tdhServicesJobDTO = new TdhServicesJobDTO();
                                 BeanUtils.copyProperties(tdhServicesJobVO, tdhServicesJobDTO);
@@ -171,10 +172,10 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
                     }
                 }
             }
-            num ++ ;
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultJobVO.getMsg()+resultJobVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultJobVO.getMsg()+resultJobVO.getData());
+            num++;
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultJobVO.getMsg() + resultJobVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultJobVO.getMsg() + resultJobVO.getData());
         }
 
 
@@ -190,10 +191,11 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
         daoClient.emptyThdDsListData(tdhDsDTOS);
         //调对端接口，获得“数据同步”表数据，存入本地“数据同步”表数据
         ResultVO resultDsVO = new ResultVO();
-        String resultDs = HttpClientUtils.postString("http://10.66.1.160:28070/softwareDs/getThdDsListData",Tools.toJson(tdhDsDTOS), "application/json",null);
-        resultDsVO = gs.fromJson(resultDs, new TypeToken<ResultVO>() {}.getType());
-        logger.info("resultDsVO:"+resultDsVO);
-        if("000000".equals(resultDsVO.getCode())){
+        String resultDs = HttpClientUtils.postString("http://10.66.1.160:28070/softwareDs/getThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
+        resultDsVO = gs.fromJson(resultDs, new TypeToken<ResultVO>() {
+        }.getType());
+        logger.info("resultDsVO:" + resultDsVO);
+        if ("000000".equals(resultDsVO.getCode())) {
             List<TdhDsListVO> tdhDsVOS = new ArrayList<TdhDsListVO>();
             Object object = resultDsVO.getData();
             if (object != null) {
@@ -202,15 +204,15 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
                 tdhDsVOS = gs.fromJson(tdhDsListVOString, new TypeToken<List<TdhDsListVO>>() {
                 }.getType());
                 logger.info("tdhDsVOS:" + tdhDsVOS);
-                if (tdhDsVOS == null || tdhDsVOS.size() == 0){
+                if (tdhDsVOS == null || tdhDsVOS.size() == 0) {
                     logger.info("tdhDsVOS为空，不需要同步数据！");
-                }else {
-                    for (TdhDsListVO tdhDsListVO:tdhDsVOS) {
+                } else {
+                    for (TdhDsListVO tdhDsListVO : tdhDsVOS) {
                         List<TdhDsVO> tdhDsVOList = tdhDsListVO.getTdhDsVOList();
                         List<TdhDsDTO> tdhDsDTOList = new ArrayList<TdhDsDTO>();
-                        if (tdhDsVOList == null || tdhDsVOList.size() == 0){
+                        if (tdhDsVOList == null || tdhDsVOList.size() == 0) {
                             logger.info("tdhDsVOList为空，不需要同步数据！");
-                        }else {
+                        } else {
                             for (TdhDsVO TdhDsVO : tdhDsVOList) {
                                 TdhDsDTO tdhDsDTO = new TdhDsDTO();
                                 BeanUtils.copyProperties(TdhDsVO, tdhDsDTO);
@@ -227,15 +229,15 @@ public class TdhServicesjobServiceImpl implements TdhServicesjobService {
                     }
                 }
             }
-            num ++ ;
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultDsVO.getMsg()+resultDsVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultDsVO.getMsg()+resultDsVO.getData());
+            num++;
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultDsVO.getMsg() + resultDsVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultDsVO.getMsg() + resultDsVO.getData());
         }
         logger.info("-----------------------------------------------num：" + num);
-        if(2 == num){
-           return true;
-        }else {
+        if (2 == num) {
+            return true;
+        } else {
             return false;
         }
     }

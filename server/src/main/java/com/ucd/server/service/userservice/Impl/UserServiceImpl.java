@@ -30,19 +30,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResultVO userValidate(String username, String password) {
-        ResultVO resultVO =null;
-        resultVO=daoClient.userValidate(username,password);
+        ResultVO resultVO = null;
+        resultVO = daoClient.userValidate(username, password);
         return resultVO;
     }
 
     @Override
     public PageView getUser(PageView pageView, UserDTO userDTO) throws Exception {
         Map<String, Object> models = new HashMap<String, Object>();
-        models.put("pageView",pageView);
-        models.put("userDTO",userDTO);
+        models.put("pageView", pageView);
+        models.put("userDTO", userDTO);
         ResultVO resultVO = daoClient.getUser(models);
         logger.info("resultVO=" + resultVO);
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -51,11 +51,11 @@ public class UserServiceImpl implements UserService {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
 
     @Override
@@ -63,8 +63,8 @@ public class UserServiceImpl implements UserService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUserName(userName);
         ResultVO resultVO = daoClient.getUserListData(userDTO);
-        Map<String,String> result = new HashMap<String, String>();
-        if("000000".equals(resultVO.getCode())){
+        Map<String, String> result = new HashMap<String, String>();
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String userVOString = Tools.toJson(object);
@@ -92,32 +92,32 @@ public class UserServiceImpl implements UserService {
                 List<UserVO1> userVO1List = gs.fromJson(userVOString, new TypeToken<List<UserVO1>>() {
                 }.getType());
                 logger.info("userVOString:" + userVOString);
-                if (null == userVO1List || userVO1List.size() == 0){
+                if (null == userVO1List || userVO1List.size() == 0) {
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_NOFOUND_USER.getCode() + "," + ResultExceptEnum.ERROR_NOFOUND_USER.getMessage());
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND_USER);
                 }
                 UserVO1 userVO1 = userVO1List.get(0);
                 String rolesList = userVO1.getRoles();
-                logger.info("roleName=admin++++:"+rolesList);
-                if (null == rolesList || "[]".equals(rolesList)){
-                    logger.info("roleName=admin++++:"+rolesList);
-                    result.put("power","NO");
-                }else{
-                    logger.info("roleName=admin++++:"+(rolesList.indexOf("roleName=admin")));
-                    result.put("power","NO");
-                    if (rolesList.indexOf("roleName=admin") != -1){
-                        result.put("power","YES");
+                logger.info("roleName=admin++++:" + rolesList);
+                if (null == rolesList || "[]".equals(rolesList)) {
+                    logger.info("roleName=admin++++:" + rolesList);
+                    result.put("power", "NO");
+                } else {
+                    logger.info("roleName=admin++++:" + (rolesList.indexOf("roleName=admin")));
+                    result.put("power", "NO");
+                    if (rolesList.indexOf("roleName=admin") != -1) {
+                        result.put("power", "YES");
                     }
                 }
                 resultVO.setData(result);
                 return resultVO;
-            }else {
+            } else {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_NOFOUND_USER.getCode() + "," + ResultExceptEnum.ERROR_NOFOUND_USER.getMessage());
                 throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND_USER);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
     }
 
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         userDTO.setUserName(userName);
         ResultVO resultVO = daoClient.getUserListData(userDTO);
         String result = "NO";
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String userVOString = Tools.toJson(object);
@@ -155,28 +155,28 @@ public class UserServiceImpl implements UserService {
                 List<UserVO1> userVO1List = gs.fromJson(userVOString, new TypeToken<List<UserVO1>>() {
                 }.getType());
                 logger.info("userVOString:" + userVOString);
-                if (null == userVO1List || userVO1List.size() == 0){
+                if (null == userVO1List || userVO1List.size() == 0) {
                     logger.info("异常：e=" + ResultExceptEnum.ERROR_NOFOUND_USER.getCode() + "," + ResultExceptEnum.ERROR_NOFOUND_USER.getMessage());
                     throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND_USER);
                 }
                 UserVO1 userVO1 = userVO1List.get(0);
                 String rolesList = userVO1.getRoles();
-                if (null == rolesList || "[]".equals(rolesList)){
+                if (null == rolesList || "[]".equals(rolesList)) {
                     result = "NO";
-                }else{
+                } else {
                     result = "NO";
-                    if (rolesList.indexOf("roleName=admin") != -1){
+                    if (rolesList.indexOf("roleName=admin") != -1) {
                         result = "YES";
                     }
                 }
                 return result;
-            }else {
+            } else {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_NOFOUND_USER.getCode() + "," + ResultExceptEnum.ERROR_NOFOUND_USER.getMessage());
                 throw new SoftwareException(ResultExceptEnum.ERROR_NOFOUND_USER);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
     }
 }

@@ -5,7 +5,7 @@ import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.userDTO.UserDTO;
 
 public interface UserService {
-    ResultVO userValidate(String username,String password);
+    ResultVO userValidate(String username, String password);
 
     PageView getUser(PageView pageView, UserDTO userDTO) throws Exception;
 

@@ -1,176 +1,177 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ucd.server.mapper.TdhTaskParameterMapper">
-  <resultMap id="BaseResultMap" type="com.ucd.server.model.TdhTaskParameter">
-    <id column="id" jdbcType="VARCHAR" property="id" />
-    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
-    <result column="task_state" jdbcType="INTEGER" property="taskState" />
-    <result column="task_last_time" jdbcType="TIMESTAMP" property="taskLastTime" />
-    <result column="task_time" jdbcType="TIMESTAMP" property="taskTime" />
-    <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    id, task_name, task_state, task_last_time, task_time, task_status
-  </sql>
-  <select id="selectByParameter" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
-    from tdh_task_parameter
-    where 1 = 1
-    <if test="id != null and id != ''">
-      and id = #{id,jdbcType=VARCHAR}
-    </if>
-    <if test="taskName != null and taskName != ''">
-      and task_name = #{taskName,jdbcType=VARCHAR}
-    </if>
-    <if test="taskState != null and taskState != ''">
-      and task_state = #{taskState,jdbcType=VARCHAR}
-    </if>
-    <if test="taskLastTime != null and taskLastTime != ''">
-      and task_last_time = #{taskLastTime,jdbcType=TIMESTAMP}
-    </if>
-    <if test="taskTime != null and taskTime != ''">
-      and task_time = #{taskTime,jdbcType=TIMESTAMP}
-    </if>
-    <if test="taskStatus != null and taskStatus != ''">
-      and task_status = #{taskStatus,jdbcType=VARCHAR}
-    </if>
-  </select>
-  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from tdh_task_parameter
-    where id = #{id,jdbcType=VARCHAR}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from tdh_task_parameter
-    where id = #{id,jdbcType=VARCHAR}
-  </delete>
-  <insert id="insert" parameterType="com.ucd.server.model.TdhTaskParameter">
-    insert into tdh_task_parameter (id, task_name, task_state, task_last_time, task_time, task_status
-      )
-    values (#{id,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{taskState,jdbcType=INTEGER}, #{taskLastTime,jdbcType=TIMESTAMP}, #{taskTime,jdbcType=TIMESTAMP}, #{taskStatus,jdbcType=VARCHAR}
-      )
-  </insert>
-  <insert id="insertSelective" parameterType="com.ucd.server.model.TdhTaskParameter">
-    insert into tdh_task_parameter
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        id,
-      </if>
-      <if test="taskName != null">
-        task_name,
-      </if>
-      <if test="taskState != null">
-        task_state,
-      </if>
-      <if test="taskLastTime != null" >
-        task_last_time,
-      </if>
-      <if test="taskTime != null" >
-        task_time,
-      </if>
-      <if test="taskStatus != null">
-        task_status,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=VARCHAR},
-      </if>
-      <if test="taskName != null">
-        #{taskName,jdbcType=VARCHAR},
-      </if>
-      <if test="taskState != null">
-        #{taskState,jdbcType=INTEGER},
-      </if>
-      <if test="taskLastTime != null" >
-        #{taskLastTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskTime != null" >
-        #{taskTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskStatus != null">
-        #{taskStatus,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.ucd.server.model.TdhTaskParameter">
-    update tdh_task_parameter
-    <set>
-      <if test="taskName != null">
-        task_name = #{taskName,jdbcType=VARCHAR},
-      </if>
-      <if test="taskState != null">
+    <resultMap id="BaseResultMap" type="com.ucd.server.model.TdhTaskParameter">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="task_name" jdbcType="VARCHAR" property="taskName"/>
+        <result column="task_state" jdbcType="INTEGER" property="taskState"/>
+        <result column="task_last_time" jdbcType="TIMESTAMP" property="taskLastTime"/>
+        <result column="task_time" jdbcType="TIMESTAMP" property="taskTime"/>
+        <result column="task_status" jdbcType="INTEGER" property="taskStatus"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, task_name, task_state, task_last_time, task_time, task_status
+    </sql>
+    <select id="selectByParameter" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tdh_task_parameter
+        where 1 = 1
+        <if test="id != null and id != ''">
+            and id = #{id,jdbcType=VARCHAR}
+        </if>
+        <if test="taskName != null and taskName != ''">
+            and task_name = #{taskName,jdbcType=VARCHAR}
+        </if>
+        <if test="taskState != null and taskState != ''">
+            and task_state = #{taskState,jdbcType=VARCHAR}
+        </if>
+        <if test="taskLastTime != null and taskLastTime != ''">
+            and task_last_time = #{taskLastTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="taskTime != null and taskTime != ''">
+            and task_time = #{taskTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="taskStatus != null and taskStatus != ''">
+            and task_status = #{taskStatus,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tdh_task_parameter
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from tdh_task_parameter
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.ucd.server.model.TdhTaskParameter">
+        insert into tdh_task_parameter (id, task_name, task_state, task_last_time, task_time, task_status
+        )
+        values (#{id,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{taskState,jdbcType=INTEGER},
+        #{taskLastTime,jdbcType=TIMESTAMP}, #{taskTime,jdbcType=TIMESTAMP}, #{taskStatus,jdbcType=VARCHAR}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.ucd.server.model.TdhTaskParameter">
+        insert into tdh_task_parameter
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="taskName != null">
+                task_name,
+            </if>
+            <if test="taskState != null">
+                task_state,
+            </if>
+            <if test="taskLastTime != null">
+                task_last_time,
+            </if>
+            <if test="taskTime != null">
+                task_time,
+            </if>
+            <if test="taskStatus != null">
+                task_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="taskName != null">
+                #{taskName,jdbcType=VARCHAR},
+            </if>
+            <if test="taskState != null">
+                #{taskState,jdbcType=INTEGER},
+            </if>
+            <if test="taskLastTime != null">
+                #{taskLastTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskTime != null">
+                #{taskTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskStatus != null">
+                #{taskStatus,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ucd.server.model.TdhTaskParameter">
+        update tdh_task_parameter
+        <set>
+            <if test="taskName != null">
+                task_name = #{taskName,jdbcType=VARCHAR},
+            </if>
+            <if test="taskState != null">
+                task_state = #{taskState,jdbcType=INTEGER},
+            </if>
+            <if test="taskLastTime != null">
+                task_last_time = #{taskLastTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskTime != null">
+                task_time = #{taskTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskStatus != null ">
+                task_status = #{taskStatus,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByTaskName" parameterType="com.ucd.server.model.TdhTaskParameter">
+        update tdh_task_parameter
+        <set>
+            <if test="taskState != null">
+                task_state = #{taskState,jdbcType=INTEGER},
+            </if>
+            <if test="taskLastTime != null">
+                task_last_time = #{taskLastTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskTime != null">
+                task_time = #{taskTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskStatus != null ">
+                task_status = #{taskStatus,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where task_name = #{taskName,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ucd.server.model.TdhTaskParameter">
+        update tdh_task_parameter
+        set task_name = #{taskName,jdbcType=VARCHAR},
         task_state = #{taskState,jdbcType=INTEGER},
-      </if>
-      <if test="taskLastTime != null" >
         task_last_time = #{taskLastTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskTime != null" >
         task_time = #{taskTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskStatus != null ">
-        task_status = #{taskStatus,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByTaskName" parameterType="com.ucd.server.model.TdhTaskParameter">
-    update tdh_task_parameter
-    <set>
-      <if test="taskState != null">
-        task_state = #{taskState,jdbcType=INTEGER},
-      </if>
-      <if test="taskLastTime != null" >
-        task_last_time = #{taskLastTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskTime != null" >
-        task_time = #{taskTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskStatus != null ">
-        task_status = #{taskStatus,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where task_name = #{taskName,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.ucd.server.model.TdhTaskParameter">
-    update tdh_task_parameter
-    set task_name = #{taskName,jdbcType=VARCHAR},
-      task_state = #{taskState,jdbcType=INTEGER},
-      task_last_time = #{taskLastTime,jdbcType=TIMESTAMP},
-      task_time = #{taskTime,jdbcType=TIMESTAMP},
-      task_status = #{taskStatus,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
-  <update id="updateTdhServiceTaskState" parameterType="java.lang.Integer">
-  update tdh_task_parameter
-  set
-    task_state = #{taskState,jdbcType=INTEGER}
-  where id = "1" and task_name = "taskServiceInfo"
-</update>
+        task_status = #{taskStatus,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateTdhServiceTaskState" parameterType="java.lang.Integer">
+        update tdh_task_parameter
+        set
+        task_state = #{taskState,jdbcType=INTEGER}
+        where id = "1" and task_name = "taskServiceInfo"
+    </update>
 
-  <update id="updateTdhServiceTaskStateMap" parameterType="java.util.Map">
-  update tdh_task_parameter
-  set
-    task_state = #{taskState,jdbcType=INTEGER}
-  where task_name = #{taskName,jdbcType=VARCHAR}
-</update>
-  <update id="updateTdhServiceTaskTimeByTableName" parameterType="com.ucd.server.model.TdhTaskParameter">
-  update tdh_task_parameter
-  set
-    task_last_time = task_time,
-    task_time = #{taskTime,jdbcType=TIMESTAMP}
-  where task_name = #{taskName,jdbcType=VARCHAR}
-</update>
-  <update id="updateTdhServiceTaskStateTo0" parameterType="java.util.List" >
-    update tdh_task_parameter
-    set
-    task_state = 0
-    where task_name in
-    <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
-      #{item}
-    </foreach>
-   </update>
+    <update id="updateTdhServiceTaskStateMap" parameterType="java.util.Map">
+        update tdh_task_parameter
+        set
+        task_state = #{taskState,jdbcType=INTEGER}
+        where task_name = #{taskName,jdbcType=VARCHAR}
+    </update>
+    <update id="updateTdhServiceTaskTimeByTableName" parameterType="com.ucd.server.model.TdhTaskParameter">
+        update tdh_task_parameter
+        set
+        task_last_time = task_time,
+        task_time = #{taskTime,jdbcType=TIMESTAMP}
+        where task_name = #{taskName,jdbcType=VARCHAR}
+    </update>
+    <update id="updateTdhServiceTaskStateTo0" parameterType="java.util.List">
+        update tdh_task_parameter
+        set
+        task_state = 0
+        where task_name in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
 
 </mapper>

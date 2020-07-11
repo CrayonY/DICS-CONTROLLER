@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/softwarejob")
@@ -31,46 +32,43 @@ public class TdhServicesjobController {
     private TdhServicesjobService tdhServicesjobService;
 
 
-
-
-
     @PostMapping(value = "/getThdServicesjobInfo")
-    public ResultVO getThdServicesjobInfo(PageView pageView, TdhServicesJobDTO tdhServicesJobDTO){
+    public ResultVO getThdServicesjobInfo(PageView pageView, TdhServicesJobDTO tdhServicesJobDTO) {
         ResultVO resultVO = new ResultVO();
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView =tdhServicesjobService.getThdServicesjobInfo(pageView,tdhServicesJobDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = tdhServicesjobService.getThdServicesjobInfo(pageView, tdhServicesJobDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
 
     @PostMapping(value = "/getThdServicesjobListData")
-    public ResultVO getThdServicesjobListData(@RequestBody List<TdhServicesJobDTO> tdhServicesJobDTOList){
+    public ResultVO getThdServicesjobListData(@RequestBody List<TdhServicesJobDTO> tdhServicesJobDTOList) {
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesjobService.getThdServicesjobListData(tdhServicesJobDTOList);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     @GetMapping(value = "/test")
-    public ResultVO test(){
+    public ResultVO test() {
         ResultVO resultVO = new ResultVO();
         List<TdhServicesJobDTO> tdhServicesJobDTOS = new ArrayList<TdhServicesJobDTO>();
         TdhServicesJobDTO tdhaServicesJobDTO = new TdhServicesJobDTO();
@@ -81,8 +79,8 @@ public class TdhServicesjobController {
         tdhServicesJobDTOS.add(tdhbServicesJobDTO);
         System.out.println(Tools.toJson(tdhServicesJobDTOS));
         try {
-        String result = HttpClientUtils.postString("http://10.66.1.192:28070/softwarejob/getThdServicesjobListData",Tools.toJson(tdhServicesJobDTOS), "application/json",null);
-        resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),result);
+            String result = HttpClientUtils.postString("http://10.66.1.192:28070/softwarejob/getThdServicesjobListData", Tools.toJson(tdhServicesJobDTOS), "application/json", null);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), result);
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);

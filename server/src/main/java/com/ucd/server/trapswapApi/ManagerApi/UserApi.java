@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.util.List;
 
 
-
 /**
  * Created by JLcan on 2016/6/3.
  */
@@ -29,8 +28,10 @@ public class UserApi {
     public final static String USER_URL = "/users";
 
     private static final Logger log = LoggerFactory.getLogger(UserApi.class);
+
     /**
      * 2.1.1 用户登录
+     *
      * @param userName 用户名
      * @param password 密码
      * @return 是否登录成功
@@ -42,7 +43,7 @@ public class UserApi {
         postContent.put("userPassword", password);
         try (
                 //CloseableHttpResponse response = conObject.post(LOGIN_URL, postContent.toString());
-                CloseableHttpResponse response = conObject.post1(LOGIN_URL, postContent.toString(),conObject);
+                CloseableHttpResponse response = conObject.post1(LOGIN_URL, postContent.toString(), conObject);
         ) {
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             conObject.printLineAndTitle("login");
@@ -53,13 +54,14 @@ public class UserApi {
 
     /**
      * 2.1.2 用户登出
+     *
      * @return 是否登出成功
      */
     public static boolean logout(Connection conObject) throws Exception {
         boolean result;
         try (
                 //CloseableHttpResponse response = conObject.get(LOGOUT_URL);
-                CloseableHttpResponse response = conObject.get1(LOGOUT_URL,conObject);
+                CloseableHttpResponse response = conObject.get1(LOGOUT_URL, conObject);
         ) {
             result = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
             conObject.printLineAndTitle("logout");
@@ -70,6 +72,7 @@ public class UserApi {
 
     /**
      * 2.1.3 查看用户
+     *
      * @return 是否查询成功
      * @throws Exception
      */
@@ -96,13 +99,14 @@ public class UserApi {
 
     /**
      * 2.1.3.1 查看用户
+     *
      * @return 是否查询成功
      * @throws Exception
      */
     public static String getAllUsers1(Connection conObject) throws Exception {
         String responseContent = null;
         try {
-                CloseableHttpResponse response = conObject.getNOAbort1(USER_URL,conObject);
+            CloseableHttpResponse response = conObject.getNOAbort1(USER_URL, conObject);
 
             int statusCode = response.getStatusLine().getStatusCode();
 
@@ -132,45 +136,46 @@ public class UserApi {
 
     /**
      * 2.1.4 添加用户
-     * @param userName 用户名
-     * @param userFullName 用户全名
-     * @param userEmail 用户邮箱
-     * @param userDepart 用户所属部门
+     *
+     * @param userName        用户名
+     * @param userFullName    用户全名
+     * @param userEmail       用户邮箱
+     * @param userDepart      用户所属部门
      * @param userDescription 用户描述
-     * @param password 密码
-     * @param groupNamesList 用户组列表
-     * @param roleNamesList 用户角色列表
-     * @param userType 用户类型
+     * @param password        密码
+     * @param groupNamesList  用户组列表
+     * @param roleNamesList   用户角色列表
+     * @param userType        用户类型
      * @return 是否创建成功
      * @throws Exception
      */
     public static boolean addUser(Connection conObject, String userName, String userFullName, String userEmail, String userDepart, String userDescription, String password,
-                           List<String> groupNamesList, List<String> roleNamesList, String userType) throws Exception {
+                                  List<String> groupNamesList, List<String> roleNamesList, String userType) throws Exception {
         JSONObject user = new JSONObject();
         user.put("userName", userName);
-        if(userFullName == null || userFullName == ""){
+        if (userFullName == null || userFullName == "") {
             user.put("fullName", "");
-        }else{
+        } else {
             user.put("fullName", userFullName);
         }
-        if(userEmail == null || userEmail == ""){
+        if (userEmail == null || userEmail == "") {
             user.put("userEmail", "");
-        }else{
+        } else {
             user.put("userEmail", userEmail);
         }
-        if(userDepart == null || userDepart == ""){
+        if (userDepart == null || userDepart == "") {
             user.put("userDept", "");
-        }else{
+        } else {
             user.put("userDept", userDepart);
         }
-        if(userDescription == null || userDescription == ""){
+        if (userDescription == null || userDescription == "") {
             user.put("userDescription", "");
-        }else{
+        } else {
             user.put("userDescription", userDescription);
         }
         user.put("userPassword", password);
         JSONArray groups = new JSONArray();
-        if(groupNamesList != null) {
+        if (groupNamesList != null) {
             for (String groupName : groupNamesList) {
                 JSONObject group = new JSONObject();
                 group.put("groupName", groupName);
@@ -179,7 +184,7 @@ public class UserApi {
         }
         user.put("groups", groups);
         JSONArray roles = new JSONArray();
-        if(roleNamesList != null) {
+        if (roleNamesList != null) {
             for (String roleName : roleNamesList) {
                 JSONObject role = new JSONObject();
                 role.put("roleName", roleName);
@@ -202,17 +207,18 @@ public class UserApi {
 
     /**
      * 2.1.5 删除用户
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 是否删除成功
      */
-    public static boolean deleteUser (Connection conObject, List<String> userName, List<String> type) throws Exception{
+    public static boolean deleteUser(Connection conObject, List<String> userName, List<String> type) throws Exception {
         String path = USER_URL;
         JSONArray content = new JSONArray();
-        if(userName == null || type == null){
+        if (userName == null || type == null) {
             System.out.println("\n Wrong parameter(s)! \n");
-        }else{
-            for(int i = 0; i < userName.size(); i++){
+        } else {
+            for (int i = 0; i < userName.size(); i++) {
                 JSONObject userUnit = new JSONObject();
                 userUnit.put("userName", userName.get(i));
                 userUnit.put("type", type.get(i));
@@ -231,8 +237,9 @@ public class UserApi {
 
     /**
      * 2.1.6 获取用户信息
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 用户详细信息
      * @throws Exception
      */
@@ -251,42 +258,43 @@ public class UserApi {
 
     /**
      * 2.1.7 修改用户信息
-     * @param userName 用户名
-     * @param userType 用户类型
+     *
+     * @param userName        用户名
+     * @param userType        用户类型
      * @param changedFullName 修改后的用户全名
      * @return 是否修改成功
      * @throws Exception
      */
     public static boolean editUser(Connection conObject, String userName, String userType, String changedFullName, String changedEmail, String changedDepart,
-                            String changedDescription, List<String> groupNamesList, List<String> groupNamesAddDeleteList, List<String> roleNamesList,
-                            List<String> roleNamesAddDeleteList ) throws Exception {
+                                   String changedDescription, List<String> groupNamesList, List<String> groupNamesAddDeleteList, List<String> roleNamesList,
+                                   List<String> roleNamesAddDeleteList) throws Exception {
         boolean result;
         String path = USER_URL + "/" + userType + "/" + userName;
 
         JSONObject user = new JSONObject();
         user.put("userName", userName);
-        if( changedFullName != null && changedFullName != "" ){
+        if (changedFullName != null && changedFullName != "") {
             user.put("fullName", changedFullName);
-        }else{
+        } else {
             user.put("fullName", "");
         }
-        if( changedEmail != null && changedEmail != "" ) {
+        if (changedEmail != null && changedEmail != "") {
             user.put("userEmail", changedEmail);
-        }else{
+        } else {
             user.put("userEmail", "");
         }
-        if( changedDepart != null && changedDepart != "" ){
+        if (changedDepart != null && changedDepart != "") {
             user.put("userDept", changedDepart);
-        }else{
+        } else {
             user.put("userDept", "");
         }
-        if( changedDescription != null && changedDescription != "" ){
+        if (changedDescription != null && changedDescription != "") {
             user.put("userDescription", changedDescription);
-        }else{
+        } else {
             user.put("userDescription", "");
         }
         JSONArray groupNamesArray = new JSONArray();
-        if(groupNamesList != null) {
+        if (groupNamesList != null) {
             for (int i = 0; i < groupNamesList.size(); i++) {
                 JSONObject group = new JSONObject();
                 group.put("groupName", groupNamesList.get(i));
@@ -296,7 +304,7 @@ public class UserApi {
         }
         user.put("groups", groupNamesArray);
         JSONArray roleNamesArray = new JSONArray();
-        if(roleNamesList != null) {
+        if (roleNamesList != null) {
             for (int i = 0; i < roleNamesList.size(); i++) {
                 JSONObject role = new JSONObject();
                 role.put("roleName", roleNamesList.get(i));
@@ -318,8 +326,9 @@ public class UserApi {
 
     /**
      * 2.1.8 管理员设置用户密码
-     * @param userName 用户名
-     * @param type 用户类型
+     *
+     * @param userName        用户名
+     * @param type            用户类型
      * @param changedPassword 修改后的密码
      * @return 是否设置成功
      * @throws Exception
@@ -340,8 +349,9 @@ public class UserApi {
 
     /**
      * 2.1.9 更新用户密码
-     * @param userName 用户名
-     * @param type 用户类型
+     *
+     * @param userName    用户名
+     * @param type        用户类型
      * @param oldPassword 老密码
      * @param newPassword 新密码
      * @return 是否更新成功
@@ -368,8 +378,9 @@ public class UserApi {
 
     /**
      * 2.1.10 锁定用户
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 是否锁定成功
      * @throws Exception
      */
@@ -388,12 +399,13 @@ public class UserApi {
 
     /**
      * 2.1.11 解锁用户
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 是否解锁成功
      * @throws Exception
      */
-    public static boolean unlockUser(Connection conObject,String userName, String type) throws Exception {
+    public static boolean unlockUser(Connection conObject, String userName, String type) throws Exception {
         boolean result;
         String path = USER_URL + "/" + type + "/" + userName + "/unlock";
         try (
@@ -408,20 +420,21 @@ public class UserApi {
 
     /**
      * 2.1.12 下载KeyTab
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @param fileName KeyTab文件名
      * @return 是否解锁成功
      * @throws Exception
      */
-    public static boolean downloadKeyTab(Connection confObject,String userName, String type, String fileName) throws Exception {
+    public static boolean downloadKeyTab(Connection confObject, String userName, String type, String fileName) throws Exception {
         String url = USER_URL + "/" + type + userName + "/keytab/" + fileName;
         File file = new File(fileName);
         try (
                 CloseableHttpResponse response = confObject.get(url);
                 InputStream in = response.getEntity().getContent();
                 FileOutputStream fout = new FileOutputStream(file);
-        ){
+        ) {
             confObject.printLineAndTitle("downloadKeyTab");
             int l = -1;
             byte[] tmp = new byte[1024 * 1024];
@@ -437,12 +450,13 @@ public class UserApi {
 
     /**
      * 2.1.13 获取用户首选项
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 用户首选项信息
      * @throws Exception
      */
-    public static boolean getUserPreference(Connection conObject,String userName, String type) throws Exception {
+    public static boolean getUserPreference(Connection conObject, String userName, String type) throws Exception {
         String path = USER_URL + "/" + type + "/" + userName + "/preferences";
 
         try (
@@ -457,12 +471,13 @@ public class UserApi {
 
     /**
      * 2.1.14 获取用户权限
+     *
      * @param userName 用户名
-     * @param type 用户类型
+     * @param type     用户类型
      * @return 用户权限信息
      * @throws Exception
      */
-    public static boolean getUserPermissions(Connection conObject,String userName, String type) throws Exception {
+    public static boolean getUserPermissions(Connection conObject, String userName, String type) throws Exception {
         String path = USER_URL + "/" + type + "/" + userName + "/permissions";
         try (
                 CloseableHttpResponse response = conObject.get(path)

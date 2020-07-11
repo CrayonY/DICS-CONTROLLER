@@ -1,7 +1,6 @@
 package com.ucd.server.service.tdhservicesservice;
 
 
-
 import com.ucd.common.VO.ResultVO;
 import com.ucd.common.utils.pager.PageView;
 import com.ucd.daocommon.DTO.tdhDsauditDTO.TdhDsauditDTO;
@@ -21,7 +20,7 @@ public interface TdhServicesDsauditService {
 
     ResultVO getTdhDsauditData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception;
 
-    ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList,String userCode) throws Exception;
+    ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList, String userCode) throws Exception;
 
     ResultVO countTdhDsauditDataoByAuditStatus(Integer auditStatus) throws Exception;
 }

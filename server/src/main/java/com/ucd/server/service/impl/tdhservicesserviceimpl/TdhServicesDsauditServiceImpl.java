@@ -48,8 +48,8 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
 
     @Override
     public ResultVO saveTdhDsauditInfo(TdhDsauditDTO tdhDsauditDTO) throws Exception {
-        if(tdhDsauditDTO == null ){
-            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        if (tdhDsauditDTO == null) {
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(), TdhServicesReturnEnum.PARAM_ERROR.getMessage());
         }
         ResultVO resultVO = daoClient.saveTdhDsauditInfo(tdhDsauditDTO);
         return resultVO;
@@ -57,8 +57,8 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
 
     @Override
     public ResultVO saveTdhDsauditData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception {
-        if(tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0){
-            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        if (tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0) {
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(), TdhServicesReturnEnum.PARAM_ERROR.getMessage());
         }
         ResultVO resultVO = daoClient.saveTdhDsauditData(tdhDsauditDTOList);
         logger.info("resultVO=" + resultVO);
@@ -75,7 +75,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 tdhDsDTO.setSyncType(tdhDsauditDTO.getSyncType());
                 if ("A".equals(tdhDsDTO.getCentre())) {
                     tdhDsDTO.setCentreTableName("tdha_ds_info");
-                }else if("B".equals(tdhDsDTO.getCentre())){
+                } else if ("B".equals(tdhDsDTO.getCentre())) {
                     tdhDsDTO.setCentreTableName("tdhb_ds_info");
                 }
                 tdhDsDTOS.add(tdhDsDTO);
@@ -83,34 +83,34 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
             TdhDsListDTO tdhDsListDTO = new TdhDsListDTO();
             tdhDsListDTO.setTdhDsDTOList(tdhDsDTOS);
             Map<String, Object> models = new HashMap<String, Object>();
-            models.put("auditStatus",1);
-            models.put("userCode",tdhDsauditDTOList.get(0).getApplyerCode());
-            models.put("tdhDsDTOS",tdhDsListDTO);
+            models.put("auditStatus", 1);
+            models.put("userCode", tdhDsauditDTOList.get(0).getApplyerCode());
+            models.put("tdhDsDTOS", tdhDsListDTO);
             ResultVO resultVO1 = daoClient.updateTdhDsInfoS(models);
             if ("000000".equals(resultVO1.getCode())) {
                 logger.info("审核中！修改成功");
             } else {
                 logger.info("审核中！修改失败");
-                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核中！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "审核中！修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
             }
             return resultVO;
         } else {
-            logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+            logger.info("中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg() + resultVO.getData());
         }
     }
 
     @Override
     public PageView getTdhDsauditInfo(PageView pageView, TdhDsauditDTO tdhDsauditDTO) throws Exception {
-        if(tdhDsauditDTO == null ){
-            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        if (tdhDsauditDTO == null) {
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(), TdhServicesReturnEnum.PARAM_ERROR.getMessage());
         }
         Map<String, Object> models = new HashMap<String, Object>();
-        models.put("pageView",pageView);
-        models.put("tdhDsauditDTO",tdhDsauditDTO);
+        models.put("pageView", pageView);
+        models.put("tdhDsauditDTO", tdhDsauditDTO);
         ResultVO resultVO = daoClient.getTdhDsauditInfo(models);
         logger.info("resultVO=" + resultVO);
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -119,52 +119,52 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
 
     @Override
     public ResultVO getTdhDsauditData(List<TdhDsauditDTO> tdhDsauditDTOList) throws Exception {
         Gson gs = new Gson();
-        if(tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0){
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        if (tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0) {
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
         }
-        for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList){
-            if(tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId())){
+        for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList) {
+            if (tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId())) {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",ID不能为空");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"ID不能为空");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "ID不能为空");
             }
         }
         return null;
     }
 
     @Override
-    public ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList,String userCode) throws Exception {
+    public ResultVO auditTdhDsauditListData(List<TdhDsauditDTO> tdhDsauditDTOList, String userCode) throws Exception {
         String centre = "";
-        if (centrelocal.equals("A")){
+        if (centrelocal.equals("A")) {
             centre = "B";
-        }else if (centrelocal.equals("B")){
+        } else if (centrelocal.equals("B")) {
             centre = "A";
         }
         Gson gs = new Gson();
-        if(tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0){
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        if (tdhDsauditDTOList == null || tdhDsauditDTOList.size() == 0) {
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
         }
         List<TdhDsDTO> tdhDsDTOS = new ArrayList<TdhDsDTO>();
-        for (TdhDsauditDTO tdhDsauditDTO:tdhDsauditDTOList){
-            if(tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null || tdhDsauditDTO.getSyncType() == null){
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+        for (TdhDsauditDTO tdhDsauditDTO : tdhDsauditDTOList) {
+            if (tdhDsauditDTO == null || tdhDsauditDTO.getId() == null || "".equals(tdhDsauditDTO.getId()) || tdhDsauditDTO.getAuditStatus() == null || tdhDsauditDTO.getSyncType() == null) {
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
             }
             boolean flag = true;
-            if (tdhDsauditDTO.getAuditStatus() == 3 || tdhDsauditDTO.getAuditStatus() == 4){
+            if (tdhDsauditDTO.getAuditStatus() == 3 || tdhDsauditDTO.getAuditStatus() == 4) {
                 flag = false;
             }
-            if (flag){
+            if (flag) {
                 logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",审核状态输入错误");
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"审核状态输入错误");
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "审核状态输入错误");
             }
             tdhDsauditDTO.setAuditerCode(userCode);
             TdhDsDTO tdhDsDTO = new TdhDsDTO();
@@ -181,7 +181,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
             tdhDsDTOS.add(tdhDsDTO);
         }
         ResultVO resultVOTdhDsauditListVO = daoClient.getTdhDsauditListDataS(tdhDsauditDTOList);
-        if("000000".equals(resultVOTdhDsauditListVO.getCode())) {
+        if ("000000".equals(resultVOTdhDsauditListVO.getCode())) {
             List<TdhDsauditVO> tdhDsauditVOS = new ArrayList<TdhDsauditVO>();
             Object object = resultVOTdhDsauditListVO.getData();
             if (object != null) {
@@ -190,27 +190,27 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                 tdhDsauditVOS = gs.fromJson(tdhDsauditListVOString, new TypeToken<List<TdhDsauditVO>>() {
                 }.getType());
                 logger.info("tdhDsauditVOS:" + tdhDsauditVOS);
-                if (tdhDsauditVOS == null || tdhDsauditVOS.size() == 0){
-                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
-                }else {
-                    for (TdhDsauditVO tdhDsauditVO:tdhDsauditVOS) {
-                        if (tdhDsauditVO.getAuditStatus() == 3 || tdhDsauditVO.getAuditStatus() == 4){//已经处理，说明此表已经审核过了，不需要再次审核
-                            throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getCode(),ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getMessage());
+                if (tdhDsauditVOS == null || tdhDsauditVOS.size() == 0) {
+                    throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
+                } else {
+                    for (TdhDsauditVO tdhDsauditVO : tdhDsauditVOS) {
+                        if (tdhDsauditVO.getAuditStatus() == 3 || tdhDsauditVO.getAuditStatus() == 4) {//已经处理，说明此表已经审核过了，不需要再次审核
+                            throw new SoftwareException(ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getCode(), ResultExceptEnum.RROR_PARAMETER_AUDITSTATED.getMessage());
                         }
                     }
 //                    向对端发送http审核请求
                     ResultVO resultDsauditVO = new ResultVO();
                     String resultDsaudit = "";
                     try {
-                        resultDsaudit = HttpClientUtils.postString(urlotherside+"/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
+                        resultDsaudit = HttpClientUtils.postString(urlotherside + "/server-0.0.1-SNAPSHOT/softwareDs/updateThdDsListData", Tools.toJson(tdhDsDTOS), "application/json", null);
                         resultDsauditVO = gs.fromJson(resultDsaudit, new TypeToken<ResultVO>() {
                         }.getType());
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         logger.info("审核结果通知失败,接口超时等异常");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_HTTP,"审核结果通知失败,接口超时等异常：:" + e);
+                        throw new SoftwareException(ResultExceptEnum.ERROR_HTTP, "审核结果通知失败,接口超时等异常：:" + e);
                     }
-                    logger.info("resultDsauditVO:"+resultDsauditVO);
-                    if("000000".equals(resultDsauditVO.getCode())){
+                    logger.info("resultDsauditVO:" + resultDsauditVO);
+                    if ("000000".equals(resultDsauditVO.getCode())) {
                         logger.info("审核结果已通知对端");
                         //修改审核表对应状态
                         ResultVO resultVO1 = daoClient.updateTdhDsauditDataS(tdhDsauditDTOList);
@@ -218,7 +218,7 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                             logger.info("审核状态修改成功");
                         } else {
                             logger.info("审核状态修改失败");
-                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
+                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "审核状态修改失败异常：:" + resultVO1.getMsg() + resultVO1.getData());
                         }
                         //修改本中心对应的同步表状态
                         ResultVO resultVO2 = tdhServicesDsService.updateThdDsListData(tdhDsDTOS);
@@ -226,35 +226,35 @@ public class TdhServicesDsauditServiceImpl implements TdhServicesDsauditService 
                             logger.info("审核状态修改成功");
                         } else {
                             logger.info("审核状态修改失败");
-                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核状态修改失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
+                            throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "审核状态修改失败异常：:" + resultVO2.getMsg() + resultVO2.getData());
                         }
-                    }else{
+                    } else {
                         logger.info("审核结果通知失败");
-                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE,"审核结果通知失败异常：:" + resultDsauditVO.getMsg() + resultDsauditVO.getData());
+                        throw new SoftwareException(ResultExceptEnum.ERROR_UPDATE, "审核结果通知失败异常：:" + resultDsauditVO.getMsg() + resultDsauditVO.getData());
                     }
                     return resultDsauditVO;
                 }
-            }else {
-                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(),ResultExceptEnum.ERROR_PARAMETER.getMessage());
+            } else {
+                throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER.getCode(), ResultExceptEnum.ERROR_PARAMETER.getMessage());
             }
-        }else {
-            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsauditListVO.getMsg()+resultVOTdhDsauditListVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsauditListVO.getMsg()+resultVOTdhDsauditListVO.getData());
+        } else {
+            logger.info("dao层异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVOTdhDsauditListVO.getMsg() + resultVOTdhDsauditListVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, "dao层中心异常:" + resultVOTdhDsauditListVO.getMsg() + resultVOTdhDsauditListVO.getData());
         }
     }
 
     @Override
     public ResultVO countTdhDsauditDataoByAuditStatus(Integer auditStatus) throws Exception {
-        if(auditStatus == null){
-            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(),TdhServicesReturnEnum.PARAM_ERROR.getMessage());
+        if (auditStatus == null) {
+            throw new SoftwareException(TdhServicesReturnEnum.PARAM_ERROR.getCode(), TdhServicesReturnEnum.PARAM_ERROR.getMessage());
         }
         ResultVO resultVO = daoClient.countTdhDsauditDataoByAuditStatus(auditStatus);
         logger.info("resultVO=" + resultVO);
         if ("000000".equals(resultVO.getCode())) {
             return resultVO;
         } else {
-            logger.info( "中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg()+resultVO.getData());
+            logger.info("中心异常：e=" + ResultExceptEnum.ERROR_INSERT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_INSERT, "中心异常:" + resultVO.getMsg() + resultVO.getData());
         }
     }
 }

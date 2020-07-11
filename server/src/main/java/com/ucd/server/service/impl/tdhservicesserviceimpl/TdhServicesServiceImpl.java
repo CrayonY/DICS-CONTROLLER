@@ -124,40 +124,40 @@ public class TdhServicesServiceImpl implements TdhServicesService {
 //    }
 
     @Override
-    public String saveThdServicesListData() throws Exception{
+    public String saveThdServicesListData() throws Exception {
         //return urla+"-"+centrea+"-"+usernamea+"-"+passworda+"==="+urlb+"-"+centreb+"-"+usernameb+"-"+passwordb;
-            int num = tdhTaskParameterMapper.updateTdhServiceTaskState(1);
-            Date now = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String nowDate = sdf.format(now).substring(0,18)+"0";
-            if (num == 1) {
-                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda, nowDate);
-                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb, nowDate);
-            }else{
-                return "30";
-            }
-          return "30";
+        int num = tdhTaskParameterMapper.updateTdhServiceTaskState(1);
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowDate = sdf.format(now).substring(0, 18) + "0";
+        if (num == 1) {
+            serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda, nowDate);
+            serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb, nowDate);
+        } else {
+            return "30";
+        }
+        return "30";
 
 
     }
 
     @Override
-    public PageView getThdServicesInfo(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
-        if (tdhServicesInfoDTO.getName() == null || "".equals(tdhServicesInfoDTO.getName())){
+    public PageView getThdServicesInfo(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
+        if (tdhServicesInfoDTO.getName() == null || "".equals(tdhServicesInfoDTO.getName())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",name名称不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"name名称不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "name名称不能为空");
         }
-        if(tdhServicesInfoDTO.getCentre() == null || "".equals(tdhServicesInfoDTO.getCentre())){
+        if (tdhServicesInfoDTO.getCentre() == null || "".equals(tdhServicesInfoDTO.getCentre())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "centre中心不能为空");
         }
         serviceThread.setTableName(tdhServicesInfoDTO);
         Map<String, Object> models = new HashMap<String, Object>();
-        models.put("pageView",pageView);
-        models.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
+        models.put("pageView", pageView);
+        models.put("tdhServicesInfoDTO", tdhServicesInfoDTO);
         ResultVO resultVO = daoClient.getThdServicesInfo(models);
         logger.info("resultVO=" + resultVO);
-        if("000000".equals(resultVO.getCode())){
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -166,11 +166,11 @@ public class TdhServicesServiceImpl implements TdhServicesService {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
-        return  pageView;
+        return pageView;
     }
 
     @Override
@@ -182,41 +182,41 @@ public class TdhServicesServiceImpl implements TdhServicesService {
     @Override
     public PageView getThdServicesListNow(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
 
-        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())){
+        if (ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "centre中心不能为空");
         }
         // 确定表名
-        if (tdhServicesInfoDTO.getCentre().equals(centrea)){
+        if (tdhServicesInfoDTO.getCentre().equals(centrea)) {
             tdhServicesInfoDTO.setTableName(TDHA_SERVICES_INFO_NOW);
         }
 
-        if (tdhServicesInfoDTO.getCentre().equals(centreb)){
+        if (tdhServicesInfoDTO.getCentre().equals(centreb)) {
             tdhServicesInfoDTO.setTableName(TDHB_SERVICES_INFO_NOW);
         }
         logger.info(tdhServicesInfoDTO.toString());
         Map<String, Object> models = new HashMap<>(16);
-        models.put("pageView",pageView);
-        models.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
+        models.put("pageView", pageView);
+        models.put("tdhServicesInfoDTO", tdhServicesInfoDTO);
         ResultVO resultVO = daoClient.getThdServicesListNow(models);
         logger.info("resultVO=" + resultVO);
 
-        pageView = this.commonResult(pageView,resultVO);
+        pageView = this.commonResult(pageView, resultVO);
 
-        return  pageView;
+        return pageView;
     }
 
 
     @Override
-    public PageView getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception{
-        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeStart()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeEnd()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getSecond())){
+    public PageView getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) throws Exception {
+        if (ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeStart()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getTaskTimeEnd()) || ObjectUtils.isEmpty(tdhServicesInfoDTO.getSecond())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",参数不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"参数不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "参数不能为空");
         }
 
-        if(ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())){
+        if (ObjectUtils.isEmpty(tdhServicesInfoDTO.getCentre())) {
             logger.info("异常：e=" + ResultExceptEnum.ERROR_PARAMETER + ",centre中心不能为空");
-            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER,"centre中心不能为空");
+            throw new SoftwareException(ResultExceptEnum.ERROR_PARAMETER, "centre中心不能为空");
         }
 
         // 确定表名
@@ -224,9 +224,9 @@ public class TdhServicesServiceImpl implements TdhServicesService {
         serviceThread.setTableName(tdhServicesInfoDTO);
 
         // 时间处理java8
-       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-       LocalDateTime taskTimeStart1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeStart(), dtf);
-       LocalDateTime taskTimeEnd1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeEnd(), dtf);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime taskTimeStart1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeStart(), dtf);
+        LocalDateTime taskTimeEnd1 = LocalDateTime.parse(tdhServicesInfoDTO.getTaskTimeEnd(), dtf);
 
    /*    Date newDate = java.sql.Date.valueOf(String.valueOf(taskTimeStart1));
        Date newDate1 = java.sql.Date.valueOf(String.valueOf(taskTimeEnd1));
@@ -247,12 +247,12 @@ public class TdhServicesServiceImpl implements TdhServicesService {
         tdhServicesInfoDTO.setTaskTimeEnd(sdf.format(cal1.getTime()));
         Map<String, Object> model = new HashMap<>(16);
 
-        model.put("pageView",pageView);
-        model.put("tdhServicesInfoDTO",tdhServicesInfoDTO);
+        model.put("pageView", pageView);
+        model.put("tdhServicesInfoDTO", tdhServicesInfoDTO);
 
         ResultVO resultVO = daoClient.getTdhHealthStatusByTime(model);
 
-        pageView = this.commonResult(pageView,resultVO);
+        pageView = this.commonResult(pageView, resultVO);
 
         logger.info("resultVO=" + resultVO);
 
@@ -260,8 +260,8 @@ public class TdhServicesServiceImpl implements TdhServicesService {
     }
 
 
-    public PageView commonResult(PageView pageView,ResultVO resultVO){
-        if("000000".equals(resultVO.getCode())){
+    public PageView commonResult(PageView pageView, ResultVO resultVO) {
+        if ("000000".equals(resultVO.getCode())) {
             Object object = resultVO.getData();
             if (object != null) {
                 String pageViewString = Tools.toJson(object);
@@ -270,13 +270,12 @@ public class TdhServicesServiceImpl implements TdhServicesService {
                 }.getType());
                 logger.info("pageViewString:" + pageViewString);
             }
-        }else {
-            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg()+resultVO.getData());
-            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT,resultVO.getMsg()+resultVO.getData());
+        } else {
+            logger.info("异常：e=" + ResultExceptEnum.ERROR_SELECT + "," + resultVO.getMsg() + resultVO.getData());
+            throw new SoftwareException(ResultExceptEnum.ERROR_SELECT, resultVO.getMsg() + resultVO.getData());
         }
         return pageView;
     }
-
 
 
 //    @Override

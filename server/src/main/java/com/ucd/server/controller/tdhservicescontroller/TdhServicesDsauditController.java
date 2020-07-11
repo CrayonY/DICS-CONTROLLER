@@ -26,6 +26,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/softwareDsaudit")
@@ -46,78 +47,76 @@ public class TdhServicesDsauditController {
     UserService userService;
 
 
-
-
-/**
- * @author gongweimin
- * @Description 获得审核列表（分页）       
- * @date 2019/5/10 9:38 
- * @params [pageView, tdhDsauditDTO]
- * @exception  
- * @return com.ucd.common.VO.ResultVO  
- */
+    /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
+     * @author gongweimin
+     * @Description 获得审核列表（分页）
+     * @date 2019/5/10 9:38
+     * @params [pageView, tdhDsauditDTO]
+     */
     @PostMapping(value = "/getTdhDsauditInfo")
-    public ResultVO getTdhDsauditInfo(PageView pageView, TdhDsauditDTO tdhDsauditDTO){
+    public ResultVO getTdhDsauditInfo(PageView pageView, TdhDsauditDTO tdhDsauditDTO) {
         ResultVO resultVO = new ResultVO();
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView =tdhServicesDsauditService.getTdhDsauditInfo(pageView,tdhDsauditDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = tdhServicesDsauditService.getTdhDsauditInfo(pageView, tdhDsauditDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
-     * @Description 添加审核数据       
-     * @date 2019/5/10 9:38 
+     * @Description 添加审核数据
+     * @date 2019/5/10 9:38
      * @params [tdhDsauditDTOList]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/saveTdhDsauditData")
-    public  ResultVO saveTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList) {
+    public ResultVO saveTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList) {
         logger.info("进入controller啦——————————————");
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsauditService.saveTdhDsauditData(tdhDsauditDTOList);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
      * @Description 获得审核列表
-     * @date 2019/5/10 9:39 
+     * @date 2019/5/10 9:39
      * @params [tdhDsauditDTOList]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/getTdhDsauditData")
-    public ResultVO getTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList){
+    public ResultVO getTdhDsauditData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList) {
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsauditService.getTdhDsauditData(tdhDsauditDTOList);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
@@ -149,15 +148,15 @@ public class TdhServicesDsauditController {
 //
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
      * @Description 审核对端数据同步得请求
      * @date 2019/5/10 9:39
      * @params [tdhDsauditDTOList, req]
-     * @exception
-     * @return com.ucd.common.VO.ResultVO
      */
     @PostMapping(value = "/auditTdhDsauditListData")
-    public ResultVO auditTdhDsauditListData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList, HttpServletRequest req){
+    public ResultVO auditTdhDsauditListData(@RequestBody List<TdhDsauditDTO> tdhDsauditDTOList, HttpServletRequest req) {
         ResultVO resultVO = new ResultVO();
         String userName = "";
         String accessToken = "";
@@ -217,15 +216,15 @@ public class TdhServicesDsauditController {
 
             //获取header
             Enumeration headerNames = req.getHeaderNames();
-            if(headerNames==null){
+            if (headerNames == null) {
                 logger.info("没有hearder");
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(),ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
-            }else{
-                while (headerNames.hasMoreElements()){
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_HEADER.getCode(), ResultExceptEnum.ERROR_HTTP_HEADER.getMessage());
+            } else {
+                while (headerNames.hasMoreElements()) {
 
                     //获取cookie的键
                     String key = (String) headerNames.nextElement();
-                    System.out.println("key:"+key);
+                    System.out.println("key:" + key);
                     if ("username".equals(key)) {
 
                         //获取cookie的值
@@ -242,55 +241,55 @@ public class TdhServicesDsauditController {
                     }
 
                 }
-                if("".equals(accessToken)){
+                if ("".equals(accessToken)) {
                     logger.info("token为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(),ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_TOKEN.getCode(), ResultExceptEnum.ERROR_HTTP_TOKEN.getMessage());
                 }
-                if("".equals(userName)){
+                if ("".equals(userName)) {
                     logger.info("userName为空");
-                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+                    throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
                 }
             }
             OperationLogInfoDTO operationLogInfoDTO = new OperationLogInfoDTO();
             operationLogInfoDTO.setUserCode(userName);
-            operationLogInfoDTO.setValue(userName+ OperationLogInfoEnum.auditTdhDsauditListData.getMessage());
+            operationLogInfoDTO.setValue(userName + OperationLogInfoEnum.auditTdhDsauditListData.getMessage());
             operationLogInfoService.saveOperationLogInfo(operationLogInfoDTO);
             String power = userService.checkUserPower(userName);
-            if ("NO".equals(power)){
-                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(),ResultExceptEnum.ERROR_HTTP_USER.getMessage());
+            if ("NO".equals(power)) {
+                throw new SoftwareException(ResultExceptEnum.ERROR_HTTP_USER.getCode(), ResultExceptEnum.ERROR_HTTP_USER.getMessage());
             }
-            resultVO = tdhServicesDsauditService.auditTdhDsauditListData(tdhDsauditDTOList,userName);
-            logger.info("resultVO:"+resultVO);
+            resultVO = tdhServicesDsauditService.auditTdhDsauditListData(tdhDsauditDTOList, userName);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
     /**
+     * @return com.ucd.common.VO.ResultVO
+     * @throws
      * @author gongweimin
      * @Description 按照审核状态统计数量
-     * @date 2019/5/10 9:44 
+     * @date 2019/5/10 9:44
      * @params [auditStatus]
-     * @exception  
-     * @return com.ucd.common.VO.ResultVO  
      */
     @PostMapping(value = "/countTdhDsauditDataoByAuditStatus")
-    public  ResultVO countTdhDsauditDataoByAuditStatus(@Param("auditStatus") Integer auditStatus) {
+    public ResultVO countTdhDsauditDataoByAuditStatus(@Param("auditStatus") Integer auditStatus) {
         logger.info("进入countTdhDsauditDataoByAuditStatuscontroller啦——————————————");
-        logger.info("auditStatus——————————————"+auditStatus);
+        logger.info("auditStatus——————————————" + auditStatus);
         ResultVO resultVO = new ResultVO();
         try {
             resultVO = tdhServicesDsauditService.countTdhDsauditDataoByAuditStatus(auditStatus);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }

@@ -1,7 +1,6 @@
 package com.ucd.server.controller.tdhservicescontroller;
 
 
-
 import com.ucd.common.VO.ResultVO;
 import com.ucd.common.enums.ResultEnum;
 import com.ucd.common.utils.ResultVOUtil;
@@ -55,7 +54,7 @@ public class TdhServicesController {
         ResultVO resultVO = new ResultVO();
         try {
             String result = tdhServicesService.saveThdServicesListData();
-            resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(), ResultEnum.RESULT_SUCCESS.getMessage(),result);
+            resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(), ResultEnum.RESULT_SUCCESS.getMessage(), result);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,20 +65,20 @@ public class TdhServicesController {
     }
 
     @PostMapping(value = "/getThdServicesInfo")
-    public ResultVO getThdServicesInfo(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO){
+    public ResultVO getThdServicesInfo(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) {
         ResultVO resultVO = new ResultVO();
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView =tdhServicesService.getThdServicesInfo(pageView,tdhServicesInfoDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = tdhServicesService.getThdServicesInfo(pageView, tdhServicesInfoDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
@@ -92,7 +91,7 @@ public class TdhServicesController {
         String centre = "A";
         try {
             String result = tdhServicesService.updateDataSynchronizationState(centre);
-            resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(), ResultEnum.RESULT_SUCCESS.getMessage(),result);
+            resultVO = ResultVOUtil.setResult(ResultEnum.RESULT_SUCCESS.getCode(), ResultEnum.RESULT_SUCCESS.getMessage(), result);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,61 +102,59 @@ public class TdhServicesController {
     }
 
 
-
-
     /**
+     * @return com.ucd.common.utils.pager.PageView
+     * @throws
      * @author Crayon
-     * @Description 查看所有实时表数据       
-     * @date 2019/4/16 3:11 PM 
+     * @Description 查看所有实时表数据
+     * @date 2019/4/16 3:11 PM
      * @params [pageView, tdhServicesInfoDTO]
-     * @exception  
-     * @return com.ucd.common.utils.pager.PageView  
      */
     @PostMapping(value = "/getThdServicesListNow")
-    public ResultVO getThdServicesListNow(PageView pageView,TdhServicesInfoDTO tdhServicesInfoDTO){
-        logger.info("tdhServicesInfoDTO:"+tdhServicesInfoDTO);
+    public ResultVO getThdServicesListNow(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) {
+        logger.info("tdhServicesInfoDTO:" + tdhServicesInfoDTO);
         ResultVO resultVO;
         try {
-            if(pageView == null){
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView =tdhServicesService.getThdServicesListNow(pageView,tdhServicesInfoDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = tdhServicesService.getThdServicesListNow(pageView, tdhServicesInfoDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
 
 
     /**
+     * @return com.ucd.common.utils.pager.PageView
+     * @throws
      * @author Crayon
      * @Description 服务健康状态监测
      * @date 2019/4/19 10:19 AM
      * @params [pageView, second, startTime, endTime]
-     * @exception
-     * @return com.ucd.common.utils.pager.PageView
      */
     @PostMapping(value = "/getTdhHealthStatus")
-    public ResultVO getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO){
+    public ResultVO getTdhHealthStatus(PageView pageView, TdhServicesInfoDTO tdhServicesInfoDTO) {
         ResultVO resultVO = new ResultVO();
-        try{
-            if(pageView == null){
+        try {
+            if (pageView == null) {
                 pageView = new PageView();
             }
-            pageView = tdhServicesService.getTdhHealthStatus(pageView,tdhServicesInfoDTO);
-            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(),TdhServicesReturnEnum.SUCCESS.getMessage(),pageView);
-            logger.info("resultVO:"+resultVO);
+            pageView = tdhServicesService.getTdhHealthStatus(pageView, tdhServicesInfoDTO);
+            resultVO = ResultVOUtil.setResult(TdhServicesReturnEnum.SUCCESS.getCode(), TdhServicesReturnEnum.SUCCESS.getMessage(), pageView);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             resultVO = ResultVOUtil.error(e);
-            logger.info("resultVO:"+resultVO);
+            logger.info("resultVO:" + resultVO);
             return resultVO;
         }
     }
@@ -178,9 +175,6 @@ public class TdhServicesController {
 //
 //        return resultVO;
 //    }
-
-
-
 
 
 }
