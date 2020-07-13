@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: root
-#    url: jdbc:mysql://10.66.1.192:3306/clouddemo?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
+    #    url: jdbc:mysql://10.66.1.192:3306/clouddemo?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
     url: jdbc:mysql://10.28.3.203:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 #    url: jdbc:mysql://10.66.1.164:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 #  jpa:
@@ -22,8 +22,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka-0.0.1-SNAPSHOT/eureka/
-#       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
-#      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
+  #       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
+  #      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
