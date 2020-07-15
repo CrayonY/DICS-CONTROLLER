@@ -1,0 +1,62 @@
+# 昆明 大漾田
+server:
+  port: 28070
+spring:
+  application:
+    name: software
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://10.50.197.245:3306/monitordb_a?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://10.50.197.241:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.50.197.242:8761/eureka-0.0.1-SNAPSHOT/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+#SOFTWARE:
+ribbon:
+  NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+  ReadTimeout: 120000
+  ConnectTimeout: 30000
+mybatis:
+  mapper-locations: classpath:mapping/*.xml  #注意：一定要对应mapper映射xml文件的所在路径
+  type-aliases-package: com.ucd.server.model.*  # 注意：对应实体类的路径
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印SQL
+
+basicparameters:
+  transwarp:
+    serviceinfourla: http://10.50.197.11:8180/api
+    joburla: http://10.50.197.41:4044/api
+    centrea: A
+    usernamea: monitorservice
+    passworda: monitorservice
+    # job流数量  需要与大数据同步
+    jobsizea: 37
+    serviceinfourlb: http://10.50.198.12:8180/api
+    joburlb: http://10.50.198.41:4044/api
+    centreb: B
+    usernameb: monitorservice
+    passwordb: monitorservice
+    jobsizeb: 37
+    kafkatime: 0.05
+    namenuma: 14
+    namenumb: 13
+    service-runtime: 180
+    # 服务数量 需要与大数据同步
+    service-name-a: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,Slipstream2,TxSQL1,Workflow1,Milano1
+    service-name-b: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,TxSQL1,Workflow1,Milano1
+    #注意：与星环确认token和限制IP
+    guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
+    syncip: 10.50.198.11
+    syncusername: root
+    syncpassword: Manage!@#123
+    syncstartshell: /root/datasync/sync.sh
+    syncstopshell: /root/datasync/yarnkiller.sh
+
+  configrunning: 0
+  centrelocal: A
+  urlotherside: http://10.50.198.245:8180
