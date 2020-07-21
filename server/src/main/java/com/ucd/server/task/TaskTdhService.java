@@ -60,13 +60,17 @@ public class TaskTdhService {
 
     private final static Logger logger = LoggerFactory.getLogger(TaskTdhService.class);
 
+/*
     // 每5秒启动（测试）
     @Scheduled(cron = "3/5 * * * * ?")
     public void timerToNow() {
         System.out.println("now time:" + sdf.format(new Date()));
     }
+*/
 
-    //向星环发起请求，获取集群用户信息，并存库
+    /**
+     * 向星环发起请求，获取集群用户信息，并存库
+     */
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
 //    @Scheduled(cron = "0/30 * * * * ?")
 //    @Scheduled(cron = "0/10 * * * * ?")
@@ -81,7 +85,6 @@ public class TaskTdhService {
         logger.info("num:" + num);
         if (num == 1) {
             try {
-//                now = sdf.parse(sdf.format(now).substring(0,18)+"0");
                 logger.info("集群用户信息--成功进入");
                 //记录定时任务运行时间
                 TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
@@ -103,9 +106,11 @@ public class TaskTdhService {
         return;
     }
 
-    //向星环发起请求，获取集群服务信息，并存库
+    /**
+     * 向星环发起请求，获取集群服务信息，并存库  doing 10
+     */
     //@Scheduled(cron = "0-59/28 03-06 18 * * ?")
-//    @Scheduled(cron = "0/30 * * * * ?")
+    //@Scheduled(cron = "0/30 * * * * ?")
     @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesListData() {
         Date now = new Date();
@@ -148,40 +153,13 @@ public class TaskTdhService {
             return;
         }
 
-
-      /*  Date now = new Date();
-        logger.info("taskSaveThdServicesListData()now time:" + sdf.format(now));
-            Map<String,Object> map = new HashMap<String,Object>();
-            map.put("taskState",1);
-            map.put("taskName","taskServiceInfo");
-            int num = tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
-            logger.info("num:" + num);
-            if (num == 1) {
-                try {
-                logger.info("集群服务信息--成功进入");
-                    //记录定时任务运行时间
-                    TdhTaskParameter tdhTaskParameter = new TdhTaskParameter();
-                    tdhTaskParameter.setTaskName("taskServiceInfo");
-                    tdhTaskParameter.setTaskTime(now);
-                    tdhTaskParameterMapper.updateTdhServiceTaskTimeByTableName(tdhTaskParameter);
-                serviceThread.saveThdServicesListDataThread(serviceinfourla, centrea, usernamea, passworda);
-                serviceThread.saveThdServicesListDataThread(serviceinfourlb, centreb, usernameb, passwordb);
-                    Thread.sleep(5000);
-                    map.put("taskState",0);
-                    tdhTaskParameterMapper.updateTdhServiceTaskStateMap(map);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                logger.info("集群服务信息--没有进入");
-                return;
-            }
-*/
         return;
     }
 
-    //向星环发起请求，获取running的job信息，并判断是否需要数据同步
-//    @Scheduled(cron = "0/30 * * * * ?")
+    /**
+     * 向星环发起请求，获取running的job信息，并判断是否需要数据同步 doing 10
+     */
+    //@Scheduled(cron = "0/30 * * * * ?")
     @Scheduled(cron = "0/10 * * * * ?")
     public void taskSaveThdServicesJobErrorData() {
         Date now = new Date();
@@ -222,7 +200,9 @@ public class TaskTdhService {
         return;
     }
 
-    //每个月初将上个月还没有进行完copytable的DS数据（还剩不超过1条数据） 按照表名月份归为1条数据，类别是snapshot
+    /**
+     * 每个月初将上个月还没有进行完copytable的DS数据（还剩不超过1条数据） 按照表名月份归为1条数据，类别是snapshot doing ( "0 5 0 1 * ?")
+     */
 //    @Scheduled(cron = "0/30 * * * * ?")
     @Scheduled(cron = "0 5 0 1 * ?")
     public void taskUpdateThdDsData() {
@@ -262,7 +242,7 @@ public class TaskTdhService {
         return;
     }
 
-    //自动开门
+    // 自动开门 doing 5/10 * * * * ?
 //    @Scheduled(cron = "5/30 * * * * ?")
     @Scheduled(cron = "5/10 * * * * ?")
     public void taskOpentaskState() {
@@ -299,18 +279,5 @@ public class TaskTdhService {
 
         return;
     }
-
-
-//    public void testList(){
-//        logger.info("进入testList");
-//        List<String> list = new ArrayList<String>();
-//        for(int i = 0;i < 10000000;i++){
-//            UUID aa = UUID.randomUUID();
-//            list.add(aa.toString());
-//        }
-//        for (String bb : list){
-//            String cc = bb;
-//        }
-//    }
 
 }
