@@ -50,12 +50,18 @@ basicparameters:
     service-name-a: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,Slipstream2,TxSQL1,Workflow1,Milano1
     service-name-b: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,TxSQL1,Workflow1,Milano1
     #注意：与星环确认token和限制IP
+    # guardian 启动 确认token
     guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
-    syncip: 10.50.198.11
+    # 脚本所在ip地址
+    syncip: 10.50.197.11
+    # 进入这台虚机的用户名密码
     syncusername: root
-    syncpassword: Manage!@#123
+    syncpassword: bjcj@123456
+    # 数据同步的脚本位置
     syncstartshell: /root/datasync/sync.sh
+    # 终止同步脚本位置
     syncstopshell: /root/datasync/yarnkiller.sh
+
 
   configrunning: 0
   centrelocal: A

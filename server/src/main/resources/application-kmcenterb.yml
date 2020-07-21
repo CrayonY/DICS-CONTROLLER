@@ -58,5 +58,5 @@ basicparameters:
     syncstopshell: /root/datasync/yarnkiller.sh
 
   configrunning: 0
-  centrelocal: A
+  centrelocal: B
   urlotherside: http://10.50.197.245:8180
