@@ -74,6 +74,7 @@ public class Connection {
         HttpGet getRequest = new HttpGet(fullUrl);
         getRequest.setConfig(defaultRequestConfig);
         CloseableHttpResponse response = connection.client1.execute(getRequest);
+        // 中断请求
         getRequest.abort();
         return response;
     }

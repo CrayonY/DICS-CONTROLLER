@@ -6,7 +6,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: 123456
+    password: root
     url: jdbc:mysql://10.28.3.203:3306/monitordb_a?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 #  jpa:
 #    show-sql: true
@@ -20,8 +20,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka-0.0.1-SNAPSHOT/eureka/
-  #       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
-  #      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
@@ -57,7 +55,7 @@ basicparameters:
     service-runtime: 180
     # 服务数量 需要与大数据同步
     service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2,Manager
-    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager,Discover1
+    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager
     #注意：与星环确认token和限制IP
     guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
     syncip: 10.28.3.48
@@ -68,6 +66,5 @@ basicparameters:
 
   configrunning: 0
   centrelocal: A
-  #urlotherside: http://10.28.3.201:8180
-  #urlotherside: http://10.166.50.156:28070
+  # B中心地址
   urlotherside: http://10.28.3.203:28070

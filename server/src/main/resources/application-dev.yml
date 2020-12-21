@@ -1,3 +1,4 @@
+# 昆明 本地开发环境
 server:
   port: 28070
 spring:
@@ -6,24 +7,12 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: root
-    #    url: jdbc:mysql://10.66.1.192:3306/clouddemo?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
-    url: jdbc:mysql://10.28.3.203:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
-#    url: jdbc:mysql://10.66.1.164:3306/monitordb?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
-#  jpa:
-#    show-sql: true
-#  cloud:
-#    config:
-#      discovery:
-#        enabled: true
-#        service-id: CONFIG
-#      profile: dev
+    password: rootroot
+    url: jdbc:mysql://localhost:3306/monitordb_b?characterEncoding=utf-8&useSSL=false&useAffectedRows=true
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka-0.0.1-SNAPSHOT/eureka/
-  #       defaultZone: http://10.66.1.202:8761/eureka-0.0.1-SNAPSHOT/eureka/,http://10.66.1.203:8761/eureka-0.0.1-SNAPSHOT/eureka/
-  #      defaultZone: http://10.66.1.192:8761/eureka-0.0.1-SNAPSHOT/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
@@ -40,32 +29,34 @@ mybatis:
 
 basicparameters:
   transwarp:
-    serviceinfourla: http://10.28.3.160:8180/api
-    joburla: http://10.28.3.50:4044/api
+    serviceinfourla: http://10.50.197.11:8180/api
+    joburla: http://10.50.197.41:4044/api
     centrea: A
-    usernamea: gongweimin
-    passworda: gongweimin
-    jobsizea: 13
-    serviceinfourlb: http://10.28.3.51:8180/api
-    joburlb: http://10.28.3.52:4044/api
+    usernamea: monitorservice
+    passworda: monitorservice
+    # job流数量  需要与大数据同步
+    jobsizea: 37
+    serviceinfourlb: http://10.50.198.12:8180/api
+    joburlb: http://10.50.198.41:4044/api
     centreb: B
-    usernameb: gongweimin
-    passwordb: gongweimin
-    jobsizeb: 3
-    kafkatime: 1
-    namenuma: 18
-    namenumb: 20
+    usernameb: monitorservice
+    passwordb: monitorservice
+    jobsizeb: 37
+    kafkatime: 0.05
+    namenuma: 14
+    namenumb: 13
     service-runtime: 180
-    service-name-a: TOS,Transwarp_License_Cluster,ZooKeeper1,HDFS1,YARN1,Search1,Hyperbase1,TxSQL1,Inceptor1,Kafka1,Milano1,Slipstream1,Guardian,SlipstreamStudio1,Discover1,Workflow1,Inceptor2,Manager
-    service-name-b: TOS,Transwarp_License_Cluster,ZooKeeper1,Kafka1,Search1,Milano1,HDFS1,YARN1,TxSQL1,Inceptor1,Slipstream1,Hyperbase1,Pilot1,Transporter1,Workflow1,Notification1,Rubik1,TxSQL2,Inceptor2,Manager
+    # 服务数量 需要与大数据同步
+    service-name-a: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,Slipstream2,TxSQL1,Workflow1,Milano1
+    service-name-b: TOS,ZooKeeper1,HDFS1,YARN1,Kafka1,Hyperbase1,Inceptor1,Slipstream1,InceptorGateway1,Inceptor2,TxSQL1,Workflow1,Milano1
     #注意：与星环确认token和限制IP
     guardian-access-token: rrZs53w3ImiEjhLzpOqv-TDH
-    syncip: 10.28.3.48
+    syncip: 10.50.198.11
     syncusername: root
-    syncpassword: bjcj@123456
+    syncpassword: Manage!@#123
     syncstartshell: /root/datasync/sync.sh
     syncstopshell: /root/datasync/yarnkiller.sh
 
   configrunning: 0
-  centrelocal: A
-  urlotherside: http://10.28.3.201:8180
+  centrelocal: B
+  urlotherside: http://10.50.197.245:8180
